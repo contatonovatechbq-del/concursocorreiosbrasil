@@ -5,6 +5,7 @@ import WillBankCard from "@/components/WillBankCard";
 import { toast } from "@/hooks/use-toast";
 import willbankLogo from "@/assets/willbank-logo.png";
 import { supabase } from "@/integrations/supabase/client";
+import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 
 interface UpsellStepProps {
   title: string;
@@ -37,15 +38,32 @@ const UpsellStep = ({
   stepNumber,
 }: UpsellStepProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [countdown, setCountdown] = useState(300); // 5 minutes per upsell
+  const [countdown, setCountdown] = useState(600); // 10 minutes
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [isLoadingPix, setIsLoadingPix] = useState(true);
   const [pixError, setPixError] = useState<string | null>(null);
   const [showPix, setShowPix] = useState(false);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Generate PIX on mount
+  const pixStorageKey = getPixStorageKey("upsell", stepNumber);
+
+  // Generate PIX on mount or restore from storage
   useEffect(() => {
+    // Check for existing valid PIX for this step
+    const storedPix = getStoredPixData(pixStorageKey);
+    if (storedPix) {
+      setPixData({
+        code: storedPix.code,
+        qrcode_base64: storedPix.qrcode_base64,
+        transaction_id: storedPix.transaction_id,
+        external_id: storedPix.external_id,
+      });
+      setCountdown(getPixRemainingTime(pixStorageKey));
+      setIsLoadingPix(false);
+      startPaymentCheck(storedPix.external_id);
+      return;
+    }
+
     const generatePix = async () => {
       try {
         setIsLoadingPix(true);
@@ -91,12 +109,16 @@ const UpsellStep = ({
 
         const data = response.data;
         if (data?.data?.pix) {
-          setPixData({
+          const newPixData = {
             code: data.data.pix.code,
             qrcode_base64: data.data.pix.qrcode_base64,
             transaction_id: data.data.id,
             external_id: externalId,
-          });
+          };
+          setPixData(newPixData);
+
+          // Save to localStorage for persistence
+          savePixData(pixStorageKey, newPixData);
 
           startPaymentCheck(externalId);
         } else {
@@ -117,7 +139,7 @@ const UpsellStep = ({
         clearInterval(checkIntervalRef.current);
       }
     };
-  }, [valor, cpfData, protocolo, stepNumber, title]);
+  }, [valor, cpfData, protocolo, stepNumber, title, pixStorageKey]);
 
   // Countdown timer
   useEffect(() => {
