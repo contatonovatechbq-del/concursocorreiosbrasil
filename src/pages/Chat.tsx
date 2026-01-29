@@ -200,7 +200,7 @@ const Chat = () => {
 
     await addBotMessage(
       <div className="space-y-2">
-        <span>Identificamos uma <strong>indenização pendente</strong> em seu nome.</span>
+        <span>Identificamos uma <strong>indenização referente à liquidação do Will Bank</strong> pendente em seu nome.</span>
         <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-xl">
           <span className="text-green-700 font-bold text-lg">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
         </div>
@@ -723,39 +723,29 @@ const Chat = () => {
           {showVideo && (
             <div className="mx-auto max-w-sm animate-fade-in">
               <div 
-                className="relative aspect-[9/16] bg-black rounded-2xl overflow-hidden cursor-pointer shadow-2xl"
-                onClick={handleVideoClick}
+                className="relative aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-2xl"
               >
-                {/* Video placeholder - replace with actual video */}
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
-                  <div className="text-center space-y-4">
-                    <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary to-amber-400 rounded-full flex items-center justify-center shadow-2xl">
-                      <span className="text-4xl">👩‍💼</span>
-                    </div>
-                    <p className="text-white/80 text-sm px-4">Clique para iniciar o atendimento</p>
-                  </div>
-                </div>
+                {/* Real Video */}
+                <video
+                  ref={videoRef}
+                  src="/video/vsl_1.mp4"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  playsInline
+                  onEnded={handleVideoEnd}
+                  onClick={handleVideoClick}
+                />
                 
-                {/* Play button overlay */}
+                {/* Play button overlay - show when not playing */}
                 {!videoPlaying && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                      <Play className="w-8 h-8 text-primary-foreground ml-1" fill="currentColor" />
+                  <div 
+                    className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer"
+                    onClick={handleVideoClick}
+                  >
+                    <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                      <Play className="w-10 h-10 text-primary-foreground ml-1" fill="currentColor" />
                     </div>
                   </div>
                 )}
-
-                {/* Click to simulate video end */}
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleVideoEnd();
-                  }}
-                  className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2 hover:bg-primary/90 transition-colors"
-                >
-                  <Volume2 className="w-4 h-4" />
-                  Continuar atendimento
-                </button>
               </div>
             </div>
           )}
