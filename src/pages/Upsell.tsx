@@ -50,8 +50,9 @@ const Upsell = () => {
   const location = useLocation();
   const { step } = useParams<{ step: string }>();
   
-  // Parse step number (1-7), default to 1
-  const stepNumber = Math.min(Math.max(parseInt(step || "1", 10), 1), 7);
+  // Parse step number (1-7), default to 1. Handle NaN case.
+  const parsedStep = parseInt(step || "1", 10);
+  const stepNumber = isNaN(parsedStep) ? 1 : Math.min(Math.max(parsedStep, 1), 7);
   const currentIndex = stepNumber - 1;
   const currentUpsell = UPSELLS[currentIndex];
 
