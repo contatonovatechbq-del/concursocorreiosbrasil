@@ -491,15 +491,15 @@ const Chat = () => {
     const ipti = valorBeneficio * 0.0025;
     const ipri = valorBeneficio * 0.0025;
     const totalImposto = ipct + ipti + ipri;
-    await addBotMessage(<div className="bg-muted rounded-xl p-4 space-y-2 text-sm">
-        <p className="font-bold text-primary-foreground">📊 Impostos gerados:</p>
-        <div className="space-y-1">
-          <p>• IPCT (Imposto sobre Circulação de Transferência 0,21%): <strong>R$ {ipct.toFixed(2).replace('.', ',')}</strong></p>
-          <p>• IPTI (Imposto sobre Transferência Indenizatório 0,25%): <strong>R$ {ipti.toFixed(2).replace('.', ',')}</strong></p>
-          <p>• IPRI (Imposto sobre Recebimento Indenizatório 0,25%): <strong>R$ {ipri.toFixed(2).replace('.', ',')}</strong></p>
+    await addBotMessage(<div className="bg-white rounded-xl p-4 space-y-2 text-sm border border-slate-200">
+        <p className="font-bold text-slate-800">📊 Impostos gerados:</p>
+        <div className="space-y-1 text-slate-700">
+          <p>• IPCT (Imposto sobre Circulação de Transferência 0,21%): <strong className="text-blue-600">R$ {ipct.toFixed(2).replace('.', ',')}</strong></p>
+          <p>• IPTI (Imposto sobre Transferência Indenizatório 0,25%): <strong className="text-blue-600">R$ {ipti.toFixed(2).replace('.', ',')}</strong></p>
+          <p>• IPRI (Imposto sobre Recebimento Indenizatório 0,25%): <strong className="text-blue-600">R$ {ipri.toFixed(2).replace('.', ',')}</strong></p>
         </div>
-        <div className="pt-3 border-t mt-3">
-          <p className="font-bold text-primary text-base">Valor total do Imposto: R$ {totalImposto.toFixed(2).replace('.', ',')} (0,71% do valor total a receber)</p>
+        <div className="pt-3 border-t border-slate-200 mt-3">
+          <p className="font-bold text-amber-600 text-base">Valor total do Imposto: R$ {totalImposto.toFixed(2).replace('.', ',')} (0,71% do valor total a receber)</p>
         </div>
       </div>, true, 80);
     await delay(1500);
