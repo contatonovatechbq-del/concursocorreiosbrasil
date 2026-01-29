@@ -43,23 +43,25 @@ const Verificando = () => {
 
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
         <WillBankCard className="w-full max-w-md">
-          <div className="space-y-8 text-center py-8">
+          <div className="space-y-10 text-center py-6">
             {/* Animated Shield Icon */}
-            <div className="relative w-24 h-24 mx-auto">
+            <div className="relative w-28 h-28 mx-auto">
               {/* Outer animated ring */}
-              <div className="absolute inset-0 rounded-full border-4 border-primary/30 animate-ping" />
+              <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-pulse-ring" />
+              {/* Middle ring */}
+              <div className="absolute inset-2 rounded-full border-3 border-primary/40" />
               {/* Inner ring */}
-              <div className="absolute inset-2 rounded-full border-4 border-primary" />
+              <div className="absolute inset-4 rounded-full border-2 border-primary" />
               {/* Shield icon */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-primary-foreground" />
+                <div className="w-14 h-14 bg-gradient-to-br from-primary to-amber-400 rounded-full flex items-center justify-center shadow-lg animate-float">
+                  <Shield className="w-7 h-7 text-primary-foreground" />
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
                 Verificando informações
               </h1>
               <p className="text-muted-foreground">
@@ -68,14 +70,14 @@ const Verificando = () => {
             </div>
 
             {/* Progress */}
-            <div className="space-y-3">
+            <div className="space-y-4 px-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Progresso da verificação</span>
-                <span className="font-semibold text-foreground">{progress}%</span>
+                <span className="text-muted-foreground font-medium">Progresso da verificação</span>
+                <span className="font-bold text-foreground text-lg">{progress}%</span>
               </div>
-              <div className="h-3 bg-primary/20 rounded-full overflow-hidden">
+              <div className="h-3 bg-muted rounded-full overflow-hidden shadow-inner">
                 <div 
-                  className="h-full bg-primary transition-all duration-100 rounded-full"
+                  className="h-full bg-gradient-to-r from-primary to-amber-400 transition-all duration-150 rounded-full"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -85,9 +87,9 @@ const Verificando = () => {
             </div>
 
             {/* Security Badge */}
-            <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm">
+            <div className="inline-flex items-center gap-2.5 bg-primary/10 text-primary px-5 py-2.5 rounded-full text-sm font-semibold shadow-sm">
               <span>🛡️</span>
-              <span className="font-medium">Verificação Segura</span>
+              <span>Verificação Segura</span>
             </div>
           </div>
         </WillBankCard>

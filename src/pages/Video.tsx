@@ -56,59 +56,59 @@ const Video = () => {
         <WillBankCard className="w-full max-w-2xl">
           <div className="space-y-6">
             {/* Progress bar at top */}
-            <Progress value={progress} className="h-1.5" />
+            <Progress value={progress} className="h-2" />
 
             {/* Video Placeholder */}
-            <div className="relative aspect-video bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 rounded-xl overflow-hidden">
+            <div className="relative aspect-video bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl overflow-hidden shadow-xl">
               {/* Fake video content */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="w-48 h-48 mx-auto bg-primary rounded-lg flex items-center justify-center mb-4">
-                    <span className="text-6xl">👩‍💼</span>
+                  <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-gradient-to-br from-primary to-amber-400 rounded-2xl flex items-center justify-center shadow-2xl">
+                    <span className="text-5xl sm:text-6xl">👩‍💼</span>
                   </div>
                 </div>
               </div>
               
               {/* Audio Button Overlay */}
-              <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-6 py-3 rounded-full flex items-center gap-2 font-semibold shadow-lg hover:bg-primary/90 transition">
-                <Volume2 className="w-5 h-5" />
+              <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-8 py-4 rounded-full flex items-center gap-3 font-bold shadow-2xl hover:bg-primary/90 hover:scale-105 transition-all duration-300">
+                <Volume2 className="w-6 h-6" />
                 Clique para ouvir
               </button>
 
               {/* Video controls */}
               <div className="absolute top-4 right-4 flex gap-2">
-                <button className="bg-black/50 text-white px-3 py-1 rounded text-xs">
+                <button className="bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-black/80 transition-colors">
                   📋 Desanexar vídeo
                 </button>
-                <button className="bg-black/50 text-white px-3 py-1 rounded text-xs">
+                <button className="bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-black/80 transition-colors">
                   ⏭️ RGX
                 </button>
               </div>
             </div>
 
             {/* User Data Card */}
-            <div className="border-2 border-primary rounded-xl overflow-hidden">
+            <div className="border-2 border-primary/40 rounded-2xl overflow-hidden shadow-sm">
               {/* Yellow top border already from Card */}
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-border/40">
                 {dataFields.map((field, index) => {
                   const Icon = field.icon;
                   return (
-                    <div key={index} className="flex items-center gap-4 p-4">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <div key={index} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
+                      <div className="w-11 h-11 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl flex items-center justify-center">
                         <Icon className="w-5 h-5 text-primary" />
                       </div>
-                      <span className="font-medium text-foreground">{field.value}</span>
+                      <span className="font-semibold text-foreground">{field.value}</span>
                     </div>
                   );
                 })}
                 
                 {/* Consulta Status */}
-                <div className="flex items-center gap-4 p-4 bg-primary/10">
-                  <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
-                    <Search className="w-5 h-5 text-primary" />
+                <div className="flex items-center gap-4 p-4 bg-primary/5">
+                  <div className="w-11 h-11 bg-primary/20 rounded-xl flex items-center justify-center">
+                    <Search className={`w-5 h-5 text-primary ${!showConsulta ? 'animate-pulse' : ''}`} />
                   </div>
-                  <span className="text-muted-foreground">
-                    {showConsulta ? "Consulta finalizada!" : "Sua consulta está em andamento..."}
+                  <span className={`font-medium ${showConsulta ? 'text-success' : 'text-muted-foreground'}`}>
+                    {showConsulta ? "✓ Consulta finalizada!" : "Sua consulta está em andamento..."}
                   </span>
                 </div>
               </div>
