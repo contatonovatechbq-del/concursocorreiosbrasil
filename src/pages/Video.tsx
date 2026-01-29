@@ -6,6 +6,7 @@ import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import { Progress } from "@/components/ui/progress";
+import { saveSession, getSession } from "@/hooks/useSessionPersistence";
 
 const Video = () => {
   const navigate = useNavigate();
@@ -15,13 +16,17 @@ const Video = () => {
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoEnded, setVideoEnded] = useState(false);
 
-  const cpfData: CPFData | undefined = location.state?.cpfData;
+  // Try to get cpfData from location state or session
+  const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
 
   useEffect(() => {
     if (!cpfData) {
       navigate("/");
       return;
     }
+
+    // Save session
+    saveSession({ cpfData, currentStep: "/video" });
   }, [cpfData, navigate]);
 
   const handleVideoClick = () => {

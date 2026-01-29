@@ -6,6 +6,7 @@ import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
+import { saveSession, getSession } from "@/hooks/useSessionPersistence";
 
 const Biometria = () => {
   const navigate = useNavigate();
@@ -23,13 +24,17 @@ const Biometria = () => {
     lighting: boolean;
   }>({ face: false, lighting: false });
 
-  const cpfData: CPFData | undefined = location.state?.cpfData;
+  // Try to get cpfData from location state or session
+  const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
 
   useEffect(() => {
     if (!cpfData) {
       navigate("/");
       return;
     }
+
+    // Save session
+    saveSession({ cpfData, currentStep: "/biometria" });
 
     // Start camera
     startCamera();

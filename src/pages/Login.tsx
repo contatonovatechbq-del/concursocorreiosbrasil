@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CPFInput } from "@/components/CPFInput";
@@ -8,12 +8,28 @@ import { toast } from "@/hooks/use-toast";
 import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
+import { getSession } from "@/hooks/useSessionPersistence";
 
 const Login = () => {
   const navigate = useNavigate();
   const [cpf, setCpf] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Check for existing session and redirect
+  useEffect(() => {
+    const session = getSession();
+    if (session?.cpfData && session?.currentStep && session.currentStep !== "/") {
+      navigate(session.currentStep, {
+        state: {
+          cpfData: session.cpfData,
+          valorBeneficio: session.valorBeneficio,
+          protocolo: session.protocolo,
+        },
+        replace: true,
+      });
+    }
+  }, [navigate]);
 
   const handleConsultar = async () => {
     setError("");
