@@ -6,6 +6,7 @@ import { CPFResult } from "@/components/CPFResult";
 import { validateCPF, unformatCPF, consultarCPF, CPFData } from "@/lib/cpf";
 import { Search, ShieldCheck, RefreshCw, Loader2, AlertTriangle, Phone, Mail, MessageCircle, Clock, Lock, Shield, Building2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import willbankLogo from "@/assets/willbank-logo.png";
 
 const Index = () => {
   const [cpf, setCpf] = useState("");
@@ -54,32 +55,27 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="gradient-primary text-primary-foreground px-6 py-4">
+      <header className="bg-card border-b border-border px-6 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
-                <span className="font-bold text-lg">W</span>
-              </div>
-              <span className="font-bold text-xl">Will Bank</span>
-            </div>
+            <img src={willbankLogo} alt="Will Bank" className="h-10 object-contain" />
           </div>
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-white/80">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Benefício</span>
             <span>›</span>
             <span>Indenização</span>
             <span>›</span>
-            <span className="text-white font-medium">Análise</span>
+            <span className="text-foreground font-medium">Análise</span>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 -mt-4">
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
         <Card className="w-full max-w-md shadow-xl border-0 overflow-hidden">
-          {/* Card Header Gradient */}
-          <div className="gradient-primary h-2" />
+          {/* Card Header with primary color */}
+          <div className="bg-primary h-2" />
           
           <CardContent className="p-6 sm:p-8 space-y-6">
             <div className="text-center space-y-2">
@@ -119,7 +115,7 @@ const Index = () => {
                 <Button 
                   onClick={handleConsultar}
                   disabled={loading || unformatCPF(cpf).length < 11}
-                  className="w-full h-12 text-base font-semibold gradient-primary hover:opacity-90 transition-opacity"
+                  className="w-full h-12 text-base font-semibold"
                 >
                   {loading ? (
                     <>
@@ -215,15 +211,15 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="gradient-primary text-primary-foreground px-6 py-6">
+      <footer className="bg-primary text-primary-foreground px-6 py-6">
         <div className="max-w-4xl mx-auto text-center space-y-2">
           <p className="text-sm">
             Will Bank - Instituição Financeira autorizada pelo Banco Central do Brasil.
           </p>
-          <p className="text-xs text-white/70">
+          <p className="text-xs opacity-80">
             CNPJ: 34.711.571/0001-36 | Av. Paulista, 1374 - São Paulo, SP - 01310-100
           </p>
-          <p className="text-xs text-white/70 pt-2">
+          <p className="text-xs opacity-80 pt-2">
             © 2025 Will Bank. Todos os direitos reservados.
           </p>
         </div>
