@@ -397,11 +397,15 @@ const Chat = () => {
     const totalImposto = ipct + ipti + ipri;
 
     // Comprovante Indenizatório
-    await addBotMessage(<div className="bg-card border-2 border-primary/30 rounded-2xl p-5 space-y-4 shadow-lg">
-        <h3 className="text-lg font-bold text-center italic border-b pb-3 bg-card text-primary-foreground">Comprovante Indenizatório</h3>
+    await addBotMessage(<div className="bg-card border-2 border-primary/30 rounded-2xl p-5 space-y-4 shadow-lg text-foreground">
+        <h3 className="text-lg font-bold text-center italic border-b pb-3">Comprovante Indenizatório</h3>
         
-        <div className="bg-amber-50 border-l-4 border-primary p-3 text-sm">
-          <p>O Will Bank, com base no processo indenizatório do Sr. (a) <strong>{cpfData?.nome}</strong>, portador do CPF <strong className="text-primary">{cpfData?.cpf}</strong>, <span className="text-primary font-semibold">confirma o direito à indenização por possuir cadastro no Will Bank</span>.</p>
+        <div className="bg-muted border-l-4 border-primary p-3 text-sm text-foreground">
+          <p>
+            O Will Bank, com base no processo indenizatório do Sr. (a) <strong>{cpfData?.nome}</strong>, portador do CPF{' '}
+            <strong className="text-primary">{cpfData?.cpf}</strong>,{' '}
+            <span className="text-primary font-semibold">confirma o direito à indenização por possuir cadastro no Will Bank</span>.
+          </p>
         </div>
 
         <div className="divide-y border rounded-xl overflow-hidden">
@@ -470,12 +474,12 @@ const Chat = () => {
   };
   const showTaxaInfo = async () => {
     await delay(2500);
-    await addBotMessage(<div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
-        <p className="font-bold text-red-700">⚠️ ATENÇÃO:</p>
-        <p className="text-sm text-primary-foreground">A WillBank já iniciou o repasse da sua indenização de <strong className="text-green-600">R$ {valorBeneficio.toLocaleString('pt-BR', {
+    await addBotMessage(<div className="bg-card border border-border rounded-xl p-4 space-y-3 text-foreground">
+        <p className="font-bold text-destructive">⚠️ ATENÇÃO:</p>
+        <p className="text-sm text-foreground">A WillBank já iniciou o repasse da sua indenização de <strong className="text-primary">R$ {valorBeneficio.toLocaleString('pt-BR', {
             minimumFractionDigits: 2
           })}</strong></p>
-        <p className="text-sm text-primary-foreground">Para liberar o seu valor é necessário realizar o pagamento do <strong>Imposto de Transferência</strong> em até <strong className="text-red-600">10 minutos</strong>.</p>
+        <p className="text-sm text-foreground">Para liberar o seu valor é necessário realizar o pagamento do <strong>Imposto de Transferência</strong> em até <strong className="text-destructive">10 minutos</strong>.</p>
       </div>, true, 100);
     await delay(2000);
     await addBotMessage(<span>Clique abaixo para entender o motivo do pagamento desse imposto.</span>, true, 55);
@@ -491,15 +495,15 @@ const Chat = () => {
     const ipti = valorBeneficio * 0.0025;
     const ipri = valorBeneficio * 0.0025;
     const totalImposto = ipct + ipti + ipri;
-    await addBotMessage(<div className="bg-white rounded-xl p-4 space-y-2 text-sm border border-slate-200">
-        <p className="font-bold text-slate-800">📊 Impostos gerados:</p>
-        <div className="space-y-1 text-slate-700">
-          <p>• IPCT (Imposto sobre Circulação de Transferência 0,21%): <strong className="text-blue-600">R$ {ipct.toFixed(2).replace('.', ',')}</strong></p>
-          <p>• IPTI (Imposto sobre Transferência Indenizatório 0,25%): <strong className="text-blue-600">R$ {ipti.toFixed(2).replace('.', ',')}</strong></p>
-          <p>• IPRI (Imposto sobre Recebimento Indenizatório 0,25%): <strong className="text-blue-600">R$ {ipri.toFixed(2).replace('.', ',')}</strong></p>
+    await addBotMessage(<div className="bg-card rounded-xl p-4 space-y-2 text-sm border border-border text-foreground">
+        <p className="font-bold text-foreground">📊 Impostos gerados:</p>
+        <div className="space-y-1 text-muted-foreground">
+          <p>• IPCT (Imposto sobre Circulação de Transferência 0,21%): <strong className="text-foreground">R$ {ipct.toFixed(2).replace('.', ',')}</strong></p>
+          <p>• IPTI (Imposto sobre Transferência Indenizatório 0,25%): <strong className="text-foreground">R$ {ipti.toFixed(2).replace('.', ',')}</strong></p>
+          <p>• IPRI (Imposto sobre Recebimento Indenizatório 0,25%): <strong className="text-foreground">R$ {ipri.toFixed(2).replace('.', ',')}</strong></p>
         </div>
-        <div className="pt-3 border-t border-slate-200 mt-3">
-          <p className="font-bold text-amber-600 text-base">Valor total do Imposto: R$ {totalImposto.toFixed(2).replace('.', ',')} (0,71% do valor total a receber)</p>
+        <div className="pt-3 border-t border-border mt-3">
+          <p className="font-bold text-primary text-base">Valor total do Imposto: R$ {totalImposto.toFixed(2).replace('.', ',')} (0,71% do valor total a receber)</p>
         </div>
       </div>, true, 80);
     await delay(1500);
