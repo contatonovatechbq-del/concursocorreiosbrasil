@@ -11,6 +11,7 @@ import Biometria from "./pages/Biometria";
 import Video from "./pages/Video";
 import Chat from "./pages/Chat";
 import Saque from "./pages/Saque";
+import Upsell from "./pages/Upsell";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/video" element={<Video />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/saque" element={<Saque />} />
+            <Route path="/upsell" element={<Upsell />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
