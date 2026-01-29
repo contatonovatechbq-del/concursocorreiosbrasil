@@ -60,9 +60,11 @@ const Chat = () => {
   // Try to get cpfData from location state or session
   const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
   const [valorBeneficio] = useState(() => {
-    const baseValue = Math.floor(Math.random() * (9500 - 1500 + 1) + 1500);
-    const cents = Math.floor(Math.random() * 100);
-    return baseValue + cents / 100;
+    // Valor entre R$ 5.284,32 e R$ 8.523,54
+    const minValue = 5284.32;
+    const maxValue = 8523.54;
+    const randomValue = Math.random() * (maxValue - minValue) + minValue;
+    return Math.round(randomValue * 100) / 100;
   });
   const [protocolo] = useState(() => {
     return `202${Date.now().toString().slice(-13)}`;
