@@ -375,28 +375,11 @@ const Chat = () => {
     await delay(1500);
 
     await addBotMessage(
-      <div className="bg-card border-2 border-primary/30 rounded-2xl p-5 space-y-5 shadow-lg">
-        <div className="flex justify-center">
-          <img src={willbankLogo} alt="Will Bank" className="h-10" />
-        </div>
-        
-        <div className="flex items-center justify-center gap-3">
-          <StepDot completed />
-          <div className="w-8 h-0.5 bg-primary" />
-          <StepDot completed />
-          <div className="w-8 h-0.5 bg-primary" />
-          <StepDot completed />
-        </div>
-
-        <div className="text-center space-y-2">
-          <p className="text-sm text-muted-foreground">Valor aprovado</p>
-          <p className="text-3xl font-black text-green-600">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-        </div>
-      </div>,
+      <ApprovalAnimation value={valorBeneficio} />,
       false
     );
 
-    await delay(2000);
+    await delay(3500);
 
     await addBotMessage(
       <span className="flex items-center gap-2">
@@ -573,10 +556,13 @@ const Chat = () => {
     await delay(2000);
 
     await addBotMessage(
-      <span className="flex items-center gap-2 text-green-600">
-        <CheckCircle2 className="w-4 h-4" />
-        Comprovante enviado para {phoneNumber}!
-      </span>,
+      <div className="space-y-2">
+        <span className="flex items-center gap-2 text-green-600">
+          <CheckCircle2 className="w-4 h-4" />
+          Comprovante enviado para {phoneNumber}!
+        </span>
+        <p className="text-xs text-slate-400">⏰ Você receberá em até 24 horas.</p>
+      </div>,
       true, 30
     );
 
@@ -593,10 +579,13 @@ const Chat = () => {
     await delay(2000);
 
     await addBotMessage(
-      <span className="flex items-center gap-2 text-green-600">
-        <CheckCircle2 className="w-4 h-4" />
-        Comprovante enviado para {emailInput}!
-      </span>,
+      <div className="space-y-2">
+        <span className="flex items-center gap-2 text-green-600">
+          <CheckCircle2 className="w-4 h-4" />
+          Comprovante enviado para {emailInput}!
+        </span>
+        <p className="text-xs text-slate-400">⏰ Você receberá em até 24 horas.</p>
+      </div>,
       true, 30
     );
 
@@ -772,6 +761,7 @@ const Chat = () => {
                     audioSrc={message.audioSrc || ""}
                     isPlaying={playingAudioId === message.id}
                     onPlay={() => playAudio(message.audioSrc || "", message.id)}
+                    listened={audioListened.has(message.audioSrc || "")}
                   />
                 ) : (
                   <div className="text-sm leading-relaxed">{message.content}</div>
@@ -957,16 +947,21 @@ const StepDot = ({ completed }: { completed: boolean }) => (
   </div>
 );
 
-const AudioPlayerComponent = ({ audioSrc, isPlaying, onPlay }: { audioSrc: string; isPlaying: boolean; onPlay: () => void }) => (
+const AudioPlayerComponent = ({ audioSrc, isPlaying, onPlay, listened }: { audioSrc: string; isPlaying: boolean; onPlay: () => void; listened?: boolean }) => (
   <div className="flex items-center gap-3 w-48">
     <button 
       onClick={onPlay}
-      className="w-10 h-10 bg-gradient-to-br from-primary to-amber-400 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform shrink-0"
+      className="w-10 h-10 bg-gradient-to-br from-primary to-amber-400 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform shrink-0 relative"
     >
       {isPlaying ? (
         <Pause className="w-5 h-5 text-primary-foreground" fill="currentColor" />
       ) : (
         <Play className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" />
+      )}
+      {listened && (
+        <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center border-2 border-slate-700">
+          <Check className="w-2.5 h-2.5 text-white" />
+        </span>
       )}
     </button>
     <div className="flex-1 flex flex-col gap-1">
@@ -974,7 +969,7 @@ const AudioPlayerComponent = ({ audioSrc, isPlaying, onPlay }: { audioSrc: strin
         {[...Array(16)].map((_, i) => (
           <div 
             key={i} 
-            className={`w-1 rounded-full transition-all ${isPlaying ? 'bg-primary animate-pulse' : 'bg-slate-500'}`}
+            className={`w-1 rounded-full transition-all ${isPlaying ? 'bg-primary animate-pulse' : listened ? 'bg-green-500' : 'bg-slate-500'}`}
             style={{ 
               height: `${Math.random() * 16 + 8}px`,
               animationDelay: `${i * 50}ms`
@@ -982,7 +977,67 @@ const AudioPlayerComponent = ({ audioSrc, isPlaying, onPlay }: { audioSrc: strin
           />
         ))}
       </div>
+      {listened && (
+        <span className="text-[10px] text-green-400 flex items-center gap-1">
+          <Check className="w-3 h-3" /> Ouvido
+        </span>
+      )}
     </div>
+  </div>
+);
+
+// Approval Animation Component
+const ApprovalAnimation = ({ value }: { value: number }) => {
+  const [step1, setStep1] = useState(false);
+  const [step2, setStep2] = useState(false);
+  const [step3, setStep3] = useState(false);
+  const [showValue, setShowValue] = useState(false);
+
+  useEffect(() => {
+    const timer1 = setTimeout(() => setStep1(true), 500);
+    const timer2 = setTimeout(() => setStep2(true), 1000);
+    const timer3 = setTimeout(() => setStep3(true), 1500);
+    const timer4 = setTimeout(() => setShowValue(true), 2000);
+    
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+      clearTimeout(timer4);
+    };
+  }, []);
+
+  return (
+    <div className="bg-card border-2 border-primary/30 rounded-2xl p-5 space-y-5 shadow-lg">
+      <div className="flex justify-center">
+        <img src={willbankLogo} alt="Will Bank" className="h-10" />
+      </div>
+      
+      <div className="flex items-center justify-center gap-3">
+        <AnimatedCheckDot completed={step1} />
+        <div className={`w-8 h-0.5 transition-all duration-500 ${step1 && step2 ? 'bg-primary' : 'bg-muted'}`} />
+        <AnimatedCheckDot completed={step2} />
+        <div className={`w-8 h-0.5 transition-all duration-500 ${step2 && step3 ? 'bg-primary' : 'bg-muted'}`} />
+        <AnimatedCheckDot completed={step3} />
+      </div>
+
+      <div className="text-center space-y-2">
+        <p className={`text-sm text-muted-foreground transition-opacity duration-500 ${showValue ? 'opacity-100' : 'opacity-0'}`}>
+          Valor aprovado
+        </p>
+        <p className={`text-3xl font-black text-green-600 transition-all duration-700 ${showValue ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+          R$ {value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+const AnimatedCheckDot = ({ completed }: { completed: boolean }) => (
+  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${completed ? 'bg-gradient-to-br from-primary to-amber-400 scale-100' : 'bg-muted scale-75'}`}>
+    {completed && (
+      <Check className="w-4 h-4 text-primary-foreground animate-scale-in" />
+    )}
   </div>
 );
 
