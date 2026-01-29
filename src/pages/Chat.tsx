@@ -160,13 +160,36 @@ const Chat = () => {
   const generateFakeOptions = (correctAnswer: string, type: "mae" | "nascimento"): QuizOption[] => {
     const fakeNames = ["MARIA SANTOS OLIVEIRA", "ANA PAULA FERREIRA", "CLAUDIA SOUZA LIMA", "PATRICIA GOMES SILVA"];
     const fakeDates = ["15/03/1998", "22/07/1995", "08/12/2001", "30/05/1999"];
-    const options = type === "mae" ? fakeNames : fakeDates;
-    const shuffled = options.filter(o => o !== correctAnswer).sort(() => Math.random() - 0.5).slice(0, 3);
-    shuffled.push(correctAnswer);
-    return shuffled.sort(() => Math.random() - 0.5).map(text => ({
-      text,
-      isCorrect: text === correctAnswer
-    }));
+    
+    // Check if mother's name is not available
+    const isMotherNameUnavailable = type === "mae" && 
+      (!correctAnswer || correctAnswer === "Não disponível" || correctAnswer.trim() === "");
+    
+    if (type === "mae") {
+      const shuffled = fakeNames.filter(o => o !== correctAnswer).sort(() => Math.random() - 0.5).slice(0, 2);
+      
+      // Always add "Não identificada" option
+      const naoIdentificada = "NÃO IDENTIFICADA";
+      shuffled.push(naoIdentificada);
+      
+      // Add correct answer if available
+      if (!isMotherNameUnavailable) {
+        shuffled.push(correctAnswer);
+      }
+      
+      return shuffled.sort(() => Math.random() - 0.5).map(text => ({
+        text,
+        // "NÃO IDENTIFICADA" is correct when mother name is unavailable, otherwise the actual name is correct
+        isCorrect: isMotherNameUnavailable ? text === naoIdentificada : text === correctAnswer
+      }));
+    } else {
+      const shuffled = fakeDates.filter(o => o !== correctAnswer).sort(() => Math.random() - 0.5).slice(0, 3);
+      shuffled.push(correctAnswer);
+      return shuffled.sort(() => Math.random() - 0.5).map(text => ({
+        text,
+        isCorrect: text === correctAnswer
+      }));
+    }
   };
   const handleVideoEnd = async () => {
     setVideoPlaying(false);
