@@ -20,7 +20,8 @@ const ConfirmaDados = () => {
   }, [cpfData, navigate]);
 
   const handleConfirmar = () => {
-    navigate("/biometria", { state: { cpfData } });
+    // TODO: Reativar biometria depois - navigate("/biometria", { state: { cpfData } });
+    navigate("/video", { state: { cpfData } });
   };
 
   const handleCorrigir = () => {
