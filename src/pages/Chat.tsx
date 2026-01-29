@@ -320,9 +320,9 @@ const Chat = () => {
           ⚠️ ATENÇÃO, {cpfData?.nome?.split(' ')[0]}!
         </p>
         <p className="text-sm">Confira os dados inseridos para garantir que o valor será transferido corretamente:</p>
-        <div className="bg-white rounded-lg p-3 border space-y-1">
-          <p><strong>Nome:</strong> {cpfData?.nome}</p>
-          <p><strong>Chave Pix:</strong> {cpfData?.cpf}</p>
+        <div className="bg-white rounded-lg p-3 border space-y-1 text-foreground">
+          <p className="text-foreground"><strong>Nome:</strong> {cpfData?.nome}</p>
+          <p className="text-foreground"><strong>Chave Pix:</strong> {cpfData?.cpf}</p>
         </div>
         <p className="text-xs text-muted-foreground">Se houver algum erro, o pagamento não será concluído. A WillBank não se responsabiliza em casos de transferências em chave pix erradas.</p>
       </div>, true, 80);
@@ -348,9 +348,9 @@ const Chat = () => {
           ⚠️ ATENÇÃO, {cpfData?.nome?.split(' ')[0]}!
         </p>
         <p className="text-sm text-primary-foreground">Confira os dados inseridos para garantir que o valor será transferido corretamente:</p>
-        <div className="bg-white rounded-lg p-3 border space-y-1">
-          <p className=""><strong>Nome:</strong> {cpfData?.nome}</p>
-          <p><strong>Chave Pix:</strong> {pixKeyInput}</p>
+        <div className="bg-white rounded-lg p-3 border space-y-1 text-foreground">
+          <p className="text-foreground"><strong>Nome:</strong> {cpfData?.nome}</p>
+          <p className="text-foreground"><strong>Chave Pix:</strong> {pixKeyInput}</p>
         </div>
         <p className="text-xs text-muted-foreground">Se houver algum erro, o pagamento não será concluído. A WillBank não se responsabiliza em casos de transferências em chave pix erradas.</p>
       </div>, true, 80);
