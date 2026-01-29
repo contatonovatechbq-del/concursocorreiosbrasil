@@ -69,7 +69,17 @@ serve(async (req) => {
           document: body.buyer.document,
           phone: body.buyer.phone,
         },
-        tracking: body.tracking,
+        tracking: {
+          utm_source: body.tracking?.utm_source || '',
+          utm_medium: body.tracking?.utm_medium || '',
+          utm_campaign: body.tracking?.utm_campaign || '',
+          utm_content: body.tracking?.utm_content || '',
+          utm_term: body.tracking?.utm_term || '',
+          utm_id: body.tracking?.utm_id || '',
+          src: body.tracking?.src || '',
+          sck: body.tracking?.sck || '',
+          ref: body.tracking?.ref || '',
+        },
       }),
     });
 
