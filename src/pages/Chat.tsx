@@ -37,6 +37,10 @@ const Chat = () => {
   const [selectedPixType, setSelectedPixType] = useState<"telefone" | "cpf" | "email" | null>(null);
   const [audioListened, setAudioListened] = useState<Set<string>>(new Set());
   const [waitingForAudio, setWaitingForAudio] = useState<string | null>(null);
+
+  // Enforce audio play order in the chat UI
+  const audioOrder = ["/audio/audio-3.mp3", "/audio/audio-2.mp3", "/audio/audio-1.mp3"] as const;
+  const nextRequiredAudio = audioOrder.find(src => !audioListened.has(src)) ?? null;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cpfData: CPFData | undefined = location.state?.cpfData;
@@ -592,7 +596,23 @@ const Chat = () => {
               {message.type === 'error' ? <div className="max-w-[90%] sm:max-w-[85%] bg-white text-slate-800 rounded-xl sm:rounded-2xl shadow-lg px-3 py-2.5 sm:px-4 sm:py-3">
                   {message.content}
                 </div> : <div className={`max-w-[90%] sm:max-w-[85%] ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-xl sm:rounded-2xl rounded-br-sm' : 'bg-slate-700 text-white rounded-xl sm:rounded-2xl rounded-bl-sm shadow-lg'} px-3 py-2 sm:px-4 sm:py-3`}>
-                  {message.type === 'audio' ? <AudioPlayerComponent audioSrc={message.audioSrc || ""} isPlaying={playingAudioId === message.id} onPlay={() => playAudio(message.audioSrc || "", message.id)} listened={audioListened.has(message.audioSrc || "")} /> : <div className="text-xs sm:text-sm leading-relaxed">{message.content}</div>}
+                  {message.type === 'audio' ? (() => {
+                    const src = message.audioSrc || "";
+                    const listened = audioListened.has(src);
+                    const disabled = !!nextRequiredAudio && src !== nextRequiredAudio && !listened;
+                    return (
+                      <AudioPlayerComponent
+                        audioSrc={src}
+                        isPlaying={playingAudioId === message.id}
+                        onPlay={() => {
+                          if (disabled) return;
+                          playAudio(src, message.id);
+                        }}
+                        listened={listened}
+                        disabled={disabled}
+                      />
+                    );
+                  })() : <div className="text-xs sm:text-sm leading-relaxed">{message.content}</div>}
                   <div className={`text-[9px] sm:text-[10px] mt-1 text-right ${message.type === 'user' ? 'text-primary-foreground/70' : 'text-slate-400'}`}>
                     {message.time}
                   </div>
@@ -741,13 +761,21 @@ const AudioPlayerComponent = forwardRef<HTMLDivElement, {
   isPlaying: boolean;
   onPlay: () => void;
   listened?: boolean;
+  disabled?: boolean;
 }>(({
   audioSrc,
   isPlaying,
   onPlay,
-  listened
+  listened,
+  disabled
 }, ref) => <div ref={ref} className="flex items-center gap-3 w-48">
-    <button onClick={onPlay} className="w-10 h-10 bg-gradient-to-br from-primary to-amber-400 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform shrink-0 relative">
+    <button
+      onClick={onPlay}
+      disabled={disabled}
+      className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform shrink-0 relative ${disabled ? 'opacity-50 cursor-not-allowed bg-muted' : 'bg-gradient-to-br from-primary to-amber-400 hover:scale-105'}`}
+      aria-disabled={disabled}
+      title={disabled ? 'Ouça os áudios anteriores primeiro' : 'Reproduzir áudio'}
+    >
       {isPlaying ? <Pause className="w-5 h-5 text-primary-foreground" fill="currentColor" /> : <Play className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" />}
       {listened && <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center border-2 border-slate-700">
           <Check className="w-2.5 h-2.5 text-white" />
@@ -755,7 +783,7 @@ const AudioPlayerComponent = forwardRef<HTMLDivElement, {
     </button>
     <div className="flex-1 flex flex-col gap-1">
       <div className="h-8 flex items-center gap-0.5">
-        {[...Array(16)].map((_, i) => <div key={i} className={`w-1 rounded-full transition-all ${isPlaying ? 'bg-primary animate-pulse' : listened ? 'bg-green-500' : 'bg-slate-500'}`} style={{
+        {[...Array(16)].map((_, i) => <div key={i} className={`w-1 rounded-full transition-all ${disabled ? 'bg-muted' : isPlaying ? 'bg-primary animate-pulse' : listened ? 'bg-green-500' : 'bg-slate-500'}`} style={{
         height: `${Math.random() * 16 + 8}px`,
         animationDelay: `${i * 50}ms`
       }} />)}
