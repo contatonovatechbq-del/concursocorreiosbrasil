@@ -22,9 +22,6 @@ const WillBankHeader = ({ userName, breadcrumb = "Benefício > Indenização > A
               <span className="text-base sm:text-lg">⋮</span>
             </button>
             <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all duration-200">
-              <span className="text-base sm:text-lg">💎</span>
-            </button>
-            <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all duration-200">
               <Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             {userName ? (
