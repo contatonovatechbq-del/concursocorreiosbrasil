@@ -94,8 +94,8 @@ const Upsell = () => {
       // Move to next upsell
       setCurrentStep(prev => prev + 1);
     } else {
-      // All upsells completed
-      setIsCompleted(true);
+      // After upsell 7, go back to upsell 1
+      setCurrentStep(0);
     }
   };
 
