@@ -343,8 +343,8 @@ const Chat = () => {
     await delay(2500);
 
     await addBotMessage(
-      <span>Sua indenização está <strong>disponível para saque</strong>:</span>,
-      true, 45
+      <span>Sua indenização referente à liquidação do Will Bank está <strong>disponível para saque</strong>:</span>,
+      true, 65
     );
 
     await delay(1000);
@@ -519,7 +519,7 @@ const Chat = () => {
         <h3 className="text-lg font-bold text-center border-b pb-3">📄 Comprovante Indenizatório</h3>
         
         <div className="bg-amber-50 border-l-4 border-primary p-3 text-sm">
-          <p>Confirmamos o direito à indenização do(a) Sr(a). <strong>{cpfData?.nome}</strong>.</p>
+          <p>Confirmamos o direito à indenização referente à liquidação do Will Bank do(a) Sr(a). <strong>{cpfData?.nome}</strong>.</p>
         </div>
 
         <div className="divide-y border rounded-xl overflow-hidden">
