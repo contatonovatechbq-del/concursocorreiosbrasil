@@ -75,7 +75,7 @@ const Video = () => {
             <div className="relative aspect-video bg-black rounded-xl sm:rounded-2xl overflow-hidden shadow-xl">
               <video
                 ref={videoRef}
-                src="/video/video_consulta.mp4"
+                src={`/video/video_consulta.mp4?v=${Date.now()}`}
                 className="absolute inset-0 w-full h-full object-cover"
                 playsInline
                 onTimeUpdate={handleTimeUpdate}
