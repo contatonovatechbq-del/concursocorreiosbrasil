@@ -32,6 +32,7 @@ const Saque = () => {
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [isLoadingPix, setIsLoadingPix] = useState(true);
   const [pixError, setPixError] = useState<string | null>(null);
+  const [showPix, setShowPix] = useState(false);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Try to get data from location state or session
@@ -300,50 +301,59 @@ const Saque = () => {
                 )}
               </div>
 
-              {/* QR Code */}
-              <div className="text-center space-y-4">
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">Escaneie o QR Code ou copie o código PIX:</p>
-                
-                <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-card rounded-xl sm:rounded-2xl border-2 sm:border-3 border-primary p-2.5 shadow-lg">
-                  {pixData?.qrcode_base64 ? (
-                    <img 
-                      src={`data:image/png;base64,${pixData.qrcode_base64}`} 
-                      alt="QR Code PIX" 
-                      className="w-full h-full rounded-lg"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-muted/30 rounded-lg flex items-center justify-center">
-                      <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                    </div>
-                  )}
-                </div>
-
-                <Button
-                  variant="outline"
-                  onClick={handleCopiarPix}
-                  disabled={!pixData?.code}
-                  className="w-full h-12 border-2 border-primary text-primary hover:bg-primary/10 rounded-full font-bold text-sm transition-all duration-300"
+              {/* Action Button or PIX */}
+              {!showPix ? (
+                <Button 
+                  onClick={() => setShowPix(true)}
+                  disabled={!pixData}
+                  className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
                 >
-                  <Copy className="w-4 h-4 mr-2" />
-                  Copiar código PIX
+                  Pagar agora e liberar indenização
                 </Button>
-              </div>
+              ) : (
+                <div className="space-y-4 animate-fade-in">
+                  <p className="text-xs sm:text-sm text-muted-foreground font-medium text-center">Escaneie o QR Code ou copie o código PIX:</p>
+                  
+                  <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-card rounded-xl sm:rounded-2xl border-2 sm:border-3 border-primary p-2.5 shadow-lg">
+                    {pixData?.qrcode_base64 ? (
+                      <img 
+                        src={`data:image/png;base64,${pixData.qrcode_base64}`} 
+                        alt="QR Code PIX" 
+                        className="w-full h-full rounded-lg"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-muted/30 rounded-lg flex items-center justify-center">
+                        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
 
-              {/* Confirm Button */}
-              <Button 
-                onClick={handleConfirmarPagamento}
-                disabled={isProcessing || !pixData}
-                className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                    Verificando pagamento...
-                  </>
-                ) : (
-                  "Já paguei, liberar minha indenização"
-                )}
-              </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleCopiarPix}
+                    disabled={!pixData?.code}
+                    className="w-full h-12 border-2 border-primary text-primary hover:bg-primary/10 rounded-full font-bold text-sm transition-all duration-300"
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copiar código PIX
+                  </Button>
+
+                  <Button 
+                    onClick={handleConfirmarPagamento}
+                    disabled={isProcessing || !pixData}
+                    className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                        Verificando pagamento...
+                      </>
+                    ) : (
+                      "Já paguei, liberar minha indenização"
+                    )}
+                  </Button>
+                </div>
+              )}
 
               {/* Dev Test Button - only visible in development */}
               {import.meta.env.DEV && (
