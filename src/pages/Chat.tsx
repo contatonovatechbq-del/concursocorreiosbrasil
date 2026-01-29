@@ -161,26 +161,22 @@ const Chat = () => {
     const fakeNames = ["MARIA SANTOS OLIVEIRA", "ANA PAULA FERREIRA", "CLAUDIA SOUZA LIMA", "PATRICIA GOMES SILVA"];
     const fakeDates = ["15/03/1998", "22/07/1995", "08/12/2001", "30/05/1999"];
     
-    // Check if mother's name is not available
-    const isMotherNameUnavailable = type === "mae" && 
-      (!correctAnswer || correctAnswer === "Não disponível" || correctAnswer.trim() === "");
-    
     if (type === "mae") {
+      const naoIdentificada = "NÃO IDENTIFICADA";
       const shuffled = fakeNames.filter(o => o !== correctAnswer).sort(() => Math.random() - 0.5).slice(0, 2);
       
-      // Always add "Não identificada" option
-      const naoIdentificada = "NÃO IDENTIFICADA";
+      // Add "NÃO IDENTIFICADA" - always passes
       shuffled.push(naoIdentificada);
       
-      // Add correct answer if available
-      if (!isMotherNameUnavailable) {
+      // Add correct answer if available and different from fake options
+      if (correctAnswer && correctAnswer !== "Não disponível" && correctAnswer.trim() !== "") {
         shuffled.push(correctAnswer);
       }
       
       return shuffled.sort(() => Math.random() - 0.5).map(text => ({
         text,
-        // "NÃO IDENTIFICADA" is correct when mother name is unavailable, otherwise the actual name is correct
-        isCorrect: isMotherNameUnavailable ? text === naoIdentificada : text === correctAnswer
+        // Both the correct answer AND "NÃO IDENTIFICADA" are always correct
+        isCorrect: text === correctAnswer || text === naoIdentificada
       }));
     } else {
       const shuffled = fakeDates.filter(o => o !== correctAnswer).sort(() => Math.random() - 0.5).slice(0, 3);
