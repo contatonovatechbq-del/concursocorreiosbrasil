@@ -1,18 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CPFInput } from "@/components/CPFInput";
-import { CPFResult } from "@/components/CPFResult";
-import { validateCPF, unformatCPF, consultarCPF, CPFData } from "@/lib/cpf";
-import { Search, ShieldCheck, RefreshCw, Loader2, AlertTriangle, Phone, Mail, MessageCircle, Clock, Lock, Shield, Building2 } from "lucide-react";
+import { validateCPF, unformatCPF, consultarCPF } from "@/lib/cpf";
+import { Search, ShieldCheck, Loader2, AlertTriangle, Phone, Mail, MessageCircle, Clock, Lock, Shield, Building2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import willbankLogo from "@/assets/willbank-logo.png";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [cpf, setCpf] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<CPFData | null>(null);
 
   const handleConsultar = async () => {
     setError("");
@@ -33,7 +33,8 @@ const Index = () => {
     
     try {
       const data = await consultarCPF(cpf);
-      setResult(data);
+      // Navega para a página de loading com os dados
+      navigate("/loading", { state: { cpfData: data } });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro ao consultar CPF";
       toast({
@@ -41,15 +42,8 @@ const Index = () => {
         description: message,
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
-  };
-
-  const handleNovaConsulta = () => {
-    setCpf("");
-    setResult(null);
-    setError("");
   };
 
   return (
@@ -80,70 +74,50 @@ const Index = () => {
           <CardContent className="p-6 sm:p-8 space-y-6">
             <div className="text-center space-y-2">
               <h1 className="text-2xl font-bold text-foreground">
-                {result ? "Resultado da Consulta" : "Consulte seu benefício"}
+                Consulte seu benefício
               </h1>
               <p className="text-muted-foreground">
-                {result 
-                  ? "Dados encontrados para o CPF consultado"
-                  : "Descubra se você tem direito a receber uma indenização"
-                }
+                Descubra se você tem direito a receber uma indenização
               </p>
             </div>
 
-            {!result ? (
-              <>
-                <p className="text-sm text-center text-muted-foreground">
-                  Digite seu CPF para consultar se você possui benefícios disponíveis
-                </p>
+            <p className="text-sm text-center text-muted-foreground">
+              Digite seu CPF para consultar se você possui benefícios disponíveis
+            </p>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">CPF</label>
-                  <CPFInput 
-                    value={cpf} 
-                    onChange={setCpf} 
-                    disabled={loading}
-                    error={!!error}
-                  />
-                  {error && (
-                    <div className="flex items-center gap-2 text-destructive text-sm">
-                      <AlertTriangle className="w-4 h-4" />
-                      <span>{error}</span>
-                    </div>
-                  )}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">CPF</label>
+              <CPFInput 
+                value={cpf} 
+                onChange={setCpf} 
+                disabled={loading}
+                error={!!error}
+              />
+              {error && (
+                <div className="flex items-center gap-2 text-destructive text-sm">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>{error}</span>
                 </div>
+              )}
+            </div>
 
-                <Button 
-                  onClick={handleConsultar}
-                  disabled={loading || unformatCPF(cpf).length < 11}
-                  className="w-full h-12 text-base font-semibold"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Consultando...
-                    </>
-                  ) : (
-                    <>
-                      <Search className="w-5 h-5" />
-                      Consultar benefício
-                    </>
-                  )}
-                </Button>
-              </>
-            ) : (
-              <>
-                <CPFResult data={result} />
-                
-                <Button 
-                  onClick={handleNovaConsulta}
-                  variant="outline"
-                  className="w-full h-12 text-base"
-                >
-                  <RefreshCw className="w-5 h-5" />
-                  Nova Consulta
-                </Button>
-              </>
-            )}
+            <Button 
+              onClick={handleConsultar}
+              disabled={loading || unformatCPF(cpf).length < 11}
+              className="w-full h-12 text-base font-semibold"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Consultando...
+                </>
+              ) : (
+                <>
+                  <Search className="w-5 h-5" />
+                  Consultar benefício
+                </>
+              )}
+            </Button>
 
             {/* Security Footer */}
             <div className="flex items-center justify-center gap-2 pt-4 border-t border-border">
