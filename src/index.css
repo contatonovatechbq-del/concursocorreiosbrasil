@@ -2,30 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Will Bank Design System */
+/* Will Bank Design System - Yellow Theme */
 
 @layer base {
 :root {
-    --background: 260 20% 98%;
-    --foreground: 260 30% 15%;
+    --background: 220 14% 96%;
+    --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 260 30% 15%;
+    --card-foreground: 222.2 84% 4.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 260 30% 15%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 330 85% 55%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 47 91% 53%;
+    --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 260 60% 50%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 260 15% 95%;
-    --muted-foreground: 260 10% 45%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 330 85% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 47 91% 53%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -33,9 +33,9 @@
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
 
-    --border: 260 20% 90%;
-    --input: 260 20% 90%;
-    --ring: 330 85% 55%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 47 91% 53%;
 
     --radius: 0.75rem;
 
@@ -50,33 +50,33 @@
   }
 
   .dark {
-    --background: 260 30% 8%;
-    --foreground: 260 10% 95%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-    --card: 260 25% 12%;
-    --card-foreground: 260 10% 95%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 260 25% 12%;
-    --popover-foreground: 260 10% 95%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 330 85% 60%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 47 91% 53%;
+    --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 260 50% 40%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 260 20% 18%;
-    --muted-foreground: 260 10% 60%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 330 85% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 260 20% 20%;
-    --input: 260 20% 20%;
-    --ring: 330 85% 60%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 47 91% 53%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -96,11 +96,5 @@
 
   body {
     @apply bg-background text-foreground;
-  }
-}
-
-@layer utilities {
-  .gradient-primary {
-    background: linear-gradient(135deg, hsl(330 85% 55%) 0%, hsl(260 60% 50%) 100%);
   }
 }
