@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.check-pix-status]
 verify_jwt = false
+
+[functions.fb-conversion]
+verify_jwt = false
