@@ -64,32 +64,51 @@ export interface CPFData {
   cpf: string;
   nome: string;
   dataNascimento: string;
-  situacao: string;
+  nomeMae: string;
+  sexo: string;
 }
 
 /**
- * Consulta dados de um CPF na Brasil API
- * @param cpf - CPF apenas com números
+ * Consulta dados de um CPF na API
+ * @param cpf - CPF com ou sem formatação
  * @returns Dados do CPF ou erro
  */
 export async function consultarCPF(cpf: string): Promise<CPFData> {
   const numbers = unformatCPF(cpf);
   
-  const response = await fetch(`https://brasilapi.com.br/api/cpf/v1/${numbers}`);
+  const response = await fetch(
+    `https://bk.elaiflow.dev/consultar-filtrada/cpf?cpf=${numbers}&token=cz1tgy6cmgjs3bvc2kqc4`,
+    {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    }
+  );
   
   if (!response.ok) {
-    if (response.status === 404) {
-      throw new Error('CPF não encontrado na base de dados');
-    }
-    throw new Error('Erro ao consultar CPF. Tente novamente mais tarde.');
+    throw new Error('Erro na consulta: ' + response.status);
   }
   
   const data = await response.json();
   
+  if (!data || !data.cpf || !data.nome) {
+    throw new Error('CPF não encontrado');
+  }
+  
+  // Converter sexo de "M"/"F" para "Masculino"/"Feminino"
+  let sexoFormatado = data.sexo || 'Não disponível';
+  if (data.sexo === 'M') {
+    sexoFormatado = 'Masculino';
+  } else if (data.sexo === 'F') {
+    sexoFormatado = 'Feminino';
+  }
+  
   return {
-    cpf: formatCPF(numbers),
-    nome: data.nome || 'Não disponível',
-    dataNascimento: data.data_nascimento || 'Não disponível',
-    situacao: data.situacao_cadastral || 'Regular',
+    cpf: formatCPF(data.cpf),
+    nome: data.nome,
+    dataNascimento: data.nascimento || 'Não disponível',
+    nomeMae: data.mae || 'Não disponível',
+    sexo: sexoFormatado,
   };
 }
