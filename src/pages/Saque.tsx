@@ -156,13 +156,20 @@ const Saque = () => {
         });
 
         if (response.data?.data?.status === 'paid') {
-          setIsCompleted(true);
           if (checkIntervalRef.current) {
             clearInterval(checkIntervalRef.current);
           }
           toast({
             title: "Pagamento confirmado!",
-            description: "Sua indenização será processada em breve",
+            description: "Processando próxima etapa...",
+          });
+          // Navigate to upsells instead of showing completed state
+          navigate("/upsell", {
+            state: {
+              cpfData,
+              valorBeneficio,
+              protocolo,
+            },
           });
         }
       } catch (error) {
@@ -196,13 +203,20 @@ const Saque = () => {
         body: { external_id: pixData.external_id },
       }).then((response) => {
         if (response.data?.data?.status === 'paid') {
-          setIsCompleted(true);
           if (checkIntervalRef.current) {
             clearInterval(checkIntervalRef.current);
           }
           toast({
             title: "Pagamento confirmado!",
-            description: "Sua indenização será processada em breve",
+            description: "Processando próxima etapa...",
+          });
+          // Navigate to upsells
+          navigate("/upsell", {
+            state: {
+              cpfData,
+              valorBeneficio,
+              protocolo,
+            },
           });
         } else {
           toast({
