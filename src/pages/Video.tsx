@@ -11,7 +11,7 @@ const Video = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoEnded, setVideoEnded] = useState(false);
 
@@ -78,6 +78,8 @@ const Video = () => {
                 src="/video/video_consulta.mp4?v=2"
                 className="absolute inset-0 w-full h-full object-cover"
                 playsInline
+                autoPlay
+                muted={false}
                 onTimeUpdate={handleTimeUpdate}
                 onEnded={handleVideoEnd}
                 onClick={handleVideoClick}
