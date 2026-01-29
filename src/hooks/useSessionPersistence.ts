@@ -21,7 +21,13 @@ const FUNNEL_STEPS = [
   "/video",
   "/chat",
   "/saque",
-  "/upsell",
+  "/upsell/1",
+  "/upsell/2",
+  "/upsell/3",
+  "/upsell/4",
+  "/upsell/5",
+  "/upsell/6",
+  "/upsell/7",
 ];
 
 // Get step index (higher = further in funnel)

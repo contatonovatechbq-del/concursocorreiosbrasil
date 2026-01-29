@@ -31,7 +31,7 @@ const App = () => (
             <Route path="/video" element={<Video />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/saque" element={<Saque />} />
-            <Route path="/upsell" element={<Upsell />} />
+            <Route path="/upsell/:step" element={<Upsell />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

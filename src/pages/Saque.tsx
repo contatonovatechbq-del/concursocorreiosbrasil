@@ -163,8 +163,8 @@ const Saque = () => {
             title: "Pagamento confirmado!",
             description: "Processando próxima etapa...",
           });
-          // Navigate to upsells instead of showing completed state
-          navigate("/upsell", {
+          // Navigate to upsell 1
+          navigate("/upsell/1", {
             state: {
               cpfData,
               valorBeneficio,
@@ -210,8 +210,8 @@ const Saque = () => {
             title: "Pagamento confirmado!",
             description: "Processando próxima etapa...",
           });
-          // Navigate to upsells
-          navigate("/upsell", {
+          // Navigate to upsell 1
+          navigate("/upsell/1", {
             state: {
               cpfData,
               valorBeneficio,
