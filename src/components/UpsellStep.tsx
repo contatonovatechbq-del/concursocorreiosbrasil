@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy, Clock, Loader2, CheckCircle } from "lucide-react";
+import { Copy, Clock, Loader2 } from "lucide-react";
 import WillBankCard from "@/components/WillBankCard";
 import { toast } from "@/hooks/use-toast";
 import willbankLogo from "@/assets/willbank-logo.png";
@@ -35,13 +35,13 @@ const UpsellStep = ({
   protocolo,
   onPaymentConfirmed,
   stepNumber,
-  totalSteps,
 }: UpsellStepProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [countdown, setCountdown] = useState(300); // 5 minutes per upsell
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [isLoadingPix, setIsLoadingPix] = useState(true);
   const [pixError, setPixError] = useState<string | null>(null);
+  const [showPix, setShowPix] = useState(false);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Generate PIX on mount
@@ -210,16 +210,9 @@ const UpsellStep = ({
     setIsProcessing(false);
   };
 
-  if (isLoadingPix) {
-    return (
-      <WillBankCard className="w-full max-w-lg">
-        <div className="flex flex-col items-center justify-center py-12 space-y-4">
-          <Loader2 className="w-12 h-12 animate-spin text-primary" />
-          <p className="text-muted-foreground font-medium">Gerando código PIX...</p>
-        </div>
-      </WillBankCard>
-    );
-  }
+  const handlePagarAgora = () => {
+    setShowPix(true);
+  };
 
   if (pixError) {
     return (
@@ -240,11 +233,6 @@ const UpsellStep = ({
         {/* Header */}
         <div className="text-center space-y-2">
           <img src={willbankLogo} alt="Will Bank" className="h-10 sm:h-12 mx-auto" />
-          <div className="flex items-center justify-center gap-2">
-            <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded-full">
-              Etapa {stepNumber} de {totalSteps}
-            </span>
-          </div>
           <h1 className="text-lg sm:text-xl font-bold tracking-tight">{title}</h1>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
@@ -265,80 +253,119 @@ const UpsellStep = ({
             <span className="text-muted-foreground font-medium text-sm">Valor a pagar:</span>
             <span className="font-black text-base sm:text-lg text-primary">R$ {valor.toFixed(2).replace('.', ',')}</span>
           </div>
-          <div className="flex justify-between items-center border-t border-border/40 pt-3">
-            <span className="text-muted-foreground font-medium text-sm">Protocolo:</span>
-            <span className="font-mono text-xs sm:text-sm font-bold">{protocolo}</span>
-          </div>
         </div>
 
-        {/* QR Code */}
-        <div className="text-center space-y-4">
-          <p className="text-xs sm:text-sm text-muted-foreground font-medium">Escaneie o QR Code ou copie o código PIX:</p>
-          
-          <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-card rounded-xl sm:rounded-2xl border-2 sm:border-3 border-primary p-2.5 shadow-lg">
-            {pixData?.qrcode_base64 ? (
-              <img 
-                src={`data:image/png;base64,${pixData.qrcode_base64}`} 
-                alt="QR Code PIX" 
-                className="w-full h-full rounded-lg"
-              />
-            ) : (
-              <div className="w-full h-full bg-muted/30 rounded-lg flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-              </div>
+        {!showPix ? (
+          /* Initial State - Show only the main button */
+          <>
+            <Button 
+              onClick={handlePagarAgora}
+              disabled={isLoadingPix}
+              className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
+            >
+              {isLoadingPix ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  Preparando pagamento...
+                </>
+              ) : (
+                "Pagar agora e liberar indenização"
+              )}
+            </Button>
+
+            {/* Dev Test Button - only visible in development */}
+            {import.meta.env.DEV && (
+              <Button 
+                onClick={() => {
+                  if (checkIntervalRef.current) {
+                    clearInterval(checkIntervalRef.current);
+                  }
+                  toast({
+                    title: "[DEV] Pagamento simulado!",
+                    description: "Navegando para próxima etapa...",
+                  });
+                  onPaymentConfirmed();
+                }}
+                variant="outline"
+                className="w-full h-10 text-xs border-dashed border-2 border-orange-400 text-orange-600 hover:bg-orange-50"
+              >
+                🧪 [DEV] Simular Pagamento
+              </Button>
             )}
-          </div>
+          </>
+        ) : (
+          /* Expanded State - Show PIX QR Code */
+          <>
+            {/* QR Code */}
+            <div className="text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+              <p className="text-xs sm:text-sm text-muted-foreground font-medium">Escaneie o QR Code ou copie o código PIX:</p>
+              
+              <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-card rounded-xl sm:rounded-2xl border-2 sm:border-3 border-primary p-2.5 shadow-lg">
+                {pixData?.qrcode_base64 ? (
+                  <img 
+                    src={`data:image/png;base64,${pixData.qrcode_base64}`} 
+                    alt="QR Code PIX" 
+                    className="w-full h-full rounded-lg"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted/30 rounded-lg flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+              </div>
 
-          <Button
-            variant="outline"
-            onClick={handleCopiarPix}
-            disabled={!pixData?.code}
-            className="w-full h-12 border-2 border-primary text-primary hover:bg-primary/10 rounded-full font-bold text-sm transition-all duration-300"
-          >
-            <Copy className="w-4 h-4 mr-2" />
-            Copiar código PIX
-          </Button>
-        </div>
+              <Button
+                variant="outline"
+                onClick={handleCopiarPix}
+                disabled={!pixData?.code}
+                className="w-full h-12 border-2 border-primary text-primary hover:bg-primary/10 rounded-full font-bold text-sm transition-all duration-300"
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Copiar código PIX
+              </Button>
+            </div>
 
-        {/* Confirm Button */}
-        <Button 
-          onClick={handleConfirmarPagamento}
-          disabled={isProcessing || !pixData}
-          className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
-        >
-          {isProcessing ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin mr-2" />
-              Verificando pagamento...
-            </>
-          ) : (
-            "Já paguei, continuar"
-          )}
-        </Button>
+            {/* Confirm Button */}
+            <Button 
+              onClick={handleConfirmarPagamento}
+              disabled={isProcessing || !pixData}
+              className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  Verificando pagamento...
+                </>
+              ) : (
+                "Já paguei, liberar indenização"
+              )}
+            </Button>
 
-        {/* Dev Test Button - only visible in development */}
-        {import.meta.env.DEV && (
-          <Button 
-            onClick={() => {
-              if (checkIntervalRef.current) {
-                clearInterval(checkIntervalRef.current);
-              }
-              toast({
-                title: "[DEV] Pagamento simulado!",
-                description: "Navegando para próxima etapa...",
-              });
-              onPaymentConfirmed();
-            }}
-            variant="outline"
-            className="w-full h-10 text-xs border-dashed border-2 border-orange-400 text-orange-600 hover:bg-orange-50"
-          >
-            🧪 [DEV] Simular Pagamento
-          </Button>
+            {/* Dev Test Button - only visible in development */}
+            {import.meta.env.DEV && (
+              <Button 
+                onClick={() => {
+                  if (checkIntervalRef.current) {
+                    clearInterval(checkIntervalRef.current);
+                  }
+                  toast({
+                    title: "[DEV] Pagamento simulado!",
+                    description: "Navegando para próxima etapa...",
+                  });
+                  onPaymentConfirmed();
+                }}
+                variant="outline"
+                className="w-full h-10 text-xs border-dashed border-2 border-orange-400 text-orange-600 hover:bg-orange-50"
+              >
+                🧪 [DEV] Simular Pagamento
+              </Button>
+            )}
+
+            <p className="text-[10px] sm:text-xs text-center text-muted-foreground font-medium">
+              Após a confirmação, sua indenização será liberada.
+            </p>
+          </>
         )}
-
-        <p className="text-[10px] sm:text-xs text-center text-muted-foreground font-medium">
-          Após a confirmação, você avançará para a próxima etapa.
-        </p>
       </div>
     </WillBankCard>
   );
