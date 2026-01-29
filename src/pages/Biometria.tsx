@@ -131,19 +131,19 @@ const Biometria = () => {
   const canCapture = validationStatus.face && validationStatus.lighting;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col">
       <WillBankHeader 
         userName={cpfData.nome.split(' ')[0].toUpperCase()} 
       />
 
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+      <main className="flex-1 flex items-center justify-center p-3 sm:p-6">
         <WillBankCard className="w-full max-w-lg">
-          <div className="space-y-6 text-center py-4">
-            <div className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+          <div className="space-y-5 text-center py-2 sm:py-4">
+            <div className="space-y-1.5">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                 Verificação de identidade
               </h1>
-              <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+              <p className="text-muted-foreground leading-relaxed text-xs sm:text-sm">
                 {capturedPhoto 
                   ? "Analisando sua foto..."
                   : `Tire uma selfie para confirmar que é ${cpfData.nome.split(' ')[0]}`
@@ -152,22 +152,23 @@ const Biometria = () => {
             </div>
 
             {/* Camera/Photo Area */}
-            <div className="relative mx-auto w-full max-w-[300px] aspect-[3/4]">
+            <div className="relative mx-auto w-full max-w-[260px] sm:max-w-[300px] aspect-[3/4]">
               {cameraError ? (
-                <div className="absolute inset-0 bg-muted rounded-3xl flex flex-col items-center justify-center p-6">
-                  <AlertCircle className="w-12 h-12 text-destructive mb-4" />
-                  <p className="text-sm text-muted-foreground text-center">{cameraError}</p>
+                <div className="absolute inset-0 bg-muted rounded-2xl flex flex-col items-center justify-center p-4 sm:p-6">
+                  <AlertCircle className="w-10 h-10 sm:w-12 sm:h-12 text-destructive mb-3" />
+                  <p className="text-xs sm:text-sm text-muted-foreground text-center">{cameraError}</p>
                   <Button 
                     onClick={startCamera} 
-                    className="mt-4"
+                    className="mt-3"
                     variant="outline"
+                    size="sm"
                   >
                     Tentar novamente
                   </Button>
                 </div>
               ) : capturedPhoto ? (
                 // Show captured photo
-                <div className="absolute inset-0 rounded-3xl overflow-hidden">
+                <div className="absolute inset-0 rounded-2xl overflow-hidden">
                   <img 
                     src={capturedPhoto} 
                     alt="Foto capturada" 
@@ -175,9 +176,9 @@ const Biometria = () => {
                   />
                   {isAnalyzing && (
                     <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-                      <div className="w-20 h-20 rounded-full border-4 border-primary/30 border-t-primary animate-spin mb-4" />
-                      <p className="text-white font-semibold mb-2">Analisando biometria facial</p>
-                      <p className="text-white/80 text-2xl font-bold">{analysisProgress}%</p>
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-primary/30 border-t-primary animate-spin mb-3" />
+                      <p className="text-white font-semibold text-sm mb-1">Analisando biometria facial</p>
+                      <p className="text-white/80 text-xl font-bold">{analysisProgress}%</p>
                     </div>
                   )}
                 </div>
@@ -189,7 +190,7 @@ const Biometria = () => {
                     autoPlay 
                     playsInline 
                     muted
-                    className="absolute inset-0 w-full h-full object-cover rounded-3xl transform scale-x-[-1]"
+                    className="absolute inset-0 w-full h-full object-cover rounded-2xl transform scale-x-[-1]"
                   />
                   
                   {/* Face oval overlay */}
@@ -225,8 +226,8 @@ const Biometria = () => {
                   </div>
 
                   {/* Instructions */}
-                  <div className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur rounded-xl p-3">
-                    <p className="text-white text-sm font-medium text-center">
+                  <div className="absolute bottom-3 left-3 right-3 bg-black/70 backdrop-blur rounded-xl p-2.5">
+                    <p className="text-white text-xs sm:text-sm font-medium text-center">
                       Posicione seu rosto no centro
                     </p>
                   </div>
@@ -238,29 +239,29 @@ const Biometria = () => {
 
             {/* Validation Indicators */}
             {!capturedPhoto && !cameraError && (
-              <div className="flex justify-center gap-6">
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs ${
                   validationStatus.face 
                     ? 'bg-green-500/20 text-green-600' 
                     : 'bg-muted text-muted-foreground'
                 }`}>
-                  <User className="w-4 h-4" />
-                  <span className="text-sm font-medium">
-                    {validationStatus.face ? 'Rosto detectado' : 'Detectando rosto...'}
+                  <User className="w-3.5 h-3.5" />
+                  <span className="font-medium">
+                    {validationStatus.face ? 'Rosto detectado' : 'Detectando...'}
                   </span>
-                  {validationStatus.face && <CheckCircle className="w-4 h-4" />}
+                  {validationStatus.face && <CheckCircle className="w-3.5 h-3.5" />}
                 </div>
                 
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs ${
                   validationStatus.lighting 
                     ? 'bg-green-500/20 text-green-600' 
                     : 'bg-muted text-muted-foreground'
                 }`}>
-                  <Sun className="w-4 h-4" />
-                  <span className="text-sm font-medium">
-                    {validationStatus.lighting ? 'Iluminação OK' : 'Verificando luz...'}
+                  <Sun className="w-3.5 h-3.5" />
+                  <span className="font-medium">
+                    {validationStatus.lighting ? 'Luz OK' : 'Verificando...'}
                   </span>
-                  {validationStatus.lighting && <CheckCircle className="w-4 h-4" />}
+                  {validationStatus.lighting && <CheckCircle className="w-3.5 h-3.5" />}
                 </div>
               </div>
             )}
@@ -270,7 +271,7 @@ const Biometria = () => {
               <Button 
                 onClick={capturePhoto}
                 disabled={!canCapture}
-                className="w-full h-14 text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+                className="w-full h-12 text-sm font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
               >
                 <Camera className="w-5 h-5 mr-2" />
                 {canCapture ? 'Tirar foto' : 'Aguarde a validação...'}
@@ -278,11 +279,11 @@ const Biometria = () => {
             )}
 
             {capturedPhoto && !isAnalyzing && (
-              <div className="flex gap-3">
+              <div className="flex gap-2.5">
                 <Button 
                   onClick={retakePhoto}
                   variant="outline"
-                  className="flex-1 h-12 font-semibold rounded-full"
+                  className="flex-1 h-10 sm:h-12 font-semibold rounded-full text-sm"
                 >
                   Tirar novamente
                 </Button>
@@ -291,7 +292,7 @@ const Biometria = () => {
                     setIsAnalyzing(true);
                     simulateAnalysis();
                   }}
-                  className="flex-1 h-12 font-bold bg-primary hover:bg-primary/90 rounded-full"
+                  className="flex-1 h-10 sm:h-12 font-bold bg-primary hover:bg-primary/90 rounded-full text-sm"
                 >
                   Confirmar foto
                 </Button>
@@ -299,7 +300,7 @@ const Biometria = () => {
             )}
 
             {/* Security Badge */}
-            <div className="inline-flex items-center gap-2.5 bg-primary/10 text-primary px-5 py-2.5 rounded-full text-sm font-semibold">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-xs sm:text-sm font-semibold">
               <span>🔒</span>
               <span>Verificação facial segura</span>
             </div>

