@@ -118,4 +118,26 @@
     background: hsl(0 0% 100% / 0.95);
     backdrop-filter: blur(20px);
   }
+  
+  /* Safe area for mobile devices */
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* Mobile-first touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Prevent overscroll on iOS */
+html, body {
+  overscroll-behavior: none;
 }
