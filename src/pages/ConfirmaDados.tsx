@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
+import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 
 const ConfirmaDados = () => {
@@ -90,6 +91,8 @@ const ConfirmaDados = () => {
           </div>
         </WillBankCard>
       </main>
+
+      <WillBankFooter />
     </div>
   );
 };

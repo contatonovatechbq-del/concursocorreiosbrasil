@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { CreditCard, User, Calendar, Users, Search, Volume2 } from "lucide-react";
 import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
+import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import { Progress } from "@/components/ui/progress";
 
@@ -116,6 +117,8 @@ const Video = () => {
           </div>
         </WillBankCard>
       </main>
+
+      <WillBankFooter />
     </div>
   );
 };
