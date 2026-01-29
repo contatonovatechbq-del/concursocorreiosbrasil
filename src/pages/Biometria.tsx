@@ -158,12 +158,12 @@ const Biometria = () => {
                   <AlertCircle className="w-10 h-10 sm:w-12 sm:h-12 text-destructive mb-3" />
                   <p className="text-xs sm:text-sm text-muted-foreground text-center">{cameraError}</p>
                   <Button 
-                    onClick={startCamera} 
+                    onClick={() => navigate("/video", { state: { cpfData } })} 
                     className="mt-3"
-                    variant="outline"
+                    variant="default"
                     size="sm"
                   >
-                    Tentar novamente
+                    Continuar mesmo assim
                   </Button>
                 </div>
               ) : capturedPhoto ? (
