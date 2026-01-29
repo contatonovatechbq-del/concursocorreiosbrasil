@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
+import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import { toast } from "@/hooks/use-toast";
 import willbankLogo from "@/assets/willbank-logo.png";
@@ -207,6 +208,8 @@ const Saque = () => {
           )}
         </WillBankCard>
       </main>
+
+      <WillBankFooter />
     </div>
   );
 };

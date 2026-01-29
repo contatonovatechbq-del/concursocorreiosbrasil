@@ -7,6 +7,7 @@ import { ShieldCheck, Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
+import WillBankFooter from "@/components/WillBankFooter";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -110,6 +111,8 @@ const Login = () => {
           </div>
         </WillBankCard>
       </main>
+
+      <WillBankFooter />
     </div>
   );
 };

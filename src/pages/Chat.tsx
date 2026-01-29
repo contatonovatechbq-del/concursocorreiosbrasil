@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { CheckCircle2, Play, Volume2, Check } from "lucide-react";
 import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
+import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import willbankLogo from "@/assets/willbank-logo.png";
 
@@ -647,6 +648,8 @@ const Chat = () => {
           </WillBankCard>
         </div>
       </main>
+
+      <WillBankFooter />
     </div>
   );
 };

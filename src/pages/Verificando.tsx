@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Shield } from "lucide-react";
 import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
+import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 
 const Verificando = () => {
@@ -94,6 +95,8 @@ const Verificando = () => {
           </div>
         </WillBankCard>
       </main>
+
+      <WillBankFooter />
     </div>
   );
 };
