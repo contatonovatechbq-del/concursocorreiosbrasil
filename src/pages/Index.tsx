@@ -40,13 +40,6 @@ const Index = () => {
         description: message,
         variant: "destructive",
       });
-      // Fallback: mostra validação local
-      setResult({
-        cpf: cpf,
-        nome: "Não disponível (API indisponível)",
-        dataNascimento: "Não disponível",
-        situacao: "CPF válido matematicamente",
-      });
     } finally {
       setLoading(false);
     }

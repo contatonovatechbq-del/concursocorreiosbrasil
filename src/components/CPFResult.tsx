@@ -1,26 +1,11 @@
 import { CPFData } from "@/lib/cpf";
-import { User, Calendar, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { User, Calendar, Users, UserCircle } from "lucide-react";
 
 interface CPFResultProps {
   data: CPFData;
 }
 
 export function CPFResult({ data }: CPFResultProps) {
-  const isRegular = data.situacao.toLowerCase().includes('regular');
-  const isPendente = data.situacao.toLowerCase().includes('pendente');
-
-  const getStatusIcon = () => {
-    if (isRegular) return <CheckCircle className="w-5 h-5 text-green-600" />;
-    if (isPendente) return <AlertCircle className="w-5 h-5 text-yellow-600" />;
-    return <XCircle className="w-5 h-5 text-red-600" />;
-  };
-
-  const getStatusColor = () => {
-    if (isRegular) return 'bg-green-100 text-green-800 border-green-200';
-    if (isPendente) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    return 'bg-red-100 text-red-800 border-red-200';
-  };
-
   return (
     <div className="space-y-4 animate-in fade-in-50 duration-300">
       <div className="text-center mb-6">
@@ -46,12 +31,18 @@ export function CPFResult({ data }: CPFResultProps) {
         </div>
 
         <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-          {getStatusIcon()}
+          <Users className="w-5 h-5 text-primary" />
           <div className="flex-1">
-            <span className="text-xs text-muted-foreground block">Situação Cadastral</span>
-            <span className={`inline-flex px-2 py-0.5 rounded text-sm font-medium border ${getStatusColor()}`}>
-              {data.situacao}
-            </span>
+            <span className="text-xs text-muted-foreground block">Nome da Mãe</span>
+            <span className="font-medium text-foreground">{data.nomeMae}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+          <UserCircle className="w-5 h-5 text-primary" />
+          <div className="flex-1">
+            <span className="text-xs text-muted-foreground block">Sexo</span>
+            <span className="font-medium text-foreground">{data.sexo}</span>
           </div>
         </div>
       </div>
