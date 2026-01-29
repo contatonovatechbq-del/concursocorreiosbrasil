@@ -60,7 +60,7 @@ const Login = () => {
                 Consulte seu benefício
               </h1>
               <p className="text-muted-foreground text-base">
-                Descubra se você tem direito a receber uma indenização
+                Descubra se você tem direito a receber uma indenização referente à liquidação do Will Bank
               </p>
             </div>
 
