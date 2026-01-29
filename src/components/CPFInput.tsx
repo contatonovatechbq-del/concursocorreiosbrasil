@@ -26,7 +26,7 @@ export function CPFInput({ value, onChange, disabled, error }: CPFInputProps) {
       value={value}
       onChange={handleChange}
       disabled={disabled}
-      className={`text-center text-lg h-12 ${error ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+      className={`text-center text-xl font-bold h-14 rounded-xl border-2 focus:border-primary transition-all duration-200 ${error ? 'border-destructive focus-visible:ring-destructive' : 'border-border'}`}
       maxLength={14}
     />
   );

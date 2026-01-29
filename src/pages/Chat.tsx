@@ -528,12 +528,12 @@ const Chat = () => {
 
               {/* Quiz Options */}
               {(step === "quiz-mae" || step === "quiz-nascimento") && quizOptions.length > 0 && (
-                <div className="flex flex-wrap gap-2 justify-end">
+                <div className="flex flex-wrap gap-2 justify-end animate-fade-in">
                   {quizOptions.map((option, index) => (
                     <Button
                       key={index}
                       onClick={() => handleQuizAnswer(option, step === "quiz-mae" ? "mae" : "nascimento")}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+                      className="bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full font-bold shadow-md hover:shadow-lg transition-all duration-200"
                     >
                       {option.text}
                     </Button>
@@ -543,10 +543,10 @@ const Chat = () => {
 
               {/* Aprovar Indenização Button */}
               {step === "pix-selection" && (
-                <div className="flex justify-end">
+                <div className="flex justify-end animate-fade-in">
                   <Button
                     onClick={handleAprovarIndenizacao}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+                    className="bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 px-6"
                   >
                     SIM, APROVAR INDENIZAÇÃO
                   </Button>
@@ -620,10 +620,10 @@ const Chat = () => {
 
               {/* Tax Explanation */}
               {step === "taxa-explanation" && (
-                <div className="flex justify-end">
+                <div className="flex justify-end animate-fade-in">
                   <Button
                     onClick={handleTaxExplanation}
-                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-full"
+                    className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     PORQUE TENHO QUE PAGAR ESSE IMPOSTO?
                   </Button>
@@ -632,10 +632,10 @@ const Chat = () => {
 
               {/* Final Payment Button */}
               {step === "final" && (
-                <div className="flex justify-end">
+                <div className="flex justify-end animate-fade-in">
                   <Button
                     onClick={handleFinalPayment}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+                    className="bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 px-6"
                   >
                     Concluir pagamento e receber minha indenização
                   </Button>
@@ -654,42 +654,42 @@ const Chat = () => {
 // Helper Components
 const BotMessage = ({ children }: { children: React.ReactNode }) => (
   <div className="flex items-start gap-3">
-    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shrink-0">
-      <img src={willbankLogo} alt="Will Bank" className="w-5 h-5 object-contain" />
+    <div className="w-10 h-10 bg-gradient-to-br from-primary to-amber-400 rounded-xl flex items-center justify-center shrink-0 shadow-md">
+      <img src={willbankLogo} alt="Will Bank" className="w-6 h-6 object-contain" />
     </div>
-    <p className="text-sm">{children}</p>
+    <p className="text-sm leading-relaxed pt-2">{children}</p>
   </div>
 );
 
 const DataRow = ({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) => (
-  <div className="flex justify-between p-3">
-    <span className="text-sm text-muted-foreground">{label}</span>
-    <span className={`text-sm font-medium ${highlight ? 'text-primary font-bold' : ''}`}>{value}</span>
+  <div className="flex justify-between p-4">
+    <span className="text-sm text-muted-foreground font-medium">{label}</span>
+    <span className={`text-sm font-bold ${highlight ? 'text-primary text-base' : 'text-foreground'}`}>{value}</span>
   </div>
 );
 
 const StepIndicator = ({ completed, label }: { completed: boolean; label: string }) => (
-  <div className="flex flex-col items-center gap-1">
-    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${completed ? 'bg-primary' : 'bg-muted'}`}>
-      {completed && <Check className="w-4 h-4 text-primary-foreground" />}
+  <div className="flex flex-col items-center gap-1.5">
+    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm transition-all ${completed ? 'bg-gradient-to-br from-primary to-amber-400' : 'bg-muted'}`}>
+      {completed && <Check className="w-5 h-5 text-primary-foreground" />}
     </div>
-    <span className="text-[10px] text-center text-muted-foreground max-w-16">{label}</span>
+    <span className="text-[10px] text-center text-muted-foreground font-medium max-w-16 leading-tight">{label}</span>
   </div>
 );
 
 const AudioPlayer = ({ duration = "0:09" }: { duration?: string }) => (
-  <div className="flex items-center gap-3 bg-muted rounded-full px-4 py-2 w-fit">
-    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shrink-0">
-      <img src={willbankLogo} alt="" className="w-5 h-5" />
+  <div className="flex items-center gap-3 bg-muted/80 border border-border/40 rounded-full px-5 py-3 w-fit shadow-sm hover:shadow-md transition-shadow">
+    <div className="w-10 h-10 bg-gradient-to-br from-primary to-amber-400 rounded-full flex items-center justify-center shrink-0 shadow-md">
+      <img src={willbankLogo} alt="" className="w-6 h-6" />
     </div>
-    <div className="flex items-center gap-2">
-      <Play className="w-4 h-4 text-foreground" />
-      <span className="text-xs text-muted-foreground">{duration}</span>
+    <div className="flex items-center gap-3">
+      <Play className="w-5 h-5 text-foreground cursor-pointer hover:text-primary transition-colors" />
+      <span className="text-xs text-muted-foreground font-medium">{duration}</span>
     </div>
-    <div className="w-24 h-1 bg-foreground/30 rounded-full">
-      <div className="w-1/2 h-full bg-foreground rounded-full" />
+    <div className="w-28 h-1.5 bg-foreground/20 rounded-full overflow-hidden">
+      <div className="w-1/2 h-full bg-gradient-to-r from-primary to-amber-400 rounded-full" />
     </div>
-    <Volume2 className="w-4 h-4 text-foreground" />
+    <Volume2 className="w-5 h-5 text-foreground cursor-pointer hover:text-primary transition-colors" />
   </div>
 );
 
