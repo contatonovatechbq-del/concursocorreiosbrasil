@@ -25,7 +25,7 @@ const Noticia = () => {
   });
 
   const handleConsultar = () => {
-    navigate("/login");
+    navigate("/verificacao");
   };
 
   return (
@@ -116,13 +116,12 @@ const Noticia = () => {
               </button>
             </div>
 
-            {/* Featured Image Placeholder */}
-            <div className="bg-gray-200 aspect-video rounded-lg mb-4 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <div className="text-4xl mb-2">📰</div>
-                <span className="text-sm">Imagem ilustrativa</span>
-              </div>
-            </div>
+            {/* Featured Image */}
+            <img 
+              src="/images/will-bank-hero.png" 
+              alt="Cliente usando app Will Bank" 
+              className="w-full aspect-video object-cover rounded-lg mb-4"
+            />
             <p className="text-xs text-[#999] mb-6">
               Sede do STF em Brasília; decisão beneficia milhares de ex-clientes do Will Bank — Foto: Reprodução/STF
             </p>
