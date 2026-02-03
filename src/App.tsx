@@ -14,6 +14,10 @@ import Chat from "./pages/Chat";
 import Saque from "./pages/Saque";
 import Upsell from "./pages/Upsell";
 import NotFound from "./pages/NotFound";
+import { captureUtmParams } from "@/hooks/useUtmTracking";
+
+// Captura UTMs imediatamente na entrada do app
+captureUtmParams();
 
 const queryClient = new QueryClient();
 

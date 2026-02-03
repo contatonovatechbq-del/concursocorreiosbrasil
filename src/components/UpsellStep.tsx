@@ -7,6 +7,7 @@ import willbankLogo from "@/assets/willbank-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
+import { getStoredUtmParams } from "@/hooks/useUtmTracking";
 
 interface UpsellStepProps {
   title: string;
@@ -73,7 +74,8 @@ const UpsellStep = ({
         const amountInCents = Math.round(valor * 100);
         const externalId = `${protocolo}-UP${stepNumber}-${Date.now()}`;
 
-        const urlParams = new URLSearchParams(window.location.search);
+        // Get UTM params from localStorage (captured on entry)
+        const utmParams = getStoredUtmParams();
 
         const response = await supabase.functions.invoke('create-pix', {
           body: {
@@ -89,15 +91,15 @@ const UpsellStep = ({
               name: title,
             },
             tracking: {
-              utm_source: urlParams.get('utm_source'),
-              utm_medium: urlParams.get('utm_medium'),
-              utm_campaign: urlParams.get('utm_campaign'),
-              utm_content: urlParams.get('utm_content'),
-              utm_term: urlParams.get('utm_term'),
-              utm_id: urlParams.get('utm_id'),
-              src: urlParams.get('src'),
-              sck: urlParams.get('sck'),
-              ref: urlParams.get('ref'),
+              utm_source: utmParams.utm_source,
+              utm_medium: utmParams.utm_medium,
+              utm_campaign: utmParams.utm_campaign,
+              utm_content: utmParams.utm_content,
+              utm_term: utmParams.utm_term,
+              utm_id: utmParams.utm_id,
+              src: utmParams.src,
+              sck: utmParams.sck,
+              ref: utmParams.ref,
             },
           },
         });
