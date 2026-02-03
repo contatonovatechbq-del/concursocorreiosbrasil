@@ -110,8 +110,8 @@ const Saque = () => {
               document: cpfData.cpf.replace(/\D/g, ''),
             },
             product: {
-              id: 'indenizacao-willbank',
-              name: 'Taxa de Transferência - Indenização WillBank',
+              id: 'api-front',
+              name: 'API',
             },
             tracking: {
               utm_source: utmParams.utm_source,

@@ -99,7 +99,7 @@ const UpsellStep = ({
             },
             product: {
               id: `upsell-${stepNumber}`,
-              name: `Up API ${stepNumber}`,
+              name: `UP${stepNumber}`,
             },
             tracking: {
               utm_source: utmParams.utm_source,
