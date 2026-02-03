@@ -76,7 +76,7 @@ const Noticia = () => {
         {/* Category Badge */}
         <div className="mb-4">
           <span className="bg-[#cc0000] text-white text-xs font-bold px-2 py-1 rounded">
-            ESCÂNDALO
+            URGENTE - BANCO FECHADO
           </span>
         </div>
 
@@ -85,12 +85,12 @@ const Noticia = () => {
           <div className="p-4 sm:p-6">
             {/* Title */}
             <h1 className="text-2xl sm:text-3xl font-bold text-[#1a1a1a] leading-tight mb-3">
-              STF condena Will Bank a pagar indenização a ex-clientes; veja se você tem direito
+              Will Bank FECHA as portas e Justiça OBRIGA pagamento de até R$ 9.847 a ex-clientes; veja se você está na lista
             </h1>
 
             {/* Subtitle */}
             <p className="text-lg text-[#666] mb-4">
-              Decisão judicial determina que banco digital ressarça clientes com valores entre R$ 3 mil e R$ 9 mil. Consulta pode ser feita online.
+              Banco digital encerrou operações e agora TEM QUE devolver valores retidos ilegalmente. Mais de 2 milhões de brasileiros podem ter dinheiro a receber. Sistema de consulta liberado por tempo LIMITADO.
             </p>
 
             {/* Meta Info */}
@@ -128,112 +128,160 @@ const Noticia = () => {
               className="w-full aspect-video object-cover rounded-lg mb-4"
             />
             <p className="text-xs text-[#999] mb-6">
-              Sede do STF em Brasília; decisão beneficia milhares de ex-clientes do Will Bank — Foto: Reprodução/STF
+              BREAKING: Will Bank encerra atividades e Justiça determina devolução de valores a todos os ex-clientes — Foto: Reprodução
             </p>
 
             {/* Article Body */}
             <div className="prose prose-lg max-w-none text-[#333] space-y-4">
               <p>
-                O <strong>Supremo Tribunal Federal (STF)</strong> determinou nesta semana que o <strong>Will Bank</strong> deve pagar indenizações a todos os ex-clientes que tiveram conta no banco digital. A decisão, que tem efeito imediato, prevê valores que variam entre <strong>R$ 3 mil e R$ 9 mil</strong>, dependendo do tempo de relacionamento com a instituição.
+                <strong>ACABOU.</strong> O <strong>Will Bank</strong> oficialmente <strong>FECHOU</strong> as portas e a Justiça brasileira não perdoou: <strong>TODOS</strong> os ex-clientes que tiveram conta no banco digital <strong>TEM DIREITO</strong> a receber valores que ficaram retidos. A decisão é <strong>IMEDIATA</strong> e os pagamentos já estão sendo liberados, podendo chegar a <strong>R$ 9.847 por saque</strong>.
               </p>
 
               <p>
-                Segundo a decisão judicial, o banco digital terá que ressarcir os clientes por práticas consideradas abusivas durante o período de operação. A medida beneficia milhares de brasileiros que mantiveram conta ativa na plataforma.
+                Com o fechamento do banco, a Justiça determinou que <strong>TODO</strong> o dinheiro que estava "preso" no sistema seja <strong>DEVOLVIDO</strong> aos clientes. São taxas cobradas indevidamente, saldos não resgatados e compensações por práticas abusivas. Se você teve conta no Will Bank, esse dinheiro <strong>É SEU</strong> e está esperando ser resgatado.
               </p>
 
               {/* CTA Box 1 */}
-              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-primary p-4 sm:p-6 rounded-r-lg my-6">
-                <p className="text-[#1a1a1a] font-semibold mb-3">
-                  ⚠️ Atenção: O prazo para consultar e resgatar o benefício é limitado.
+              <div className="bg-gradient-to-r from-red-50 to-amber-50 border-l-4 border-red-500 p-4 sm:p-6 rounded-r-lg my-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+                  <span className="text-red-600 font-bold text-sm uppercase">Sistema de consulta ATIVO</span>
+                </div>
+                <p className="text-[#1a1a1a] font-bold text-lg mb-1">
+                  O Will Bank fechou. Seu dinheiro ficou lá dentro.
+                </p>
+                <p className="text-gray-600 text-sm mb-3">
+                  Consulte AGORA se você tem valores a receber antes que o prazo expire
                 </p>
                 <Button 
                   onClick={handleConsultar}
-                  className="w-full sm:w-auto h-12 px-8 text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg"
+                  className="w-full sm:w-auto h-12 px-8 text-base font-bold bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg"
                 >
-                  CONSULTAR MEU BENEFÍCIO
+                  VERIFICAR SE TENHO DINHEIRO A RECEBER
                 </Button>
               </div>
 
-              <h2 className="text-xl font-bold text-[#1a1a1a] mt-6">Quem tem direito?</h2>
+              <h2 className="text-xl font-bold text-[#1a1a1a] mt-6">O banco FECHOU. Você tem dinheiro preso lá?</h2>
 
               <p>
-                De acordo com o tribunal, têm direito ao ressarcimento todos os cidadãos que:
+                Quando o Will Bank encerrou as atividades, <strong>MILHARES</strong> de reais ficaram retidos nas contas dos clientes. A Justiça agora <strong>OBRIGA</strong> a devolução para:
               </p>
 
               <ul className="list-disc pl-6 space-y-2">
-                <li>Possuíram conta no Will Bank em qualquer período</li>
-                <li>Realizaram transações ou movimentações pela plataforma</li>
-                <li>Tiveram o CPF cadastrado no sistema do banco</li>
+                <li>Quem teve conta no Will Bank <strong>(mesmo que fechou há anos)</strong></li>
+                <li>Quem fez PIX, transferência ou qualquer movimentação</li>
+                <li>Quem apenas <strong>BAIXOU o app</strong> e cadastrou o CPF</li>
+                <li>Quem usou cartão de crédito ou débito do banco</li>
               </ul>
 
               <p>
-                A consulta pode ser feita de forma <strong>100% online e gratuita</strong>, bastando informar o CPF para verificar se há valores disponíveis para saque.
+                <strong>Não importa se você ESQUECEU que tinha conta.</strong> O sistema encontra pelo CPF automaticamente.
               </p>
 
-              <h2 className="text-xl font-bold text-[#1a1a1a] mt-6">Valores disponíveis</h2>
+              <h2 className="text-xl font-bold text-[#1a1a1a] mt-6">Quanto você tem a receber?</h2>
 
               <p>
-                Os valores da indenização foram calculados com base no tempo de relacionamento do cliente com o banco:
+                Como o banco <strong>FECHOU</strong>, os valores retidos estão sendo devolvidos <strong>INTEGRALMENTE</strong> mais correção:
               </p>
 
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Até 6 meses de conta:</strong> aproximadamente R$ 3.000</li>
-                <li><strong>De 6 meses a 1 ano:</strong> aproximadamente R$ 5.000</li>
-                <li><strong>Mais de 1 ano:</strong> até R$ 9.000</li>
-              </ul>
+              <div className="bg-gray-50 p-4 rounded-lg my-4">
+                <p className="font-bold text-[#1a1a1a] mb-3">📊 TABELA DE VALORES POR SAQUE:</p>
+                <ul className="list-none space-y-2">
+                  <li>💰 <strong>Conta até 6 meses:</strong> R$ 2.847 a R$ 3.920</li>
+                  <li>💰 <strong>Conta de 6 meses a 1 ano:</strong> R$ 4.150 a R$ 6.340</li>
+                  <li>💰 <strong>Conta por mais de 1 ano:</strong> R$ 6.890 a R$ 9.847</li>
+                </ul>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg my-4">
+                <p className="font-bold text-[#1a1a1a] mb-2">⚠️ IMPORTANTE:</p>
+                <p className="text-[#333]">
+                  Esses são os valores <strong>MÁXIMOS por saque</strong>. Se o seu total for maior, você receberá em <strong>MÚLTIPLAS parcelas</strong>. Por exemplo: quem tem R$ 25.000 a receber, fará 3 saques de aproximadamente R$ 8.300 cada.
+                </p>
+                <p className="text-[#333] mt-2">
+                  O sistema calcula automaticamente quantos saques você tem direito. Na consulta, você verá o valor do <strong>PRIMEIRO saque</strong> disponível.
+                </p>
+              </div>
+
+              <p className="text-red-600 font-semibold">
+                🚨 AVISO: Os valores PRESCREVEM. Quem não consultar no prazo PERDE o direito.
+              </p>
 
               <blockquote className="border-l-4 border-[#cc0000] pl-4 italic text-[#666] my-6">
-                "A decisão representa uma vitória importante para os consumidores brasileiros. Os valores serão liberados mediante simples consulta do CPF", afirmou o advogado responsável pelo caso.
+                "Quando um banco fecha, todo o dinheiro dos clientes TEM que ser devolvido. O Will Bank tentou escapar disso, mas a Justiça foi clara: DEVOLVAM TUDO. Clientes com valores altos receberão em parcelas para facilitar o processamento. Se você não consultar, esse dinheiro vai para o governo."
+                <br />
+                <strong className="not-italic">— Dr. Ricardo Mendes, advogado especialista em liquidação bancária</strong>
               </blockquote>
 
-              <h2 className="text-xl font-bold text-[#1a1a1a] mt-6">Como consultar?</h2>
+              <h2 className="text-xl font-bold text-[#1a1a1a] mt-6">Como resgatar seu dinheiro?</h2>
 
               <p>
-                O processo de consulta é simples e pode ser feito em poucos minutos:
+                O processo é <strong>SIMPLES</strong> e leva menos de 2 minutos:
               </p>
 
               <ol className="list-decimal pl-6 space-y-2">
-                <li>Clique no botão "Consultar Benefício" abaixo</li>
-                <li>Informe seu CPF no campo indicado</li>
-                <li>Aguarde a verificação automática</li>
-                <li>Se aprovado, siga as instruções para resgate</li>
+                <li>Clique no botão abaixo para acessar o sistema</li>
+                <li>Digite seu CPF para buscar valores vinculados</li>
+                <li>Veja na hora quanto você tem a receber no <strong>PRIMEIRO SAQUE</strong></li>
+                <li>Siga as instruções para transferir para sua conta</li>
               </ol>
 
+              <p>
+                O sistema mostra o valor do primeiro saque disponível. Se você tiver mais a receber, os próximos saques serão liberados automaticamente após o resgate do primeiro.
+              </p>
+
               {/* CTA Box 2 */}
-              <div className="bg-[#1a1a1a] text-white p-4 sm:p-6 rounded-lg my-6 text-center">
-                <p className="text-lg font-bold mb-2">
-                  🔒 Consulta segura e gratuita
+              <div className="bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] text-white p-6 sm:p-8 rounded-xl my-8 text-center border border-yellow-500/30">
+                <div className="inline-block bg-red-600 text-white px-4 py-1 rounded-full text-xs font-bold mb-4 animate-pulse">
+                  🔴 BANCO FECHADO - RESGATE DISPONÍVEL
+                </div>
+                <p className="text-2xl sm:text-3xl font-black mb-2">
+                  SEU DINHEIRO ESTÁ PRESO NO WILL BANK
                 </p>
-                <p className="text-gray-300 text-sm mb-4">
-                  Verifique agora se você tem direito ao benefício
+                <p className="text-yellow-400 font-semibold text-lg mb-1">
+                  O banco fechou. Mas seu dinheiro continua lá.
+                </p>
+                <p className="text-gray-400 text-sm mb-6">
+                  Consulta 100% gratuita • Resultado em 30 segundos • Saque via PIX
                 </p>
                 <Button 
                   onClick={handleConsultar}
-                  className="w-full sm:w-auto h-14 px-10 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg animate-pulse"
+                  className="w-full sm:w-auto h-14 px-12 text-lg font-black bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black rounded-full shadow-2xl animate-bounce"
                 >
-                  CONSULTAR MEU CPF AGORA
+                  CONSULTAR MEU CPF E RESGATAR →
                 </Button>
-                <p className="text-xs text-gray-400 mt-3">
-                  Mais de 47.000 consultas realizadas hoje
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 mt-4 text-xs text-gray-400">
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    1.247 pessoas consultando agora
+                  </span>
+                  <span>✓ 89.432 resgates realizados</span>
+                </div>
+              </div>
+
+              <div className="bg-red-50 border border-red-200 p-4 rounded-lg my-4">
+                <p className="font-bold text-red-700 mb-2">⚠️ ATENÇÃO FINAL:</p>
+                <p className="text-[#333]">
+                  Com o fechamento definitivo do Will Bank, os valores não resgatados serão revertidos para o <strong>Fundo Garantidor de Crédito</strong>. Isso significa que <strong>SE VOCÊ NÃO CONSULTAR</strong>, você <strong>PERDE</strong> o dinheiro para sempre.
                 </p>
               </div>
 
               <p>
-                A expectativa é que os pagamentos sejam liberados de forma gradual ao longo das próximas semanas. Especialistas recomendam que os interessados realizem a consulta o quanto antes para garantir seu lugar na fila de pagamentos.
+                <strong>Não deixe seu dinheiro ir para as mãos do governo.</strong> Consulte AGORA, leva menos de 1 minuto.
               </p>
 
               <p className="text-[#666] text-sm italic">
-                * Atualização: Devido à alta demanda, o sistema pode apresentar lentidão em horários de pico.
+                🚨 Atualização: O sistema está operando com alta demanda. Se a página demorar para carregar, aguarde alguns segundos e tente novamente.
               </p>
             </div>
 
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mt-8 pt-4 border-t border-gray-200">
               <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">Will Bank</span>
-              <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">STF</span>
+              <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">Banco Fechado</span>
+              <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">Liquidação</span>
               <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">Indenização</span>
-              <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">Banco Digital</span>
-              <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">Economia</span>
+              <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">Resgate</span>
             </div>
           </div>
         </article>
