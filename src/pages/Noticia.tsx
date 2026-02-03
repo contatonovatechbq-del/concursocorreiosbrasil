@@ -245,18 +245,18 @@ const Noticia = () => {
               </div>
 
               <div className="bg-[#fff5f5] border border-[#f0d0d0] p-4 rounded my-4">
-                <p className="font-bold text-[#cc0000] mb-2">ATENÇÃO:</p>
+                <p className="font-bold text-[#cc0000] mb-2">ÚLTIMO AVISO:</p>
                 <p className="text-[#333]">
-                  Com o fechamento definitivo do Will Bank, os valores não resgatados serão revertidos para o <strong>Fundo Garantidor de Crédito</strong>. Isso significa que <strong>SE VOCÊ NÃO CONSULTAR</strong>, você <strong>PERDE</strong> o dinheiro para sempre.
+                  O prazo para resgate está <strong>ACABANDO</strong>. Após o encerramento do processo de liquidação, todo dinheiro não reclamado será transferido <strong>DEFINITIVAMENTE</strong> para a União. Você terá <strong>ZERO</strong> direito de reclamar depois. A Justiça já avisou: quem não consultar <strong>PERDE TUDO</strong>.
                 </p>
               </div>
 
               <p>
-                <strong>Não deixe seu dinheiro ir para as mãos do governo.</strong> Consulte AGORA, leva menos de 1 minuto.
+                <strong>Seu dinheiro vai virar dinheiro do governo em poucos dias.</strong> Consulte AGORA — leva 30 segundos.
               </p>
 
               <p className="text-[#666] text-sm italic">
-                Atualização: O sistema está operando com alta demanda. Se a página demorar para carregar, aguarde alguns segundos e tente novamente.
+                Nota da redação: Devido ao alto volume de acessos, o sistema pode apresentar lentidão. Se isso acontecer, aguarde e tente novamente. Não desista — seu dinheiro está lá.
               </p>
             </div>
 
