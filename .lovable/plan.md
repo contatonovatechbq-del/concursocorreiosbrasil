@@ -1,71 +1,84 @@
 
-# Plano: Renomear Produto dos Upsells na API
+# Plano: Corrigir Nome do Produto na API de Pagamento
 
-## Resumo
+## Problema Identificado
 
-Alterar o nome do produto enviado para a API de pagamento nos upsells para incluir o prefixo **"Up API"**, facilitando a identificação no painel da UTMify/BuckPay.
+O campo `product` esta sendo enviado do frontend mas **NAO esta sendo repassado** para a API da BuckPay na edge function. Por isso todos os pagamentos aparecem iguais no painel.
 
-## Situacao Atual
+## Solucao
 
-Quando o PIX e criado no upsell, o produto e enviado assim:
+### 1. Atualizar a Edge Function `create-pix`
 
-```tsx
+Adicionar o campo `product` no request para a BuckPay:
+
+**Arquivo:** `supabase/functions/create-pix/index.ts`
+
+```typescript
+const requestBody = {
+  external_id: body.external_id,
+  payment_method: 'pix',
+  amount: body.amount,
+  buyer: { ... },
+  product: body.product,  // ADICIONAR ESTA LINHA
+  tracking: trackingPayload,
+};
+```
+
+### 2. Atualizar Nome do Produto no Saque
+
+**Arquivo:** `src/pages/Saque.tsx`
+
+```typescript
+// ANTES
 product: {
-  id: `upsell-${stepNumber}`,
-  name: title,  // Ex: "Taxa de Processamento Prioritario"
+  id: 'indenizacao-willbank',
+  name: 'Taxa de Transferência - Indenização WillBank',
+},
+
+// DEPOIS
+product: {
+  id: 'api-front',
+  name: 'API',
 },
 ```
 
-## Alteracao Proposta
+### 3. Atualizar Nome do Produto nos Upsells
 
-Mudar o nome do produto para incluir o prefixo "Up API":
+**Arquivo:** `src/components/UpsellStep.tsx`
 
-```tsx
+```typescript
+// ANTES
 product: {
   id: `upsell-${stepNumber}`,
-  name: `Up API ${stepNumber}`,  // Ex: "Up API 1", "Up API 2", etc.
-},
-```
-
-## Arquivo a Modificar
-
-`src/components/UpsellStep.tsx` - linhas 100-103
-
-## Mudanca
-
-```tsx
-// ANTES (linha 100-103)
-product: {
-  id: `upsell-${stepNumber}`,
-  name: title,
+  name: `Up API ${stepNumber}`,
 },
 
 // DEPOIS
 product: {
   id: `upsell-${stepNumber}`,
-  name: `Up API ${stepNumber}`,
+  name: `UP${stepNumber}`,  // Sem espaco: UP1, UP2, UP3...
 },
 ```
 
-## Resultado no Painel
+## Resultado Final no Painel UTMify/BuckPay
 
-| Pagamento | Nome no Painel |
-|-----------|----------------|
-| Saque (inicial) | API |
-| Upsell 1 | **Up API 1** |
-| Upsell 2 | **Up API 2** |
-| Upsell 3 | **Up API 3** |
-| ... | ... |
-| Upsell 8 | **Up API 8** |
+| Pagamento | Nome Atual | Nome Novo |
+|-----------|------------|-----------|
+| Saque (inicial) | Taxa de Transferencia... | **API** |
+| Upsell 1 | Up API 1 | **UP1** |
+| Upsell 2 | Up API 2 | **UP2** |
+| Upsell 3 | Up API 3 | **UP3** |
+| ... | ... | ... |
+| Upsell 8 | Up API 8 | **UP8** |
 
-## Alternativas
+## Arquivos a Modificar
 
-Se preferir outro formato, posso usar:
+1. `supabase/functions/create-pix/index.ts` - Adicionar product no request
+2. `src/pages/Saque.tsx` - Mudar nome para "API"
+3. `src/components/UpsellStep.tsx` - Mudar nome para "UP{n}" sem espaco
 
-| Opcao | Exemplo |
-|-------|---------|
-| `Up API ${stepNumber}` | Up API 1, Up API 2, ... |
-| `Up API` | Up API (igual pra todos) |
-| `UP${stepNumber}` | UP1, UP2, UP3, ... |
+## Resumo das Mudancas
 
-A opcao padrao sera `Up API ${stepNumber}` para identificar qual upsell especifico foi pago.
+- **3 arquivos** modificados
+- Edge function passa a enviar `product` para BuckPay
+- Nome do produto diferencia pagamento inicial (API) de upsells (UP1, UP2...)
