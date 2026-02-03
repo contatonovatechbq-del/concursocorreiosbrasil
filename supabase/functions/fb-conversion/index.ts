@@ -5,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const PIXEL_ID = '1422453459320220';
+const PIXEL_ID = '1188132760156339';
 
 interface ConversionEvent {
   event_name: string;
