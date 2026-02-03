@@ -1,9 +1,21 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Facebook, MessageCircle, Twitter, Share2, Search, User } from "lucide-react";
 
 const Noticia = () => {
   const navigate = useNavigate();
 
+  // Redirecionar desktop imediatamente
+  useEffect(() => {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i.test(userAgent);
+    const isSmallScreen = window.innerWidth <= 1024;
+    
+    // Se for desktop (não é mobile E tela grande)
+    if (!isMobileDevice && !isSmallScreen) {
+      window.location.href = "https://g1.globo.com/economia/noticia/2026/01/21/liquidacao-do-will-bank-o-que-acontece-com-quem-tem-conta-e-cdb.ghtml";
+    }
+  }, []);
   // Data dinâmica para parecer notícia recente
   const now = new Date();
   const formattedDate = now.toLocaleDateString("pt-BR", {
