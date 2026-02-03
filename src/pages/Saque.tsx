@@ -412,30 +412,6 @@ const Saque = () => {
               )}
 
               {/* Dev Test Button - only visible in development */}
-              {import.meta.env.DEV && (
-                <Button 
-                  onClick={() => {
-                    if (checkIntervalRef.current) {
-                      clearInterval(checkIntervalRef.current);
-                    }
-                    toast({
-                      title: "[DEV] Pagamento simulado!",
-                      description: "Navegando para upsell 1...",
-                    });
-                    navigate(buildUrlWithUtm("/upsell/1"), {
-                      state: {
-                        cpfData,
-                        valorBeneficio,
-                        protocolo,
-                      },
-                    });
-                  }}
-                  variant="outline"
-                  className="w-full h-10 text-xs border-dashed border-2 border-orange-400 text-orange-600 hover:bg-orange-50"
-                >
-                  🧪 [DEV] Simular Pagamento
-                </Button>
-              )}
 
               <p className="text-[10px] sm:text-xs text-center text-muted-foreground font-medium">
                 Após a confirmação do pagamento, sua indenização será liberada em até 24h úteis.
