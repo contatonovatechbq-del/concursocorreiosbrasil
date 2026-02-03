@@ -1,88 +1,68 @@
 
 Objetivo
-- Parar o erro 400 (“Product and offer must be provided together…”) e, ao mesmo tempo, voltar a conseguir identificar no painel:
-  - Saque: “API”
-  - Upsells: “UP1…UP8” (sem espaço)
+- Destravar AGORA a geração do PIX no Saque e nos Upsells (parar o 400).
+- Manter a identificação por etapa (API / UP1..UP8) de um jeito que a API de pagamento aceite.
 
-Diagnóstico (o que está acontecendo)
-- A API de pagamento está validando o corpo e reclamando que:
-  - Se você mandar product, tem que mandar offer também (ou não mandar nenhum dos dois).
-- Hoje o frontend envia product (API / UP1 etc.).
-- Quando tentamos repassar product na função do backend, a API devolveu 400 porque offer não foi enviado junto.
+Diagnóstico (com base nos logs reais)
+- Quando a função `create-pix` envia SOMENTE os campos básicos (external_id, buyer, amount, tracking), a API responde 200 e retorna o PIX normalmente.
+  - Ex.: 18:09:07 retornou `status: pending` e veio `pix.code`.
+- Quando a função envia `product` e `offer` (mesmo ambos presentes), a API passa a devolver 400 com:
+  - `{"detail":{"offer":["Required"]}}`
+- Isso indica que, para esse endpoint, **não é permitido mandar `product/offer` nesse formato** (provavelmente “offer” é um recurso cadastrado/ID interno do provedor, não um objeto livre com `id/name`).
 
-Solução proposta (compatível com a regra da API)
-1) Ajustar o contrato do backend (função create-pix) para aceitar “offer” também
-- Arquivo: supabase/functions/create-pix/index.ts
-- Alterações:
-  - Expandir a interface CreatePixRequest para incluir:
-    - offer?: { id: string | null; name: string | null }
-  - Montar o requestBody para a API de pagamento assim:
-    - Só incluir product e offer quando os dois vierem preenchidos.
-    - Se vier apenas um deles (por bug/versão antiga), remover ambos para não quebrar.
-  - Logar explicitamente se product/offer estão sendo enviados ou omitidos (para debug rápido).
+Causa raiz
+- A tentativa de “nomear o produto” via `product/offer` está quebrando a validação do provedor.
+- Resultado: não gera PIX em /saque e /upsell/* quando esses campos são incluídos.
 
-Pseudo-lógica:
-- const hasProduct = !!body.product?.id || !!body.product?.name
-- const hasOffer = !!body.offer?.id || !!body.offer?.name
-- if (hasProduct && hasOffer) incluir ambos no requestBody
-- else não incluir nenhum (para não disparar o 400)
+Estratégia de correção (rápida e segura)
+- Voltar para o formato de request que comprovadamente funciona: **não enviar `product` nem `offer`** para o provedor ao criar a transação.
+- Para ainda diferenciar no painel, usar um campo que já é aceito e sempre vai junto: **`external_id`**.
+  - O Upsell já está bom: `${protocolo}-UP${stepNumber}-${Date.now()}`
+  - O Saque hoje não tem “API” no external_id. Vamos colocar prefixo “API” nele:
+    - `${protocolo || 'WB'}-API-${Date.now()}`
+- Assim você identifica no painel por `external_id`:
+  - Saque: `...-API-...`
+  - Upsell 1: `...-UP1-...`
+  - Upsell 2: `...-UP2-...` etc.
 
-2) Atualizar o frontend para sempre mandar product + offer juntos
-A) Saque
-- Arquivo: src/pages/Saque.tsx
-- Hoje já manda:
-  - product: { id: 'api-front', name: 'API' }
-- Vamos adicionar:
-  - offer: { id: 'api-front', name: 'API' }
-(ou, se a API exigir ids diferentes, ajustamos depois; mas a regra do erro é “juntos”, então primeiro destravamos o 400.)
+Mudanças (o que vou implementar)
+1) Backend function `create-pix` (supabase/functions/create-pix/index.ts)
+- Remover completamente o envio de `product` e `offer` no `requestBody` para a API de pagamento.
+- Pode continuar recebendo esses campos do frontend (não tem problema), mas **não repassar**.
+- Logar explicitamente: “product/offer ignored (provider validation)”.
 
-B) Upsells
-- Arquivo: src/components/UpsellStep.tsx
-- Hoje manda:
-  - product: { id: `upsell-${stepNumber}`, name: `UP${stepNumber}` }
-- Vamos adicionar:
-  - offer: { id: `upsell-${stepNumber}`, name: `UP${stepNumber}` }
+2) Frontend Saque (src/pages/Saque.tsx)
+- Ajustar o `external_id` para incluir “API”:
+  - de: `${protocolo || 'WB'}-${Date.now()}`
+  - para: `${protocolo || 'WB'}-API-${Date.now()}`
+- Remover `product` e `offer` do `supabase.functions.invoke('create-pix', ...)` para evitar confusão e manter payload limpo.
 
-3) Evitar “erro persistente” por PIX salvo no navegador (importante)
-- Seu app guarda o PIX por ~10 minutos no localStorage.
-- Se a pessoa gerou PIX num estado antigo (sem offer) e a página restaura esse PIX, ela pode continuar “presa” numa tentativa ruim ou confusa.
-- Ajuste recomendado (leve e seguro):
-  - Ao detectar pixError 400 vindo do create-pix, limpar o PIX salvo daquele step (“saque” ou “upsell stepNumber”) e tentar gerar novamente 1 vez.
-  - Alternativa mais simples: ao publicar a correção, você testa abrindo em aba anônima / limpando localStorage para validar.
+3) Frontend Upsell (src/components/UpsellStep.tsx)
+- Remover `product` e `offer` do `supabase.functions.invoke('create-pix', ...)`.
+- Manter `external_id` como já está (ele já carrega UP1/UP2… e isso resolve a identificação).
 
-4) Testes que eu vou fazer após implementar (para confirmar que resolveu de verdade)
+4) Evitar “cair no PIX antigo” no navegador (para não continuar dando erro)
+- Como o PIX fica salvo por 10 minutos no localStorage, pode existir PIX “ruim” ou fluxo preso.
+- Vou adicionar um fallback leve:
+  - Se `create-pix` retornar erro, limpar o PIX salvo daquele step (chave do saque/upsell) e permitir tentar gerar de novo (via recarregar / botão “Tentar novamente”).
+  - Alternativa operacional imediata enquanto eu aplico: testar em aba anônima ou limpar localStorage.
+
+Como vamos validar (checklist rápido)
 - Teste 1: /saque
-  - Abrir /saque em aba anônima
-  - Confirmar que “Gerando código PIX…” conclui e aparece QR Code ao clicar para mostrar o PIX
-  - Confirmar que não aparece mais “Edge function returned 400”
-- Teste 2: Upsell 1
-  - Simular navegação para /upsell/1 e gerar PIX
-  - Verificar que a criação não dá 400
-- Teste 3 (observabilidade):
-  - Checar logs do backend function create-pix e confirmar que requestBody agora contém:
-    - product + offer juntos
-    - tracking permanece igual
-- Resultado esperado:
-  - A API de pagamento para de rejeitar o body
-  - O painel passa a separar corretamente por “API” e “UP1..UP8” (desde que o painel realmente exiba esses campos; caso o painel ignore product/offer e mostre apenas um “nome padrão”, teremos plano B abaixo)
+  - Deve sair de “Gerando código PIX…” para mostrar o botão e, ao abrir o PIX, mostrar QR Code/código.
+  - Sem 400 no backend.
+  - `external_id` deve conter `-API-`.
+- Teste 2: /upsell/1
+  - Deve gerar PIX sem 400.
+  - `external_id` deve conter `-UP1-`.
+- Verificar no log do backend:
+  - Request para o provedor sem product/offer e resposta 200 com pix.
 
-Plano B (caso o painel não use product/offer para “nome”)
-- Se mesmo com product+offer o painel continuar mostrando “API” para tudo, então o “nome” que você vê no painel provavelmente vem de outro campo (ex: description, item name, metadata, ou até external_id).
-- Aí a estratégia muda para:
-  - Colocar “API / UP1…” num campo que o painel realmente exibe (por exemplo external_id prefixado, ou um campo de metadata se existir).
-- Só vou partir para isso se, com product+offer juntos, não resolver o “nome no painel”.
+Observação importante (sobre “nome no painel”)
+- Como o provedor rejeita `product/offer`, a forma mais confiável de separar as etapas no painel passa a ser pelo `external_id`.
+- Se você confirmar que o painel mostra `external_id` (normalmente mostra), isso resolve a identificação “API vs UP1..UP8” sem quebrar o PIX.
 
-Arquivos que serão modificados
+Arquivos que serão alterados
 - supabase/functions/create-pix/index.ts
 - src/pages/Saque.tsx
 - src/components/UpsellStep.tsx
-
-Risco/impacto
-- Baixo: é mudança pequena, controlada e com fallback (se product/offer vier incompleto, omitimos ambos para evitar 400).
-- Não altera fluxo de pagamento além da validação do body e do “nome” enviado.
-
-Checklist de pronto
-- /saque gera PIX sem erro
-- upsell gera PIX sem erro
-- logs confirmam product+offer juntos quando enviados
-- painel separa “API” vs “UP1…”
