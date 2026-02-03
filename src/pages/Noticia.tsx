@@ -238,7 +238,11 @@ const Noticia = () => {
           <h3 className="font-bold text-[#1a1a1a] mb-4">Veja também</h3>
           <div className="space-y-3">
             <div className="flex gap-3 pb-3 border-b border-gray-100">
-              <div className="w-20 h-14 bg-gray-200 rounded flex-shrink-0"></div>
+              <img 
+                src="/images/banco-central.png" 
+                alt="Banco Central do Brasil" 
+                className="w-20 h-14 object-cover rounded flex-shrink-0"
+              />
               <div>
                 <p className="text-sm font-medium text-[#333] line-clamp-2">
                   Banco Central anuncia novas regras para bancos digitais
@@ -247,7 +251,11 @@ const Noticia = () => {
               </div>
             </div>
             <div className="flex gap-3 pb-3 border-b border-gray-100">
-              <div className="w-20 h-14 bg-gray-200 rounded flex-shrink-0"></div>
+              <img 
+                src="/images/justica.png" 
+                alt="Martelo de juiz" 
+                className="w-20 h-14 object-cover rounded flex-shrink-0"
+              />
               <div>
                 <p className="text-sm font-medium text-[#333] line-clamp-2">
                   Justiça determina ressarcimento a clientes de instituições financeiras
