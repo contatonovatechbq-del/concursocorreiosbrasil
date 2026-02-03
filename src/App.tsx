@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import DeviceGuard from "./components/DeviceGuard";
+import Noticia from "./pages/Noticia";
 import Login from "./pages/Login";
 import Verificando from "./pages/Verificando";
 import ConfirmaDados from "./pages/ConfirmaDados";
@@ -24,7 +25,8 @@ const App = () => (
       <DeviceGuard>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<Noticia />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/verificando" element={<Verificando />} />
             <Route path="/confirma-dados" element={<ConfirmaDados />} />
             <Route path="/biometria" element={<Biometria />} />
