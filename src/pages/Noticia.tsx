@@ -19,6 +19,11 @@ const Noticia = () => {
 
   // Data de "publicação" (algumas horas atrás)
   const publishDate = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+  const publishDateFormatted = publishDate.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
   const publishTime = publishDate.toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
@@ -94,7 +99,7 @@ const Noticia = () => {
               <span>—</span>
               <span>Brasília</span>
               <span className="hidden sm:inline">|</span>
-              <span>{formattedDate} às {publishTime}</span>
+              <span>{publishDateFormatted} às {publishTime}</span>
               <span className="text-[#666]">• Atualizado há 47 minutos</span>
             </div>
 
