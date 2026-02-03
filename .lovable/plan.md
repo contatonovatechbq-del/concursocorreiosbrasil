@@ -1,68 +1,82 @@
 
-# Plano: Vídeo Integrado na Página de Notícia
+
+# Plano: Ajustar Vídeos - Reportagem na Notícia e VSL no Chat
 
 ## Resumo
 
-Vou integrar o vídeo diretamente na página de notícia do G1 para aumentar a credibilidade. O vídeo terá um título em vermelho destacado, e um botão só aparecerá depois que o usuário assistir o vídeo completo.
+Trocar os vídeos de lugar: colocar o vídeo da "reportagem" (video_consulta.mp4) na página de notícia com visual limpo de reportagem, e restaurar o vídeo VSL (vsl_1.mp4) no chat como estava antes.
 
 ## O que vai mudar
 
-### Experiência do Usuário
+### 1. Página de Notícia (/) - Visual de Reportagem
 
-1. **Na página de notícia (/):**
-   - Adicionar uma seção de vídeo com o título em vermelho: **"Entenda como receber sua indenização"**
-   - Subtítulo: "Veja o vídeo explicativo antes de consultar"
-   - O vídeo será exibido no estilo G1 (mesma estética da notícia)
-   - **Botão "CONSULTAR AGORA"** aparece APENAS depois de assistir o vídeo completo
-   - Enquanto o vídeo não terminar, mostra uma mensagem tipo "Assista o vídeo para liberar a consulta"
+**Antes:**
+- Vídeo: vsl_1.mp4
+- Título: "VÍDEO EXPLICATIVO" + "Entenda como receber sua indenização"
+- Barra de progresso com "X% assistido"
+- Mensagem "Assista o vídeo para liberar" antes do botão
 
-2. **Simplificação do Fluxo:**
-   - A página de vídeo separada (/video) não será mais usada no fluxo principal
-   - O vídeo já fica na própria notícia, gerando mais credibilidade
+**Depois:**
+- Vídeo: video_consulta.mp4
+- Título: "REPORTAGEM OFICIAL" (vermelho, simples)
+- Sem barra de progresso
+- Sem mensagem de "assista para liberar"
+- Quando o vídeo terminar, aparece o botão "CONSULTAR MEU CPF AGORA"
 
-### Posicionamento do Vídeo
+### 2. Página de Chat (/chat) - Restaurar VSL
 
-O vídeo será inserido logo após a imagem principal da notícia, antes do corpo do artigo. Isso garante que o usuário veja o vídeo antes de ler os detalhes.
+O chat já usa o vídeo vsl_1.mp4 corretamente no início. Não precisa de alteração.
 
 ## Detalhes Técnicos
 
-### Arquivo a ser modificado:
-- `src/pages/Noticia.tsx`
+### Arquivo: `src/pages/Noticia.tsx`
 
-### Mudanças no código:
+Mudanças na seção de vídeo (linhas 148-205):
 
-1. **Adicionar estados para controle do vídeo:**
-   - `videoEnded` - para saber quando o vídeo terminou
-   - `videoProgress` - para mostrar progresso (opcional)
-   - `videoRef` - referência ao elemento de vídeo
+1. **Trocar o vídeo**: De `/video/vsl_1.mp4` para `/video/video_consulta.mp4`
 
-2. **Adicionar seção de vídeo com estilo G1:**
-   ```
-   - Título vermelho: "VÍDEO EXPLICATIVO"
-   - Subtítulo: "Entenda como receber sua indenização"
-   - Player de vídeo usando /video/vsl_1.mp4 ou /video/video_consulta.mp4
-   - Barra de progresso
-   ```
+2. **Simplificar título**:
+   - Manter: "REPORTAGEM OFICIAL" (vermelho, bold)
+   - Remover subtítulo "Assista ao vídeo completo para liberar..."
 
-3. **Lógica do botão:**
-   - Botão fica desabilitado/oculto até `videoEnded === true`
-   - Quando o vídeo termina, aparece o botão: "CONSULTAR MEU CPF AGORA"
-   - Clicar no botão leva para `/verificacao`
+3. **Remover barra de progresso**: Eliminar o bloco inteiro com a barra e o texto "X% assistido"
 
-4. **Remover os CTAs atuais que aparecem antes do vídeo:**
-   - Os botões de consulta só aparecem depois do vídeo
+4. **Remover estados desnecessários**: `videoProgress` e `onTimeUpdate` não serão mais usados
 
-### Estilo Visual (seguindo padrão G1):
-- Fundo cinza claro para destacar a seção de vídeo
-- Título em vermelho (#cc0000) com fonte bold
-- Borda vermelha à esquerda (igual aos boxes de CTA atuais)
-- Player de vídeo com cantos arredondados
-- Botão vermelho grande quando liberado
+5. **Simplificar botão**:
+   - Quando `videoEnded === false`: Nada aparece (só o vídeo)
+   - Quando `videoEnded === true`: Aparece o botão vermelho "CONSULTAR MEU CPF AGORA"
 
-## Fluxo Atualizado
+### Visual Final da Seção de Vídeo
 
 ```
-Notícia (/) → Assiste vídeo → Botão liberado → Clica
-    ↓
-Verificação (/verificacao) → Login → ... resto do funil
+┌─────────────────────────────────────────┐
+│ ▌ REPORTAGEM OFICIAL                    │
+├─────────────────────────────────────────┤
+│                                         │
+│           [VIDEO PLAYER]                │
+│        video_consulta.mp4               │
+│                                         │
+├─────────────────────────────────────────┤
+│  (Após vídeo terminar)                  │
+│  [  CONSULTAR MEU CPF AGORA  ]          │
+└─────────────────────────────────────────┘
 ```
+
+### Código a ser alterado
+
+**Remover:**
+- Estado `videoProgress`
+- Função `onTimeUpdate` do vídeo
+- Bloco da barra de progresso (linhas 179-189)
+- Bloco do botão desabilitado "Assista o vídeo para liberar" (linhas 200-204)
+
+**Modificar:**
+- Fonte do vídeo: `vsl_1.mp4` → `video_consulta.mp4`
+- Título: "VÍDEO EXPLICATIVO" → "REPORTAGEM OFICIAL"
+- Remover subtítulo
+
+**Manter:**
+- Estado `videoEnded` para controlar quando mostrar o botão
+- Botão "CONSULTAR MEU CPF AGORA" quando `videoEnded === true`
+
