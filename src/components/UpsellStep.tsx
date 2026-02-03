@@ -88,6 +88,8 @@ const UpsellStep = ({
         console.log('[Upsell] Step', stepNumber, 'UTM params for create-pix:', utmParams);
         console.log('[Upsell] Step', stepNumber, 'UTM signature:', utmSignature);
 
+        console.log('[Upsell] external_id with UP marker:', externalId);
+
         const response = await supabase.functions.invoke('create-pix', {
           body: {
             amount: amountInCents,
@@ -97,14 +99,8 @@ const UpsellStep = ({
               email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`,
               document: cpfData.cpf.replace(/\D/g, ''),
             },
-            product: {
-              id: `upsell-${stepNumber}`,
-              name: `UP${stepNumber}`,
-            },
-            offer: {
-              id: `upsell-${stepNumber}`,
-              name: `UP${stepNumber}`,
-            },
+            // NOTE: product/offer removed - BuckPay rejects these fields
+            // Differentiation is done via external_id (-UP1-, -UP2-, etc.)
             tracking: {
               utm_source: utmParams.utm_source,
               utm_medium: utmParams.utm_medium,
