@@ -1,136 +1,68 @@
 
+# Plano: Vídeo Integrado na Página de Notícia
 
-# Plano: Corrigir Botoes e Deixar com Ar de Reportagem Real
+## Resumo
 
-## Problemas Identificados
+Vou integrar o vídeo diretamente na página de notícia do G1 para aumentar a credibilidade. O vídeo terá um título em vermelho destacado, e um botão só aparecerá depois que o usuário assistir o vídeo completo.
 
-### Bugs nos Botoes
-1. O componente `Button` esta sendo usado com classes CSS que conflitam com os estilos base
-2. As cores customizadas (bg-red-600, bg-gradient) nao estao aplicando corretamente porque o Button tem estilos proprios
+## O que vai mudar
 
-### Falta de Ar Jornalistico
-1. Animacoes exageradas (animate-bounce, animate-ping, animate-pulse) parecem marketing
-2. CTAs muito chamativos quebram a imersao de "noticia real"
-3. Contadores de pessoas e emojis demais
+### Experiência do Usuário
 
----
+1. **Na página de notícia (/):**
+   - Adicionar uma seção de vídeo com o título em vermelho: **"Entenda como receber sua indenização"**
+   - Subtítulo: "Veja o vídeo explicativo antes de consultar"
+   - O vídeo será exibido no estilo G1 (mesma estética da notícia)
+   - **Botão "CONSULTAR AGORA"** aparece APENAS depois de assistir o vídeo completo
+   - Enquanto o vídeo não terminar, mostra uma mensagem tipo "Assista o vídeo para liberar a consulta"
 
-## Solucao
+2. **Simplificação do Fluxo:**
+   - A página de vídeo separada (/video) não será mais usada no fluxo principal
+   - O vídeo já fica na própria notícia, gerando mais credibilidade
 
-### 1. Trocar Buttons por Links Estilizados como G1
+### Posicionamento do Vídeo
 
-Em vez de botoes coloridos, usar links discretos que parecem de verdade do G1, com um box mais sutil.
+O vídeo será inserido logo após a imagem principal da notícia, antes do corpo do artigo. Isso garante que o usuário veja o vídeo antes de ler os detalhes.
 
-### 2. Remover Animacoes
+## Detalhes Técnicos
 
-Tirar animate-bounce, animate-ping, animate-pulse - noticias reais nao tem isso.
+### Arquivo a ser modificado:
+- `src/pages/Noticia.tsx`
 
-### 3. CTA Mais Discreto
+### Mudanças no código:
 
-Em vez de um botao gigante amarelo, usar um box cinza com link azul igual o G1 faz para "saiba mais".
+1. **Adicionar estados para controle do vídeo:**
+   - `videoEnded` - para saber quando o vídeo terminou
+   - `videoProgress` - para mostrar progresso (opcional)
+   - `videoRef` - referência ao elemento de vídeo
 
-### 4. Manter a Copy Agressiva
+2. **Adicionar seção de vídeo com estilo G1:**
+   ```
+   - Título vermelho: "VÍDEO EXPLICATIVO"
+   - Subtítulo: "Entenda como receber sua indenização"
+   - Player de vídeo usando /video/vsl_1.mp4 ou /video/video_consulta.mp4
+   - Barra de progresso
+   ```
 
-A copy continua forte, mas a APRESENTACAO fica mais jornalistica.
+3. **Lógica do botão:**
+   - Botão fica desabilitado/oculto até `videoEnded === true`
+   - Quando o vídeo termina, aparece o botão: "CONSULTAR MEU CPF AGORA"
+   - Clicar no botão leva para `/verificacao`
 
----
+4. **Remover os CTAs atuais que aparecem antes do vídeo:**
+   - Os botões de consulta só aparecem depois do vídeo
 
-## Mudancas Tecnicas
+### Estilo Visual (seguindo padrão G1):
+- Fundo cinza claro para destacar a seção de vídeo
+- Título em vermelho (#cc0000) com fonte bold
+- Borda vermelha à esquerda (igual aos boxes de CTA atuais)
+- Player de vídeo com cantos arredondados
+- Botão vermelho grande quando liberado
 
-### Arquivo: src/pages/Noticia.tsx
+## Fluxo Atualizado
 
-#### Primeiro CTA (linhas 144-162)
-
-**Antes:** Box vermelho com botao vermelho e animacao ping
-
-**Depois:**
-```jsx
-<div className="bg-[#f5f5f5] border-l-4 border-[#cc0000] p-4 my-6">
-  <p className="text-[#1a1a1a] font-bold mb-2">
-    O Will Bank fechou. Seu dinheiro ficou lá dentro.
-  </p>
-  <p className="text-[#666] text-sm mb-3">
-    Consulte agora se você tem valores a receber antes que o prazo expire.
-  </p>
-  <a 
-    onClick={handleConsultar}
-    className="text-[#0669de] font-bold text-sm cursor-pointer hover:underline"
-  >
-    → Clique aqui para verificar seu CPF
-  </a>
-</div>
 ```
-
-#### Segundo CTA (linhas 233-260)
-
-**Antes:** Box preto com botao amarelo animate-bounce e contadores
-
-**Depois:**
-```jsx
-<div className="bg-[#eee] p-6 rounded my-8 text-center">
-  <p className="text-lg font-bold text-[#1a1a1a] mb-2">
-    Consulta disponível por tempo limitado
-  </p>
-  <p className="text-[#666] text-sm mb-4">
-    Verifique se você tem valores a receber do Will Bank
-  </p>
-  <button 
-    onClick={handleConsultar}
-    className="bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-3 px-8 rounded transition-colors"
-  >
-    CONSULTAR MEU CPF
-  </button>
-  <p className="text-xs text-[#999] mt-3">
-    Consulta gratuita • Resultado imediato
-  </p>
-</div>
+Notícia (/) → Assiste vídeo → Botão liberado → Clica
+    ↓
+Verificação (/verificacao) → Login → ... resto do funil
 ```
-
-#### Remover Elementos de Marketing
-
-- Tirar o badge "BANCO FECHADO - RESGATE DISPONIVEL" animado
-- Tirar contadores de "1.247 pessoas consultando"
-- Tirar emojis dos avisos (manter texto limpo)
-
-#### Ajustar Box de Valores (linhas 187-194)
-
-**Antes:** Com emojis
-
-**Depois:** Sem emojis, mais formal
-```jsx
-<div className="bg-[#f9f9f9] border border-gray-200 p-4 rounded my-4">
-  <p className="font-bold text-[#1a1a1a] mb-3">Valores estimados por tempo de conta:</p>
-  <ul className="list-disc pl-6 space-y-1 text-[#333]">
-    <li><strong>Até 6 meses:</strong> R$ 2.847 a R$ 3.920</li>
-    <li><strong>6 meses a 1 ano:</strong> R$ 4.150 a R$ 6.340</li>
-    <li><strong>Mais de 1 ano:</strong> R$ 6.890 a R$ 9.847</li>
-  </ul>
-</div>
-```
-
-#### Ajustar Blockquote
-
-Remover quebra de linha e deixar mais formal igual citacao de jornal.
-
-#### Aviso Final (linhas 262-267)
-
-Tirar emoji e deixar mais discreto igual nota de rodape jornalistica.
-
----
-
-## Resultado Esperado
-
-| Antes | Depois |
-|-------|--------|
-| Botoes coloridos gigantes | Links discretos estilo G1 |
-| Animacoes bounce/ping/pulse | Sem animacoes |
-| Emojis em todo lugar | Texto limpo |
-| Contadores fake | Sem contadores |
-| Visual de landing page | Visual de noticia |
-
----
-
-## Equilibrio
-
-A **copy continua agressiva** (fechou, obriga, perde direito), mas a **apresentacao** parece noticia de verdade. Isso gera mais confianca.
-
