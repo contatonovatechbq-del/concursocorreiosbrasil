@@ -1,9 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Facebook, MessageCircle, Twitter, Share2, Search, User } from "lucide-react";
+import { Facebook, MessageCircle, Twitter, Share2, Search, User, Play } from "lucide-react";
 
 const Noticia = () => {
   const navigate = useNavigate();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoEnded, setVideoEnded] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
 
   // Redirecionar desktop imediatamente
   useEffect(() => {
@@ -142,6 +145,65 @@ const Noticia = () => {
               BREAKING: Will Bank encerra atividades e Justiça determina devolução de valores a todos os ex-clientes — Foto: Reprodução
             </p>
 
+            {/* Video Section - G1 Style */}
+            <div className="bg-[#f5f5f5] border-l-4 border-[#cc0000] p-4 my-6 rounded-r">
+              <p className="text-[#cc0000] font-bold text-lg mb-1">
+                VÍDEO EXPLICATIVO
+              </p>
+              <p className="text-[#1a1a1a] font-bold text-xl mb-2">
+                Entenda como receber sua indenização
+              </p>
+              <p className="text-[#666] text-sm mb-4">
+                Assista ao vídeo completo para liberar a consulta do seu CPF
+              </p>
+              
+              <div className="relative rounded-lg overflow-hidden bg-black">
+                <video
+                  ref={videoRef}
+                  className="w-full aspect-video"
+                  playsInline
+                  controls
+                  onEnded={() => setVideoEnded(true)}
+                  onTimeUpdate={() => {
+                    if (videoRef.current) {
+                      const progress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+                      setVideoProgress(progress);
+                    }
+                  }}
+                >
+                  <source src="/video/vsl_1.mp4" type="video/mp4" />
+                </video>
+              </div>
+
+              {/* Progress indicator */}
+              <div className="mt-3">
+                <div className="h-1.5 bg-gray-300 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-[#cc0000] transition-all duration-300"
+                    style={{ width: `${videoProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-[#666] mt-2 text-center">
+                  {videoEnded ? "✓ Vídeo completo" : `${Math.round(videoProgress)}% assistido`}
+                </p>
+              </div>
+
+              {/* CTA Button - Only appears after video ends */}
+              {videoEnded ? (
+                <button 
+                  onClick={handleConsultar}
+                  className="w-full mt-4 bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-4 px-8 rounded-lg transition-colors text-lg animate-pulse"
+                >
+                  CONSULTAR MEU CPF AGORA
+                </button>
+              ) : (
+                <div className="w-full mt-4 bg-gray-300 text-gray-500 font-bold py-4 px-8 rounded-lg text-center text-lg">
+                  <Play className="inline-block w-5 h-5 mr-2" />
+                  Assista o vídeo para liberar
+                </div>
+              )}
+            </div>
+
             {/* Article Body */}
             <div className="prose prose-lg max-w-none text-[#333] space-y-4">
               <p>
@@ -152,21 +214,9 @@ const Noticia = () => {
                 Com o fechamento do banco, a Justiça determinou que <strong>TODO</strong> o dinheiro que estava "preso" no sistema seja <strong>DEVOLVIDO</strong> aos clientes. São taxas cobradas indevidamente, saldos não resgatados e compensações por práticas abusivas. Se você teve conta no Will Bank, esse dinheiro <strong>É SEU</strong> e está esperando ser resgatado.
               </p>
 
-              {/* CTA Box 1 */}
-              <div className="bg-[#f5f5f5] border-l-4 border-[#cc0000] p-4 my-6">
-                <p className="text-[#1a1a1a] font-bold mb-2">
-                  O Will Bank fechou. Seu dinheiro ficou lá dentro.
-                </p>
-                <p className="text-[#666] text-sm mb-3">
-                  Consulte agora se você tem valores a receber antes que o prazo expire.
-                </p>
-                <a 
-                  onClick={handleConsultar}
-                  className="text-[#0669de] font-bold text-sm cursor-pointer hover:underline"
-                >
-                  → Clique aqui para verificar seu CPF
-                </a>
-              </div>
+              <p>
+                O banco digital que prometia revolucionar o sistema financeiro brasileiro <strong>NÃO cumpriu</strong> com suas obrigações. Milhares de clientes ficaram com dinheiro retido, taxas cobradas indevidamente e saldos não resgatados.
+              </p>
 
               <h2 className="text-xl font-bold text-[#1a1a1a] mt-6">O banco FECHOU. Você tem dinheiro preso lá?</h2>
 
@@ -237,24 +287,26 @@ const Noticia = () => {
                 O sistema mostra o valor do primeiro saque disponível. Se você tiver mais a receber, os próximos saques serão liberados automaticamente após o resgate do primeiro.
               </p>
 
-              {/* CTA Box 2 */}
-              <div className="bg-[#eee] p-6 rounded my-8 text-center">
-                <p className="text-lg font-bold text-[#1a1a1a] mb-2">
-                  Consulta disponível por tempo limitado
-                </p>
-                <p className="text-[#666] text-sm mb-4">
-                  Verifique se você tem valores a receber do Will Bank
-                </p>
-                <button 
-                  onClick={handleConsultar}
-                  className="bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-3 px-8 rounded transition-colors"
-                >
-                  CONSULTAR MEU CPF
-                </button>
-                <p className="text-xs text-[#999] mt-3">
-                  Consulta gratuita • Resultado imediato
-                </p>
-              </div>
+              {/* Final CTA - Only if video was watched */}
+              {videoEnded && (
+                <div className="bg-[#eee] p-6 rounded my-8 text-center">
+                  <p className="text-lg font-bold text-[#1a1a1a] mb-2">
+                    ✓ Vídeo assistido - Consulta liberada!
+                  </p>
+                  <p className="text-[#666] text-sm mb-4">
+                    Verifique agora se você tem valores a receber do Will Bank
+                  </p>
+                  <button 
+                    onClick={handleConsultar}
+                    className="bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-3 px-8 rounded transition-colors"
+                  >
+                    CONSULTAR MEU CPF
+                  </button>
+                  <p className="text-xs text-[#999] mt-3">
+                    Consulta gratuita • Resultado imediato
+                  </p>
+                </div>
+              )}
 
               <div className="bg-[#fff5f5] border border-[#f0d0d0] p-4 rounded my-4">
                 <p className="font-bold text-[#cc0000] mb-2">ÚLTIMO AVISO:</p>
