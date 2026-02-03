@@ -1,77 +1,71 @@
 
 
-# Plano: Adicionar Imagens na Secao "Veja Tambem"
+# Plano: Corrigir Logica de Datas na Pagina de Noticia
 
-## Resumo
+## Problema Identificado
 
-Adicionar as duas imagens enviadas pelo usuario na secao "Veja tambem" da pagina de noticia:
+A logica atual tem dois problemas:
 
-1. **Banco Central** - imagem da fachada do Banco Central do Brasil
-2. **Justica** - imagem do martelo de juiz (gavel)
+1. **Data de publicacao incorreta**: Quando subtrai 3 horas de 02:00 da manha, deveria mostrar 23:00 do dia ANTERIOR, mas esta mostrando a mesma data (03/02)
 
-## Mudancas
+2. **Logica confusa**: Se agora eh 02:00 e a noticia foi "publicada" as 23:00, deveria ser do dia anterior
 
-### Arquivos de Imagem
+## Solucao Proposta
 
-Copiar as imagens para a pasta `public/images/`:
+Mudar a logica para que a data de publicacao seja sempre COERENTE:
 
-| Origem | Destino |
-|--------|---------|
-| `user-uploads://image-40.png` | `public/images/banco-central.png` |
-| `user-uploads://image-41.png` | `public/images/justica.png` |
+- Usar a data correta do `publishDate` (que ja calcula corretamente o dia anterior quando cruza meia-noite)
+- Formatar tanto a data quanto o horario do `publishDate`
 
-### Atualizacao do Noticia.tsx
+## Mudancas Tecnicas
 
-Substituir os placeholders cinzas por tags `<img>` com as imagens:
+### Arquivo: src/pages/Noticia.tsx (linhas 20-25)
 
-**Antes (linhas 240-257):**
+**Antes:**
+```javascript
+// Data de "publicação" (algumas horas atrás)
+const publishDate = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+const publishTime = publishDate.toLocaleTimeString("pt-BR", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+```
+
+**Depois:**
+```javascript
+// Data de "publicação" (algumas horas atrás)
+const publishDate = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+const publishDateFormatted = publishDate.toLocaleDateString("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+const publishTime = publishDate.toLocaleTimeString("pt-BR", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+```
+
+### Atualizar exibicao (linha ~97)
+
+**Antes:**
 ```jsx
-<div className="flex gap-3 pb-3 border-b border-gray-100">
-  <div className="w-20 h-14 bg-gray-200 rounded flex-shrink-0"></div>
-  <div>
-    <p className="text-sm font-medium text-[#333] line-clamp-2">
-      Banco Central anuncia novas regras para bancos digitais
-    </p>
-    <span className="text-xs text-[#999]">há 2 horas</span>
-  </div>
-</div>
-<div className="flex gap-3 pb-3 border-b border-gray-100">
-  <div className="w-20 h-14 bg-gray-200 rounded flex-shrink-0"></div>
-  ...
+<span>{formattedDate} às {publishTime}</span>
 ```
 
 **Depois:**
 ```jsx
-<div className="flex gap-3 pb-3 border-b border-gray-100">
-  <img 
-    src="/images/banco-central.png" 
-    alt="Banco Central do Brasil" 
-    className="w-20 h-14 object-cover rounded flex-shrink-0"
-  />
-  <div>
-    <p className="text-sm font-medium text-[#333] line-clamp-2">
-      Banco Central anuncia novas regras para bancos digitais
-    </p>
-    <span className="text-xs text-[#999]">há 2 horas</span>
-  </div>
-</div>
-<div className="flex gap-3 pb-3 border-b border-gray-100">
-  <img 
-    src="/images/justica.png" 
-    alt="Martelo de juiz" 
-    className="w-20 h-14 object-cover rounded flex-shrink-0"
-  />
-  ...
+<span>{publishDateFormatted} às {publishTime}</span>
 ```
 
----
+## Resultado
 
-## Secao Tecnica
+- Se agora eh 03/02 as 02:00, a publicacao mostrara 02/02 as 23:00 (correto!)
+- Se agora eh 03/02 as 15:00, a publicacao mostrara 03/02 as 12:00 (correto!)
 
-### Arquivo a Modificar
-- `src/pages/Noticia.tsx` - Substituir divs placeholder por tags img
+## Arquivo a Modificar
 
-### Arquivos a Criar
-- `public/images/banco-central.png` - Copiar imagem do Banco Central
-- `public/images/justica.png` - Copiar imagem do martelo de justica
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/pages/Noticia.tsx` | Usar data formatada do publishDate em vez de formattedDate |
 
