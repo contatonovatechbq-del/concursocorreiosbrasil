@@ -80,7 +80,6 @@ serve(async (req) => {
         document: body.buyer.document,
         phone: body.buyer.phone,
       },
-      product: body.product,
       tracking: trackingPayload,
     };
 
