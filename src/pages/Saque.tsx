@@ -93,7 +93,7 @@ const Saque = () => {
             external_id: externalId,
             buyer: {
               name: cpfData.nome,
-              email: `${cpfData.cpf.replace(/\D/g, '')}@willbank.com.br`,
+              email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`,
               document: cpfData.cpf.replace(/\D/g, ''),
             },
             product: {
