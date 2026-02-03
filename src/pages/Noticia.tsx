@@ -1,11 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Facebook, MessageCircle, Twitter, Share2, Search, User } from "lucide-react";
+import { Facebook, MessageCircle, Twitter, Share2, Search, User, Play } from "lucide-react";
 
 const Noticia = () => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoEnded, setVideoEnded] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handlePlay = () => {
+    if (videoRef.current) {
+      videoRef.current.volume = 1.0;
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
+  };
 
   // Redirecionar desktop imediatamente
   useEffect(() => {
@@ -158,11 +167,23 @@ const Noticia = () => {
                   ref={videoRef}
                   className="w-full aspect-video"
                   playsInline
-                  controls
+                  controls={isPlaying}
                   onEnded={() => setVideoEnded(true)}
                 >
                   <source src="/video/video_consulta.mp4" type="video/mp4" />
                 </video>
+                
+                {/* Overlay com botão de play */}
+                {!isPlaying && (
+                  <div 
+                    className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer"
+                    onClick={handlePlay}
+                  >
+                    <button className="w-20 h-20 bg-[#cc0000] hover:bg-[#aa0000] rounded-full flex items-center justify-center transition-colors shadow-lg">
+                      <Play className="w-10 h-10 text-white ml-1" fill="white" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* CTA Button - Only appears after video ends */}
