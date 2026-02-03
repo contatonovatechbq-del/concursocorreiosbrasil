@@ -1,62 +1,79 @@
 
+# Plano: Corrigir Bug dos Áudios no Chat
 
-## Sistema de Consulta de CPF
+## Problema Identificado
 
-### Visão Geral
-Um sistema interno para validar e consultar dados de CPF, com design inspirado no modelo enviado - limpo, moderno, com destaque em amarelo.
+A lógica de verificação dos áudios está **invertida** em dois lugares, causando o bug de "clicar duas vezes" e mensagens não aparecendo corretamente.
+
+### Mapeamento Atual (INCORRETO)
+
+| Etapa | Áudio Tocado | Áudio Verificado |
+|-------|--------------|------------------|
+| `audio-3-validation` | audio-1.mp3 | audio-3.mp3 |
+| `audio-2-comprovante` | audio-2.mp3 | audio-2.mp3 |
+| `final` | audio-3.mp3 | audio-1.mp3 |
+
+### Mapeamento Correto
+
+| Etapa | Áudio Tocado | Áudio que Deve Verificar |
+|-------|--------------|--------------------------|
+| `audio-3-validation` | audio-1.mp3 | audio-1.mp3 |
+| `audio-2-comprovante` | audio-2.mp3 | audio-2.mp3 |
+| `final` | audio-3.mp3 | audio-3.mp3 |
+
+## Correções Necessarias
+
+### 1. Corrigir Verificacao na Etapa audio-3-validation (Linhas 695-699)
+
+**Antes:**
+```javascript
+{step === "audio-3-validation" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && ...}
+{step === "audio-3-validation" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && ...}
+```
+
+**Depois:**
+```javascript
+{step === "audio-3-validation" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && ...}
+{step === "audio-3-validation" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && ...}
+```
+
+### 2. Corrigir Verificacao na Etapa final (Linhas 738-742)
+
+**Antes:**
+```javascript
+{step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-1.mp3")) && ...}
+{step === "final" && waitingForAudio === "/audio/audio-1.mp3" && !audioListened.has("/audio/audio-1.mp3") && ...}
+```
+
+**Depois:**
+```javascript
+{step === "final" && (waitingForAudio === null || audioListened.has("/audio/audio-3.mp3")) && ...}
+{step === "final" && waitingForAudio === "/audio/audio-3.mp3" && !audioListened.has("/audio/audio-3.mp3") && ...}
+```
+
+## Fluxo Correto Apos Correcoes
+
+1. Usuario ouve audio-1.mp3 (validacao)
+2. Botao "CONFIRMAR VALIDACAO" aparece
+3. Usuario confirma PIX
+4. Usuario ouve audio-2.mp3 (comprovante)
+5. Botao "CONFIRMAR" aparece
+6. Usuario escolhe SMS/Email
+7. Usuario ouve audio-3.mp3 (taxas)
+8. Botao "Concluir pagamento" aparece
 
 ---
 
-### Funcionalidades
+## Secao Tecnica
 
-#### 1. Página Principal de Consulta
-- **Header** com logo e navegação
-- **Card central** com borda superior amarela
-- **Campo de CPF** com máscara automática (000.000.000-00)
-- **Botão amarelo** "Consultar CPF"
-- **Mensagem de segurança** no rodapé do card
+### Arquivos Modificados
+- `src/pages/Chat.tsx`
 
-#### 2. Validação de CPF (Local)
-- Verificação matemática dos dígitos verificadores
-- Formatação automática enquanto digita
-- Mensagem de erro para CPF inválido
-- Bloqueia consulta se formato estiver incorreto
+### Linhas Afetadas
+- Linha 695: Trocar `audio-3.mp3` por `audio-1.mp3`
+- Linha 699: Trocar `audio-3.mp3` por `audio-1.mp3`
+- Linha 738: Trocar `audio-1.mp3` por `audio-3.mp3`
+- Linha 742: Trocar `audio-1.mp3` por `audio-3.mp3`
 
-#### 3. Consulta de Dados (API Brasil API)
-Após validação, busca os seguintes dados:
-- **Nome completo**
-- **Data de nascimento**
-- **Situação cadastral** (Regular, Pendente, etc.)
-
-#### 4. Exibição de Resultados
-- Card expandido mostrando os dados encontrados
-- Ícones indicando cada informação
-- Status visual da situação cadastral (verde = regular, vermelho = irregular)
-- Opção de fazer nova consulta
-
----
-
-### Design Visual
-Baseado no modelo enviado:
-- **Cores**: Amarelo (#F5C518) como destaque, fundo cinza claro, card branco
-- **Tipografia**: Limpa e moderna
-- **Layout**: Card centralizado com bordas arredondadas
-- **Responsivo**: Funciona bem em mobile e desktop
-
----
-
-### Experiência do Usuário
-1. Usuário acessa a página
-2. Digita o CPF (formatação automática)
-3. Clica em "Consultar CPF"
-4. Sistema valida o formato
-5. Se válido, busca dados na API
-6. Exibe resultado ou mensagem de erro
-
----
-
-### Observações Técnicas
-- **API utilizada**: Brasil API (gratuita, open-source)
-- **Limitações**: A API pode ter instabilidade ou dados desatualizados
-- **Fallback**: Se a API falhar, exibe apenas a validação local com mensagem informativa
-
+### Risco
+Baixo - apenas corrige referencias incorretas de strings.
