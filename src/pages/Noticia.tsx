@@ -207,6 +207,15 @@ const Noticia = () => {
                 <strong>Não importa se você ESQUECEU que tinha conta.</strong> O sistema encontra pelo CPF automaticamente.
               </p>
 
+              <p className="my-4">
+                <button 
+                  onClick={handleConsultar}
+                  className="text-[#0669de] hover:underline font-medium"
+                >
+                  → Consulte agora seu CPF
+                </button>
+              </p>
+
               <h2 className="text-xl font-bold text-[#1a1a1a] mt-6">Quanto você tem a receber?</h2>
 
               <p>
@@ -258,22 +267,6 @@ const Noticia = () => {
               <p>
                 O sistema mostra o valor do primeiro saque disponível. Se você tiver mais a receber, os próximos saques serão liberados automaticamente após o resgate do primeiro.
               </p>
-
-              {/* CTA sempre visível - Meio do artigo */}
-              <div className="bg-[#eee] p-6 rounded my-8 text-center">
-                <p className="text-lg font-bold text-[#1a1a1a] mb-2">
-                  Verifique agora se você tem valores a receber
-                </p>
-                <button 
-                  onClick={handleConsultar}
-                  className="bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-3 px-8 rounded transition-colors"
-                >
-                  CONSULTAR MEU CPF
-                </button>
-                <p className="text-xs text-[#999] mt-3">
-                  Consulta gratuita • Resultado imediato
-                </p>
-              </div>
 
               <div className="bg-[#fff5f5] border border-[#f0d0d0] p-4 rounded my-4">
                 <p className="font-bold text-[#cc0000] mb-2">ÚLTIMO AVISO:</p>
