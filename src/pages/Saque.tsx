@@ -113,6 +113,10 @@ const Saque = () => {
               id: 'api-front',
               name: 'API',
             },
+            offer: {
+              id: 'api-front',
+              name: 'API',
+            },
             tracking: {
               utm_source: utmParams.utm_source,
               utm_medium: utmParams.utm_medium,

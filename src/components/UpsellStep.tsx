@@ -101,6 +101,10 @@ const UpsellStep = ({
               id: `upsell-${stepNumber}`,
               name: `UP${stepNumber}`,
             },
+            offer: {
+              id: `upsell-${stepNumber}`,
+              name: `UP${stepNumber}`,
+            },
             tracking: {
               utm_source: utmParams.utm_source,
               utm_medium: utmParams.utm_medium,

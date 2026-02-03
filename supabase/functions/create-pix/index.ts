@@ -18,6 +18,10 @@ interface CreatePixRequest {
     id: string | null;
     name: string | null;
   };
+  offer?: {
+    id: string | null;
+    name: string | null;
+  };
   tracking?: {
     utm_source?: string | null;
     utm_medium?: string | null;
@@ -70,7 +74,15 @@ serve(async (req) => {
     console.log('=== TRACKING PAYLOAD TO BUCKPAY ===');
     console.log('Tracking being sent:', JSON.stringify(trackingPayload, null, 2));
 
-    const requestBody = {
+    // Check if both product AND offer are provided (API requires both or neither)
+    const hasProduct = !!body.product?.id || !!body.product?.name;
+    const hasOffer = !!body.offer?.id || !!body.offer?.name;
+    
+    console.log('=== PRODUCT/OFFER CHECK ===');
+    console.log('hasProduct:', hasProduct, 'hasOffer:', hasOffer);
+
+    // Build request body
+    const requestBody: Record<string, unknown> = {
       external_id: body.external_id,
       payment_method: 'pix',
       amount: body.amount,
@@ -82,6 +94,15 @@ serve(async (req) => {
       },
       tracking: trackingPayload,
     };
+
+    // Only include product + offer if BOTH are provided
+    if (hasProduct && hasOffer) {
+      requestBody.product = body.product;
+      requestBody.offer = body.offer;
+      console.log('Including product + offer in request');
+    } else {
+      console.log('Omitting product/offer (not both provided)');
+    }
 
     console.log('=== FULL REQUEST TO BUCKPAY ===');
     console.log('Request body:', JSON.stringify(requestBody, null, 2));
