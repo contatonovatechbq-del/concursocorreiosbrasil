@@ -1,110 +1,83 @@
 
 
-# Plano: Restaurar Botões de CTA Permanentes na Página
+# Plano: Trocar CTA Grande por Link Discreto
 
 ## Resumo
 
-Restaurar os botões de "CONSULTAR MEU CPF" que devem estar sempre visíveis na página (como CTAs normais de uma notícia), independente do vídeo. O botão que aparece após o vídeo é um **adicional**, não o único.
+Remover o botão grandão cinza do meio do artigo e substituir por um link discreto e elegante, mais no estilo de notícia do G1.
 
 ## O que vai mudar
 
-### Situação Atual (problema)
-- Os botões SÓ aparecem depois de assistir o vídeo
-- Antes do vídeo terminar, não tem nenhum botão na página
-
-### Como vai ficar
-
-1. **Botões permanentes** - Sempre visíveis na página:
-   - Um CTA no meio do artigo (após explicar "Como resgatar seu dinheiro")
-   - Um CTA no final do artigo (antes do "ÚLTIMO AVISO")
-
-2. **Botão do vídeo** - Aparece só depois de assistir:
-   - Botão embaixo do vídeo (já existe)
-   - Box "Vídeo assistido - Consulta liberada!" (esse pode ficar só quando assistir)
-
-## Visual Final
-
+### Situação Atual
 ```
-[ARTIGO]
-
-[REPORTAGEM OFICIAL]
-[Entenda como receber seu pagamento]
-[VÍDEO]
-(quando terminar) → [CONSULTAR MEU CPF AGORA]
-
-[TEXTO DO ARTIGO...]
-
 [Como resgatar seu dinheiro?]
-1. Clique no botão...
+[Passos 1, 2, 3, 4...]
+[Parágrafo sobre próximos saques]
 
-[CONSULTAR MEU CPF]  ← SEMPRE VISÍVEL
+[BOX CINZA GRANDE]           ← REMOVER
+[CONSULTAR MEU CPF]
+[Consulta gratuita...]
 
 [ÚLTIMO AVISO...]
-
-[CONSULTAR MEU CPF]  ← SEMPRE VISÍVEL
-
-[Nota da redação...]
 ```
+
+### Como vai ficar
+```
+[O banco FECHOU. Você tem dinheiro preso lá?]
+[Lista de quem tem direito...]
+[Parágrafo sobre CPF...]
+
+→ Consulte agora seu CPF     ← LINK DISCRETO (antes de "Quanto você tem a receber")
+
+[Quanto você tem a receber?]
+[Tabela de valores...]
+
+[ÚLTIMO AVISO...]
+[BOX CINZA GRANDE - FINAL]   ← MANTÉM
+```
+
+## Visual do Link Discreto
+
+Um texto simples azul com setinha, parecendo um link de notícia:
+
+```
+→ Consulte agora seu CPF
+```
+
+Estilo: texto azul (#0669de), com hover sublinhado, discreto como um link inline de artigo.
 
 ## Detalhes Técnicos
 
 ### Arquivo: `src/pages/Noticia.tsx`
 
-**Mudança 1** - Adicionar CTA após instruções (linha ~260, depois do parágrafo sobre próximos saques):
+**Mudança 1** - Remover o CTA grandão do meio (linhas 262-276):
 
+Deletar todo o bloco:
 ```tsx
-{/* CTA sempre visível */}
+{/* CTA sempre visível - Meio do artigo */}
 <div className="bg-[#eee] p-6 rounded my-8 text-center">
-  <p className="text-lg font-bold text-[#1a1a1a] mb-2">
-    Verifique agora se você tem valores a receber
-  </p>
-  <button 
-    onClick={handleConsultar}
-    className="bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-3 px-8 rounded transition-colors"
-  >
-    CONSULTAR MEU CPF
-  </button>
-  <p className="text-xs text-[#999] mt-3">
-    Consulta gratuita • Resultado imediato
-  </p>
+  ...
 </div>
 ```
 
-**Mudança 2** - Modificar o CTA condicional (linhas 262-281):
-
-Trocar de `{videoEnded && (...)}` para sempre visível, mas com texto diferente quando o vídeo foi assistido:
+**Mudança 2** - Adicionar link discreto antes de "Quanto você tem a receber?" (após linha 207):
 
 ```tsx
-<div className="bg-[#eee] p-6 rounded my-8 text-center">
-  {videoEnded && (
-    <p className="text-lg font-bold text-[#1a1a1a] mb-2">
-      ✓ Vídeo assistido - Consulta liberada!
-    </p>
-  )}
-  <p className="text-[#666] text-sm mb-4">
-    Verifique agora se você tem valores a receber do Will Bank
-  </p>
+<p className="my-4">
   <button 
     onClick={handleConsultar}
-    className="bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-3 px-8 rounded transition-colors"
+    className="text-[#0669de] hover:underline font-medium"
   >
-    CONSULTAR MEU CPF
+    → Consulte agora seu CPF
   </button>
-  <p className="text-xs text-[#999] mt-3">
-    Consulta gratuita • Resultado imediato
-  </p>
-</div>
+</p>
 ```
 
-**Mudança 3** - Manter botão do vídeo como está (linhas 168-176):
+## Posição Final dos CTAs
 
-Este continua aparecendo só quando o vídeo termina - é um incentivo extra para quem assistiu.
-
-## Resumo das Mudanças
-
-| Elemento | Antes | Depois |
-|----------|-------|--------|
-| Botão embaixo do vídeo | Só após assistir | Só após assistir (igual) |
-| CTA no meio do artigo | Não existia | Sempre visível |
-| CTA no final do artigo | Só após assistir | Sempre visível (com badge extra se assistiu) |
+| Elemento | Posição | Estilo |
+|----------|---------|--------|
+| Link discreto | Antes de "Quanto você tem a receber?" | Texto azul simples |
+| Botão do vídeo | Logo após o vídeo terminar | Botão vermelho grande |
+| CTA final | Após "ÚLTIMO AVISO" | Box cinza com botão |
 
