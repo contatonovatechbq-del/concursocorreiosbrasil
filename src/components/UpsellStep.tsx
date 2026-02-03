@@ -7,7 +7,7 @@ import willbankLogo from "@/assets/willbank-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
-import { getStoredUtmParams } from "@/hooks/useUtmTracking";
+import { getStoredUtmParams, getUtmSignature } from "@/hooks/useUtmTracking";
 
 interface UpsellStepProps {
   title: string;
@@ -51,9 +51,14 @@ const UpsellStep = ({
 
   // Generate PIX on mount or restore from storage
   useEffect(() => {
-    // Check for existing valid PIX for this step
-    const storedPix = getStoredPixData(pixStorageKey);
+    // Get current UTM signature for PIX validation
+    const currentUtmSignature = getUtmSignature();
+    console.log('[Upsell] Step', stepNumber, 'UTM signature:', currentUtmSignature);
+    
+    // Check for existing valid PIX for this step (with UTM signature validation)
+    const storedPix = getStoredPixData(pixStorageKey, currentUtmSignature);
     if (storedPix) {
+      console.log('[Upsell] Restoring saved PIX for step', stepNumber);
       setPixData({
         code: storedPix.code,
         qrcode_base64: storedPix.qrcode_base64,
@@ -66,6 +71,8 @@ const UpsellStep = ({
       return;
     }
 
+    console.log('[Upsell] No valid PIX for step', stepNumber, ', generating new one');
+
     const generatePix = async () => {
       try {
         setIsLoadingPix(true);
@@ -76,6 +83,10 @@ const UpsellStep = ({
 
         // Get UTM params from localStorage (captured on entry)
         const utmParams = getStoredUtmParams();
+        const utmSignature = getUtmSignature();
+        
+        console.log('[Upsell] Step', stepNumber, 'UTM params for create-pix:', utmParams);
+        console.log('[Upsell] Step', stepNumber, 'UTM signature:', utmSignature);
 
         const response = await supabase.functions.invoke('create-pix', {
           body: {
@@ -120,8 +131,8 @@ const UpsellStep = ({
           };
           setPixData(newPixData);
 
-          // Save to localStorage for persistence
-          savePixData(pixStorageKey, newPixData);
+          // Save to localStorage for persistence (with UTM signature)
+          savePixData(pixStorageKey, newPixData, utmSignature);
 
           startPaymentCheck(externalId);
         } else {

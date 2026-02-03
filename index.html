@@ -25,6 +25,43 @@
 </head>
 
   <body>
+    <!-- Early UTM Capture - runs before React bundle loads -->
+    <script>
+      (function() {
+        try {
+          var UTM_KEY = "willbank_utm";
+          var search = window.location.search;
+          if (!search) return;
+          
+          var urlParams = new URLSearchParams(search);
+          var hasUtms = urlParams.has('utm_source') || urlParams.has('utm_campaign') || urlParams.has('src');
+          
+          if (hasUtms) {
+            var existing = {};
+            try {
+              var stored = localStorage.getItem(UTM_KEY);
+              if (stored) existing = JSON.parse(stored);
+            } catch(e) {}
+            
+            // Merge: new values override, nulls keep existing
+            var utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'utm_id', 'src', 'sck', 'ref'];
+            var merged = {};
+            for (var i = 0; i < utmKeys.length; i++) {
+              var key = utmKeys[i];
+              var newVal = urlParams.get(key);
+              merged[key] = newVal !== null ? newVal : (existing[key] || null);
+            }
+            
+            localStorage.setItem(UTM_KEY, JSON.stringify(merged));
+            console.log('[UTM-EARLY] Captured before React:', merged);
+          }
+        } catch(e) {
+          console.error('[UTM-EARLY] Error:', e);
+        }
+      })();
+    </script>
+    <!-- End Early UTM Capture -->
+
     <!-- Facebook Pixel Code -->
     <script>
       !function(f,b,e,v,n,t,s)
