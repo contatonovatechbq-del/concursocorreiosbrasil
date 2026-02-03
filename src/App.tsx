@@ -14,10 +14,7 @@ import Chat from "./pages/Chat";
 import Saque from "./pages/Saque";
 import Upsell from "./pages/Upsell";
 import NotFound from "./pages/NotFound";
-import { captureUtmParams } from "@/hooks/useUtmTracking";
-
-// Captura UTMs imediatamente na entrada do app
-captureUtmParams();
+import UtmCapture from "@/components/UtmCapture";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +24,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <UtmCapture />
         <Routes>
           <Route path="/" element={<Noticia />} />
           <Route path="/verificacao" element={<Verificacao />} />

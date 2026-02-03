@@ -7,6 +7,7 @@ export interface StoredPixData {
   transaction_id: string;
   external_id: string;
   createdAt: number;
+  utmSignature?: string; // Snapshot do tracking usado na geração
 }
 
 /**
@@ -20,20 +21,23 @@ export const getPixStorageKey = (pageType: "saque" | "upsell", step?: number): s
 };
 
 /**
- * Save PIX data to localStorage with timestamp
+ * Save PIX data to localStorage with timestamp and UTM signature
  */
-export const savePixData = (key: string, pixData: Omit<StoredPixData, "createdAt">): void => {
+export const savePixData = (key: string, pixData: Omit<StoredPixData, "createdAt">, utmSignature?: string): void => {
   const dataToStore: StoredPixData = {
     ...pixData,
     createdAt: Date.now(),
+    utmSignature: utmSignature || '',
   };
   localStorage.setItem(key, JSON.stringify(dataToStore));
+  console.log('[PIX] Saved with UTM signature:', utmSignature);
 };
 
 /**
  * Get stored PIX data if it exists and is not expired (within 10 minutes)
+ * Returns null if UTM signature doesn't match (forces new PIX generation)
  */
-export const getStoredPixData = (key: string): StoredPixData | null => {
+export const getStoredPixData = (key: string, currentUtmSignature?: string): StoredPixData | null => {
   try {
     const stored = localStorage.getItem(key);
     if (!stored) return null;
@@ -42,13 +46,33 @@ export const getStoredPixData = (key: string): StoredPixData | null => {
     const elapsed = Date.now() - data.createdAt;
 
     // Check if PIX is still valid (within 10 minutes)
-    if (elapsed < PIX_EXPIRY_MS) {
-      return data;
+    if (elapsed >= PIX_EXPIRY_MS) {
+      console.log('[PIX] Expired, removing');
+      localStorage.removeItem(key);
+      return null;
     }
 
-    // PIX expired, remove it
-    localStorage.removeItem(key);
-    return null;
+    // Check UTM signature match (if provided)
+    if (currentUtmSignature !== undefined) {
+      const storedSignature = data.utmSignature || '';
+      
+      // Se PIX foi gerado sem UTM mas agora temos UTM, invalida
+      if (!storedSignature && currentUtmSignature) {
+        console.log('[PIX] Stored without UTM but now have UTM, invalidating');
+        localStorage.removeItem(key);
+        return null;
+      }
+      
+      // Se as assinaturas são diferentes, invalida
+      if (storedSignature !== currentUtmSignature) {
+        console.log('[PIX] UTM signature changed, invalidating. Old:', storedSignature, 'New:', currentUtmSignature);
+        localStorage.removeItem(key);
+        return null;
+      }
+    }
+
+    console.log('[PIX] Restored valid PIX with signature:', data.utmSignature);
+    return data;
   } catch {
     return null;
   }
