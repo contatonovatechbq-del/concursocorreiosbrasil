@@ -7,6 +7,7 @@ import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const ConfirmaDados = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const ConfirmaDados = () => {
   }, [cpfData, navigate]);
 
   const handleConfirmar = () => {
-    navigate("/biometria", { state: { cpfData } });
+    navigate(buildUrlWithUtm("/biometria"), { state: { cpfData } });
   };
 
   const handleCorrigir = () => {

