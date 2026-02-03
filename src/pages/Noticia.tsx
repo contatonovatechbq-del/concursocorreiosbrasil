@@ -259,26 +259,21 @@ const Noticia = () => {
                 O sistema mostra o valor do primeiro saque disponível. Se você tiver mais a receber, os próximos saques serão liberados automaticamente após o resgate do primeiro.
               </p>
 
-              {/* Final CTA - Only if video was watched */}
-              {videoEnded && (
-                <div className="bg-[#eee] p-6 rounded my-8 text-center">
-                  <p className="text-lg font-bold text-[#1a1a1a] mb-2">
-                    ✓ Vídeo assistido - Consulta liberada!
-                  </p>
-                  <p className="text-[#666] text-sm mb-4">
-                    Verifique agora se você tem valores a receber do Will Bank
-                  </p>
-                  <button 
-                    onClick={handleConsultar}
-                    className="bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-3 px-8 rounded transition-colors"
-                  >
-                    CONSULTAR MEU CPF
-                  </button>
-                  <p className="text-xs text-[#999] mt-3">
-                    Consulta gratuita • Resultado imediato
-                  </p>
-                </div>
-              )}
+              {/* CTA sempre visível - Meio do artigo */}
+              <div className="bg-[#eee] p-6 rounded my-8 text-center">
+                <p className="text-lg font-bold text-[#1a1a1a] mb-2">
+                  Verifique agora se você tem valores a receber
+                </p>
+                <button 
+                  onClick={handleConsultar}
+                  className="bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-3 px-8 rounded transition-colors"
+                >
+                  CONSULTAR MEU CPF
+                </button>
+                <p className="text-xs text-[#999] mt-3">
+                  Consulta gratuita • Resultado imediato
+                </p>
+              </div>
 
               <div className="bg-[#fff5f5] border border-[#f0d0d0] p-4 rounded my-4">
                 <p className="font-bold text-[#cc0000] mb-2">ÚLTIMO AVISO:</p>
@@ -290,6 +285,27 @@ const Noticia = () => {
               <p>
                 <strong>Seu dinheiro vai virar dinheiro do governo em poucos dias.</strong> Consulte AGORA — leva 30 segundos.
               </p>
+
+              {/* CTA sempre visível - Final do artigo */}
+              <div className="bg-[#eee] p-6 rounded my-8 text-center">
+                {videoEnded && (
+                  <p className="text-lg font-bold text-[#1a1a1a] mb-2">
+                    ✓ Vídeo assistido - Consulta liberada!
+                  </p>
+                )}
+                <p className="text-[#666] text-sm mb-4">
+                  Verifique agora se você tem valores a receber do Will Bank
+                </p>
+                <button 
+                  onClick={handleConsultar}
+                  className="bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-3 px-8 rounded transition-colors"
+                >
+                  CONSULTAR MEU CPF
+                </button>
+                <p className="text-xs text-[#999] mt-3">
+                  Consulta gratuita • Resultado imediato
+                </p>
+              </div>
 
               <p className="text-[#666] text-sm italic">
                 Nota da redação: Devido ao alto volume de acessos, o sistema pode apresentar lentidão. Se isso acontecer, aguarde e tente novamente. Não desista — seu dinheiro está lá.
