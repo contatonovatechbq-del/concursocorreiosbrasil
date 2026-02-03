@@ -6,6 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import willbankLogo from "@/assets/willbank-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
+import { fbEvents } from "@/lib/fbPixel";
 
 interface UpsellStepProps {
   title: string;
@@ -167,6 +168,16 @@ const UpsellStep = ({
           if (checkIntervalRef.current) {
             clearInterval(checkIntervalRef.current);
           }
+          
+          // Fire Facebook Pixel Purchase event (client + server)
+          fbEvents.purchase({ value: valor, currency: 'BRL', content_name: title });
+          fbEvents.serverPurchase({ 
+            first_name: cpfData.nome.split(' ')[0], 
+            cpf: cpfData.cpf, 
+            value: valor, 
+            content_name: title 
+          });
+          
           toast({
             title: "Pagamento confirmado!",
             description: "Processando próxima etapa...",
@@ -208,6 +219,16 @@ const UpsellStep = ({
           if (checkIntervalRef.current) {
             clearInterval(checkIntervalRef.current);
           }
+          
+          // Fire Facebook Pixel Purchase event (client + server)
+          fbEvents.purchase({ value: valor, currency: 'BRL', content_name: title });
+          fbEvents.serverPurchase({ 
+            first_name: cpfData.nome.split(' ')[0], 
+            cpf: cpfData.cpf, 
+            value: valor, 
+            content_name: title 
+          });
+          
           toast({
             title: "Pagamento confirmado!",
             description: "Processando próxima etapa...",
