@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Facebook, MessageCircle, Twitter, Share2, Search, User, Play } from "lucide-react";
+import { Facebook, MessageCircle, Twitter, Share2, Search, User } from "lucide-react";
 
 const Noticia = () => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoEnded, setVideoEnded] = useState(false);
-  const [videoProgress, setVideoProgress] = useState(0);
 
   // Redirecionar desktop imediatamente
   useEffect(() => {
@@ -145,16 +144,10 @@ const Noticia = () => {
               BREAKING: Will Bank encerra atividades e Justiça determina devolução de valores a todos os ex-clientes — Foto: Reprodução
             </p>
 
-            {/* Video Section - G1 Style */}
+            {/* Video Section - Reportagem Oficial */}
             <div className="bg-[#f5f5f5] border-l-4 border-[#cc0000] p-4 my-6 rounded-r">
-              <p className="text-[#cc0000] font-bold text-lg mb-1">
-                VÍDEO EXPLICATIVO
-              </p>
-              <p className="text-[#1a1a1a] font-bold text-xl mb-2">
-                Entenda como receber sua indenização
-              </p>
-              <p className="text-[#666] text-sm mb-4">
-                Assista ao vídeo completo para liberar a consulta do seu CPF
+              <p className="text-[#cc0000] font-bold text-lg mb-4">
+                REPORTAGEM OFICIAL
               </p>
               
               <div className="relative rounded-lg overflow-hidden bg-black">
@@ -164,43 +157,19 @@ const Noticia = () => {
                   playsInline
                   controls
                   onEnded={() => setVideoEnded(true)}
-                  onTimeUpdate={() => {
-                    if (videoRef.current) {
-                      const progress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
-                      setVideoProgress(progress);
-                    }
-                  }}
                 >
-                  <source src="/video/vsl_1.mp4" type="video/mp4" />
+                  <source src="/video/video_consulta.mp4" type="video/mp4" />
                 </video>
               </div>
 
-              {/* Progress indicator */}
-              <div className="mt-3">
-                <div className="h-1.5 bg-gray-300 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-[#cc0000] transition-all duration-300"
-                    style={{ width: `${videoProgress}%` }}
-                  />
-                </div>
-                <p className="text-xs text-[#666] mt-2 text-center">
-                  {videoEnded ? "✓ Vídeo completo" : `${Math.round(videoProgress)}% assistido`}
-                </p>
-              </div>
-
               {/* CTA Button - Only appears after video ends */}
-              {videoEnded ? (
+              {videoEnded && (
                 <button 
                   onClick={handleConsultar}
                   className="w-full mt-4 bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-4 px-8 rounded-lg transition-colors text-lg animate-pulse"
                 >
                   CONSULTAR MEU CPF AGORA
                 </button>
-              ) : (
-                <div className="w-full mt-4 bg-gray-300 text-gray-500 font-bold py-4 px-8 rounded-lg text-center text-lg">
-                  <Play className="inline-block w-5 h-5 mr-2" />
-                  Assista o vídeo para liberar
-                </div>
               )}
             </div>
 
