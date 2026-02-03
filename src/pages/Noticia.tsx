@@ -146,9 +146,12 @@ const Noticia = () => {
 
             {/* Video Section - Reportagem Oficial */}
             <div className="bg-[#f5f5f5] border-l-4 border-[#cc0000] p-4 my-6 rounded-r">
-              <p className="text-[#cc0000] font-bold text-lg mb-4">
-                REPORTAGEM OFICIAL
-              </p>
+            <p className="text-[#cc0000] font-bold text-lg mb-1">
+              REPORTAGEM OFICIAL
+            </p>
+            <p className="text-[#1a1a1a] font-bold text-xl mb-4">
+              Entenda como receber seu pagamento
+            </p>
               
               <div className="relative rounded-lg overflow-hidden bg-black">
                 <video
