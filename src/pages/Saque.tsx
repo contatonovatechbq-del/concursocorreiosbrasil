@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
-import { getStoredUtmParams, getUtmSignature } from "@/hooks/useUtmTracking";
+import { getStoredUtmParams, getUtmSignature, buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 interface PixData {
   code: string;
@@ -211,7 +211,7 @@ const Saque = () => {
             description: "Processando próxima etapa...",
           });
           // Navigate to upsell 1
-          navigate("/upsell/1", {
+          navigate(buildUrlWithUtm("/upsell/1"), {
             state: {
               cpfData,
               valorBeneficio,
@@ -269,7 +269,7 @@ const Saque = () => {
             description: "Processando próxima etapa...",
           });
           // Navigate to upsell 1
-          navigate("/upsell/1", {
+          navigate(buildUrlWithUtm("/upsell/1"), {
             state: {
               cpfData,
               valorBeneficio,
@@ -423,7 +423,7 @@ const Saque = () => {
                       title: "[DEV] Pagamento simulado!",
                       description: "Navegando para upsell 1...",
                     });
-                    navigate("/upsell/1", {
+                    navigate(buildUrlWithUtm("/upsell/1"), {
                       state: {
                         cpfData,
                         valorBeneficio,

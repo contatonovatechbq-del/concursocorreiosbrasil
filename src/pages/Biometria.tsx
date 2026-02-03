@@ -7,6 +7,7 @@ import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import { saveSession, getSession } from "@/hooks/useSessionPersistence";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const Biometria = () => {
   const navigate = useNavigate();
@@ -117,7 +118,7 @@ const Biometria = () => {
       if (progress >= 100) {
         clearInterval(interval);
         setTimeout(() => {
-          navigate("/video", { state: { cpfData } });
+          navigate(buildUrlWithUtm("/video"), { state: { cpfData } });
         }, 800);
       }
     }, 80);
@@ -163,7 +164,7 @@ const Biometria = () => {
                   <AlertCircle className="w-10 h-10 sm:w-12 sm:h-12 text-destructive mb-3" />
                   <p className="text-xs sm:text-sm text-muted-foreground text-center">{cameraError}</p>
                   <Button 
-                    onClick={() => navigate("/video", { state: { cpfData } })} 
+                    onClick={() => navigate(buildUrlWithUtm("/video"), { state: { cpfData } })} 
                     className="mt-3"
                     variant="default"
                     size="sm"

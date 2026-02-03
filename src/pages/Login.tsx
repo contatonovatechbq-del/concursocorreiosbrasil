@@ -9,6 +9,7 @@ import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
 import { getSession } from "@/hooks/useSessionPersistence";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ const Login = () => {
     try {
       const data = await consultarCPF(cpf);
       // Navega para a página de verificação com os dados
-      navigate("/verificando", { state: { cpfData: data } });
+      navigate(buildUrlWithUtm("/verificando"), { state: { cpfData: data } });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro ao consultar CPF";
       toast({

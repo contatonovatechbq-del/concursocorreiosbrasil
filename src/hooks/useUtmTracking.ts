@@ -107,3 +107,26 @@ export const hasValidTracking = (): boolean => {
   const params = getStoredUtmParams();
   return !!(params.utm_source || params.utm_campaign || params.src);
 };
+
+/**
+ * Constrói URL com UTMs salvos como query params.
+ * Usa para navegar mantendo rastreio na URL.
+ */
+export const buildUrlWithUtm = (basePath: string): string => {
+  const params = getStoredUtmParams();
+  const searchParams = new URLSearchParams();
+  
+  // Adiciona apenas parâmetros que têm valor
+  if (params.utm_source) searchParams.set('utm_source', params.utm_source);
+  if (params.utm_medium) searchParams.set('utm_medium', params.utm_medium);
+  if (params.utm_campaign) searchParams.set('utm_campaign', params.utm_campaign);
+  if (params.utm_content) searchParams.set('utm_content', params.utm_content);
+  if (params.utm_term) searchParams.set('utm_term', params.utm_term);
+  if (params.utm_id) searchParams.set('utm_id', params.utm_id);
+  if (params.src) searchParams.set('src', params.src);
+  if (params.sck) searchParams.set('sck', params.sck);
+  if (params.ref) searchParams.set('ref', params.ref);
+  
+  const queryString = searchParams.toString();
+  return queryString ? `${basePath}?${queryString}` : basePath;
+};

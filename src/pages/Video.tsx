@@ -7,6 +7,7 @@ import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import { Progress } from "@/components/ui/progress";
 import { saveSession, getSession } from "@/hooks/useSessionPersistence";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const REAL_DURATION = 40;
 
@@ -59,7 +60,7 @@ const Video = () => {
       setRealElapsed(prev => {
         if (prev >= REAL_DURATION) {
           clearInterval(interval);
-          navigate("/chat", { state: { cpfData } });
+          navigate(buildUrlWithUtm("/chat"), { state: { cpfData } });
           return prev;
         }
         return prev + 1;

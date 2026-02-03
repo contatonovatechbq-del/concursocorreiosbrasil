@@ -6,6 +6,7 @@ import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import { saveSession, getSession } from "@/hooks/useSessionPersistence";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const Verificando = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const Verificando = () => {
         if (prev >= 100) {
           clearInterval(interval);
           setTimeout(() => {
-            navigate("/confirma-dados", { state: { cpfData } });
+            navigate(buildUrlWithUtm("/confirma-dados"), { state: { cpfData } });
           }, 500);
           return 100;
         }

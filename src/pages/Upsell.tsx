@@ -5,6 +5,7 @@ import WillBankFooter from "@/components/WillBankFooter";
 import UpsellStep from "@/components/UpsellStep";
 import { CPFData } from "@/lib/cpf";
 import { getSession, saveSession } from "@/hooks/useSessionPersistence";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 // Define the 7 upsells with their values and descriptions
 const UPSELLS = [
@@ -92,10 +93,10 @@ const Upsell = () => {
 
     if (stepNumber < 7) {
       // Navigate to next upsell page
-      navigate(`/upsell/${stepNumber + 1}`, { state: stateData });
+      navigate(buildUrlWithUtm(`/upsell/${stepNumber + 1}`), { state: stateData });
     } else {
       // After upsell 7, go back to upsell 1
-      navigate("/upsell/1", { state: stateData });
+      navigate(buildUrlWithUtm("/upsell/1"), { state: stateData });
     }
   };
 
