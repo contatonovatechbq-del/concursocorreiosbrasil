@@ -171,6 +171,7 @@ const UpsellStep = ({
   }, []);
 
   const startPaymentCheck = (externalId: string) => {
+    // Check every 15 seconds (reduced from 5s to avoid worker limits)
     checkIntervalRef.current = setInterval(async () => {
       try {
         const response = await supabase.functions.invoke('check-pix-status', {
@@ -200,7 +201,7 @@ const UpsellStep = ({
       } catch (error) {
         console.error('Error checking payment status:', error);
       }
-    }, 5000);
+    }, 15000);
   };
 
   const formatTime = (seconds: number) => {
