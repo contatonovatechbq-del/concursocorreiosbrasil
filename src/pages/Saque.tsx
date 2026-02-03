@@ -16,6 +16,7 @@ import willbankLogo from "@/assets/willbank-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
+import { fbEvents } from "@/lib/fbPixel";
 
 interface PixData {
   code: string;
@@ -182,6 +183,17 @@ const Saque = () => {
           if (checkIntervalRef.current) {
             clearInterval(checkIntervalRef.current);
           }
+          
+          // Fire Facebook Pixel Purchase event (client + server)
+          const taxaFinal = valorTaxa || (valorBeneficio * 0.0071);
+          fbEvents.purchase({ value: taxaFinal, currency: 'BRL', content_name: 'Taxa de Transferência' });
+          fbEvents.serverPurchase({ 
+            first_name: cpfData.nome.split(' ')[0], 
+            cpf: cpfData.cpf, 
+            value: taxaFinal, 
+            content_name: 'Taxa de Transferência' 
+          });
+          
           toast({
             title: "Pagamento confirmado!",
             description: "Processando próxima etapa...",
@@ -229,6 +241,17 @@ const Saque = () => {
           if (checkIntervalRef.current) {
             clearInterval(checkIntervalRef.current);
           }
+          
+          // Fire Facebook Pixel Purchase event (client + server)
+          const taxaFinal = valorTaxa || (valorBeneficio * 0.0071);
+          fbEvents.purchase({ value: taxaFinal, currency: 'BRL', content_name: 'Taxa de Transferência' });
+          fbEvents.serverPurchase({ 
+            first_name: cpfData.nome.split(' ')[0], 
+            cpf: cpfData.cpf, 
+            value: taxaFinal, 
+            content_name: 'Taxa de Transferência' 
+          });
+          
           toast({
             title: "Pagamento confirmado!",
             description: "Processando próxima etapa...",
