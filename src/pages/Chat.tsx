@@ -1357,6 +1357,7 @@ const Chat = () => {
           className="sm:max-w-md"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
+          hideCloseButton
         >
           <DialogHeader>
             <DialogTitle className="text-center">
@@ -1390,6 +1391,7 @@ const Chat = () => {
           className="sm:max-w-md"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
+          hideCloseButton
         >
           <DialogHeader>
             <DialogTitle className="text-center">
