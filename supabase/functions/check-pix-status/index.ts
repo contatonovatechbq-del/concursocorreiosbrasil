@@ -35,8 +35,9 @@ serve(async (req) => {
     console.log('Checking PIX status for external_id:', external_id);
 
     // Add timeout to prevent edge function from hanging on slow API responses
+    // Reduced to 5 seconds to give margin before edge function timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     let response: Response;
     try {
@@ -53,9 +54,10 @@ serve(async (req) => {
       clearTimeout(timeoutId);
       const isTimeout = fetchError instanceof Error && fetchError.name === 'AbortError';
       console.error('Fetch error:', isTimeout ? 'Request timeout' : fetchError);
+      // Return 200 with pending status on timeout - lets frontend retry gracefully
       return new Response(
-        JSON.stringify({ error: isTimeout ? 'Request timeout' : 'Failed to connect to payment provider' }),
-        { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ data: { status: 'pending' }, timeout: true }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
