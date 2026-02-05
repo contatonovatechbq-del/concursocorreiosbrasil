@@ -1,91 +1,66 @@
 
-# Plano: Corrigir Bugs Criticos Mobile
+# Plano: Deploy de Edge Functions e Tracking Completo
 
-## Problemas Identificados
+## Problema Principal
+A edge function `track-funnel` **não está deployada** (retorna 404), por isso a tabela `funnel_events` está vazia e o dashboard admin mostra zeros em todos os indicadores.
 
-### 1. Bug do Dialog - Clicar Fora Ainda Trava
-**Causa Raiz:** O componente `DialogContent` tem um botao X (close button) que ainda permite fechar o dialog. Mesmo com `onInteractOutside` prevenido, o usuario pode:
-- Clicar no X no canto superior direito
-- O dialog fecha, mas o estado do chat nao avanca, travando o fluxo
+## O Que Está Funcionando
+- Login do admin (sessões sendo criadas na tabela `admin_sessions`)
+- Edge functions `admin-login`, `admin-verify` e `admin-analytics` estão deployadas
+- A tabela `funnel_events` existe e tem a estrutura correta
+- O código de tracking está implementado em quase todas as páginas
 
-**Solucao:** Esconder o botao X apenas nos dialogs do Chat, adicionando `hideCloseButton` ao componente ou removendo via CSS
+## Ações Necessárias
 
-### 2. Admin Login Nao Funciona
-**Causa:** O usuario pode estar usando credenciais incorretas. A tabela `admin_users` existe com:
-- Email: `admin@willbank.com`
-- Senha (hash SHA-256): corresponde a `admin123`
+### 1. Deploy da Edge Function `track-funnel`
+Deployar a função que está faltando para que os eventos comecem a ser registrados.
 
-**Solucao:** Adicionar logging na edge function para debug e melhorar mensagens de erro
+### 2. Adicionar Tracking nas Páginas Faltantes
+Duas páginas não têm tracking implementado:
 
-### 3. PIX - Timeout 504
-**Status:** Ja corrigido! O `check-pix-status` agora retorna 200 com status "pending" em vez de 504 quando ha timeout.
+**`src/pages/Noticia.tsx`** - Primeiro passo do funil:
+```typescript
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
-O `create-pix` esta funcionando - logs mostram respostas 201 com PIX gerado.
+useEffect(() => {
+  // Track apenas em mobile
+  if (isMobile) {
+    trackFunnelEvent('noticia');
+  }
+}, []);
+```
+
+**`src/pages/Verificacao.tsx`** - Segundo passo do funil:
+```typescript
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
+
+useEffect(() => {
+  trackFunnelEvent('verificacao');
+}, []);
+```
+
+### 3. Testar o Fluxo Completo
+Após o deploy:
+1. Acessar o funil pelo celular desde a página inicial
+2. Verificar se eventos são registrados no banco
+3. Acessar `/admin/login` → fazer login → ver métricas
 
 ## Arquivos a Modificar
 
-### `src/components/ui/dialog.tsx`
-Adicionar prop `hideCloseButton` ao DialogContent para esconder o X quando necessario:
-```tsx
-const DialogContent = React.forwardRef<...>(
-  ({ className, children, hideCloseButton = false, ...props }, ref) => (
-    ...
-    {!hideCloseButton && (
-      <DialogPrimitive.Close className="absolute right-4...">
-        <X className="h-4 w-4" />
-      </DialogPrimitive.Close>
-    )}
-  )
-)
-```
+| Arquivo | Alteração |
+|---------|-----------|
+| `src/pages/Noticia.tsx` | Adicionar import e chamada do trackFunnelEvent |
+| `src/pages/Verificacao.tsx` | Adicionar import e chamada do trackFunnelEvent |
 
-### `src/pages/Chat.tsx`
-Aplicar `hideCloseButton` nos dois dialogs:
+## Resultado Esperado
+Após as alterações:
+- **Total de Sessões**: Contará sessões únicas
+- **Taxa de Conversão**: Login → Payment Confirmed (%)
+- **Pagamentos Confirmados**: Contagem real de pagamentos
+- **Funil de Conversão**: Barras mostrando drop-off entre etapas
+- **Eventos Recentes**: Lista dos últimos 20 eventos
+- **Fontes UTM**: Performance por fonte de tráfego
 
-**Dialog PIX Key (linha 1356):**
-```tsx
-<DialogContent 
-  className="sm:max-w-md"
-  onInteractOutside={(e) => e.preventDefault()}
-  onEscapeKeyDown={(e) => e.preventDefault()}
-  hideCloseButton
->
-```
-
-**Dialog Comprovante (linha 1389):**
-```tsx
-<DialogContent 
-  className="sm:max-w-md"
-  onInteractOutside={(e) => e.preventDefault()}
-  onEscapeKeyDown={(e) => e.preventDefault()}
-  hideCloseButton
->
-```
-
-### `supabase/functions/admin-login/index.ts`
-Adicionar logging para facilitar debug:
-```typescript
-console.log('Login attempt for email:', email);
-// ... apos hash
-console.log('Password hash comparison result:', passwordHash === admin.password_hash);
-```
-
-## Otimizacoes Mobile Adicionais
-
-### `src/pages/Chat.tsx`
-- Garantir padding seguro para areas do celular (safe-area-inset)
-- Melhorar responsividade de botoes
-
-### `src/components/WillBankFooter.tsx`
-- Reduzir tamanho de icones sociais no mobile
-- Ajustar espacamento
-
-## Credenciais Admin (Para Teste)
-- **Email:** admin@willbank.com
-- **Senha:** admin123
-
-## Resultado Final
-- Dialogs nao fecham ao clicar fora nem no X - usuario obrigado a confirmar dados
-- Admin login funciona com credenciais corretas
-- PIX gerando normalmente (ja estava funcionando)
-- Interface otimizada para celular
+## Credenciais Admin
+- **Email**: admin@willbank.com
+- **Senha**: admin123
