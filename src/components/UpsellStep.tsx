@@ -318,7 +318,7 @@ const UpsellStep = ({
             <Button 
               onClick={handlePagarAgora}
               disabled={isLoadingPix}
-              className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="w-full h-14 text-xs sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
             >
               {isLoadingPix ? (
                 <>
@@ -326,7 +326,10 @@ const UpsellStep = ({
                   Preparando pagamento...
                 </>
               ) : (
-                "PAGAR TAXA JUDICIAL OBRIGATÓRIA"
+                <>
+                  <span className="hidden sm:inline">PAGAR TAXA JUDICIAL OBRIGATÓRIA</span>
+                  <span className="sm:hidden">PAGAR TAXA OBRIGATÓRIA</span>
+                </>
               )}
             </Button>
 
@@ -367,7 +370,7 @@ const UpsellStep = ({
             <Button 
               onClick={handleConfirmarPagamento}
               disabled={isProcessing || !pixData}
-              className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="w-full h-14 text-xs sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
             >
               {isProcessing ? (
                 <>
@@ -375,7 +378,10 @@ const UpsellStep = ({
                   Verificando pagamento...
                 </>
               ) : (
-                "JÁ PAGUEI - PROCESSAR PRÓXIMA ETAPA"
+                <>
+                  <span className="hidden sm:inline">JÁ PAGUEI - PROCESSAR PRÓXIMA ETAPA</span>
+                  <span className="sm:hidden">JÁ PAGUEI - PRÓXIMA ETAPA</span>
+                </>
               )}
             </Button>
             <p className="text-[10px] sm:text-xs text-center text-muted-foreground font-medium">
