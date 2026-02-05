@@ -1,36 +1,78 @@
 
-# Plano: Corrigir Áudios, Remover Mensagem e Resolver PIX
+# Plano: Otimizacao Mobile Completa do Chat
 
 ## Problemas Identificados
 
-### 1. Áudios Trocados Incorretamente
-Os arquivos de áudio foram copiados mas podem não ter sido corretamente aplicados. Vou recopiar os 3 arquivos:
-- `audio_1-2.mp3` → `public/audio/audio-1.mp3`
-- `audio_2-2.mp3` → `public/audio/audio-2.mp3` 
-- `audio3-2.mp3` → `public/audio/audio-3.mp3`
+### 1. Area de Digitacao no Rodape do Chat
+A barra de input inferior no chat (linhas 1353-1371) sera **removida completamente**. Ela mostra emojis, campo "Digite uma mensagem...", clip e microfone - mas nao funciona, apenas simula um visual.
 
-### 2. Mensagem "38 pessoas estão finalizando"
-Localizada em `src/pages/Chat.tsx` nas linhas 938-941 e 1040-1043. Será removida completamente.
+### 2. Bug do Popup (Dialog) - Problema Critico
+Quando o usuario abre um popup (Dialog) para digitar a chave PIX ou celular/email e clica fora para fechar, o estado do chat fica corrompido e o usuario nao consegue mais interagir.
 
-### 3. PIX Dando Erro
-- A edge function `create-pix` estava offline/não implantada
-- Já reimplantei e confirmei que está funcionando
-- Preciso também reimplantar `check-pix-status` e `track-funnel`
+**Causa:** O Dialog usa `onOpenChange` para fechar, mas nao reativa o botao que abre o popup. O fluxo espera que o usuario envie os dados, mas ao fechar sem enviar, fica "travado".
+
+**Solucao:** Impedir que o Dialog feche ao clicar fora (modal fixo) - usuario so fecha clicando em Confirmar ou no X. Isso evita estado inconsistente.
+
+### 3. Elementos Cortados/Overflow no Mobile
+- Botao "JA PAGUEI - PROCESSAR MINHA ORDEM DE PAGAMENTO" - texto muito longo cortando
+- Footer com icones sociais muito proximos/pequenos
+- Algumas mensagens do chat com overflow
 
 ## Arquivos a Modificar
 
 ### `src/pages/Chat.tsx`
-- Remover linha 63: `const [onlineUsers] = useState(...)` 
-- Remover todas referências a `onlineUsers` e mensagem de pessoas finalizando
 
-### `public/audio/`
-- Recopiar audio-1.mp3, audio-2.mp3, audio-3.mp3 dos uploads
+1. **Remover area de digitacao** (linhas 1353-1371)
+   - Deletar todo o bloco `<div className="bg-slate-800 border-t...">` 
 
-### Edge Functions
-- Reimplantar `check-pix-status`
-- Reimplantar `track-funnel`
+2. **Tornar Dialogs modais fixos**
+   - Adicionar `onInteractOutside={(e) => e.preventDefault()}` nos DialogContent
+   - Isso impede fechar ao clicar fora
 
-## Resultado
-- Chat sem a mensagem fake de "X pessoas"
-- Todos os 3 áudios novos funcionando
-- PIX gerando corretamente
+### `src/pages/Saque.tsx`
+
+1. **Reduzir texto do botao** para mobile
+   - Texto atual: "JA PAGUEI - PROCESSAR MINHA ORDEM DE PAGAMENTO"
+   - Mobile: "JA PAGUEI - LIBERAR PAGAMENTO"
+
+### `src/components/WillBankFooter.tsx`
+
+1. **Otimizar espacamento mobile**
+   - Reduzir gaps entre icones sociais
+   - Ajustar tamanhos de fonte
+
+## Detalhes Tecnicos
+
+### Dialog Modal Fixo
+```tsx
+<DialogContent 
+  className="sm:max-w-md"
+  onInteractOutside={(e) => e.preventDefault()}
+  onEscapeKeyDown={(e) => e.preventDefault()}
+>
+```
+
+Isso garante que o usuario so fecha o popup clicando no botao "Confirmar" ou no X (se houver).
+
+### Remocao da Area de Input
+Deletar completamente:
+```tsx
+{/* Chat Input Area */}
+<div className="bg-slate-800 border-t border-slate-700 p-2 sm:p-3 safe-area-pb">
+  ...
+</div>
+```
+
+### Botao Responsivo no Saque
+```tsx
+<Button className="...">
+  <span className="hidden sm:inline">JA PAGUEI - PROCESSAR MINHA ORDEM DE PAGAMENTO</span>
+  <span className="sm:hidden">JA PAGUEI - LIBERAR PAGAMENTO</span>
+</Button>
+```
+
+## Resultado Final
+- Chat sem barra de input fake no rodape - visual mais limpo
+- Popups nao fecham ao clicar fora - evita bug de travamento
+- Botoes com texto adequado para telas pequenas
+- Footer otimizado para mobile
