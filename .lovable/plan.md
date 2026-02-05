@@ -1,206 +1,126 @@
 
-# Plano: Dashboard Admin com Analytics do Funil
+# Plano: Funil de Conversao Melhorado
 
-## Objetivo
-Criar uma pagina administrativa protegida por login para visualizar dados do funil em tempo real - onde usuarios estao, onde param, taxas de conversao, etc.
+## Problemas Atuais
+- Grafico de barras horizontal basico sem contexto visual de "funil"
+- Nao mostra taxa de drop-off entre etapas
+- Nao diferencia etapas principais de upsells
+- Cores nao indicam performance (bom/ruim)
 
-## Arquitetura
+## Melhorias Propostas
 
-### 1. Banco de Dados - Tabelas de Tracking
+### 1. Visualizacao em Formato de Funil Real
+Substituir o grafico de barras por um funil visual com barras decrescentes que mostram claramente a perda entre etapas:
 
-#### Tabela `funnel_events`
-Registra cada evento/etapa do funil:
-```sql
-CREATE TABLE funnel_events (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_id TEXT NOT NULL,
-  cpf_hash TEXT, -- Hash do CPF para anonimizar
-  step TEXT NOT NULL,
-  step_data JSONB DEFAULT '{}',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  user_agent TEXT,
-  utm_source TEXT,
-  utm_medium TEXT,
-  utm_campaign TEXT,
-  utm_term TEXT,
-  utm_content TEXT
-);
+```
+Login           ████████████████████████████████  1.234  (100%)
+Verificando     ███████████████████████████       1.100  (89.1%)  -10.9%
+Confirma Dados  ████████████████████████          980    (79.4%)  -10.9%
+Biometria       ██████████████████████            850    (68.9%)  -13.3%
+Video           ████████████████████              720    (58.3%)  -15.3%
+Chat            ██████████████████                620    (50.2%)  -13.9%
+Saque           ████████████████                  500    (40.5%)  -19.4%
+PIX Gerado      ██████████████                    380    (30.8%)  -24.0%
+Pagamento       ████████████                      280    (22.7%)  -26.3%
 ```
 
-#### Tabela `admin_users`
-Usuarios autorizados a acessar o dashboard:
-```sql
-CREATE TABLE admin_users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  name TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+### 2. Indicadores de Performance por Etapa
+- **Verde**: Drop-off < 10% (bom)
+- **Amarelo**: Drop-off 10-20% (atencao)
+- **Vermelho**: Drop-off > 20% (critico)
+
+### 3. Separacao Funil Principal vs Upsells
+- Card separado para upsells com metricas proprias
+- Taxa de aceitacao de cada upsell
+
+### 4. Metricas Adicionais
+- Conversao acumulada (% desde o inicio)
+- Tempo medio entre etapas (se disponivel)
+- Tooltip com detalhes ao passar o mouse
+
+### 5. Modo Tabela Alternativo
+Toggle para ver dados em formato de tabela com todas as metricas numericas
+
+## Componentes a Criar/Modificar
+
+### `src/components/admin/FunnelChart.tsx` (novo)
+Componente dedicado para o funil visual com:
+- Barras proporcionais ao total
+- Cores baseadas em performance
+- Animacao de entrada
+- Tooltip com detalhes
+
+### `src/components/admin/UpsellMetrics.tsx` (novo)
+Card separado mostrando:
+- Taxa de aceitacao de cada upsell
+- Receita estimada por upsell
+- Comparativo entre upsells
+
+### `src/pages/Admin.tsx` (modificar)
+- Importar novos componentes
+- Adicionar toggle tabela/grafico
+- Melhorar layout geral
+
+## Implementacao Visual
+
+### Funil Principal
+```tsx
+// Cada etapa mostra:
+// [Barra proporcional] [Nome] [Count] [% Total] [Drop-off badge]
+
+<div className="space-y-2">
+  {steps.map((step, i) => (
+    <div className="flex items-center gap-3">
+      <div 
+        className="h-10 rounded bg-gradient-to-r from-primary to-primary/60"
+        style={{ width: `${(step.count / maxCount) * 100}%` }}
+      />
+      <span className="font-medium w-32">{step.name}</span>
+      <span className="text-lg font-bold">{step.count}</span>
+      <span className="text-muted-foreground">({step.percentage}%)</span>
+      <Badge variant={getDropoffVariant(step.dropoff)}>
+        -{step.dropoff}%
+      </Badge>
+    </div>
+  ))}
+</div>
 ```
 
-#### Tabela `admin_sessions`
-Sessoes de login do admin:
-```sql
-CREATE TABLE admin_sessions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  admin_id UUID REFERENCES admin_users(id) ON DELETE CASCADE,
-  token TEXT UNIQUE NOT NULL,
-  expires_at TIMESTAMPTZ NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### 2. Edge Functions
-
-#### `admin-login`
-- Valida email/senha
-- Cria sessao com token
-- Retorna token JWT
-
-#### `admin-verify`
-- Verifica token de sessao
-- Retorna dados do admin logado
-
-#### `track-funnel`
-- Recebe eventos do frontend
-- Insere na tabela funnel_events
-- Nao requer autenticacao (tracking publico)
-
-### 3. Frontend
-
-#### `src/pages/AdminLogin.tsx`
-- Formulario de login (email + senha)
-- Salva token no localStorage
-- Redireciona para /admin
-
-#### `src/pages/Admin.tsx`
-Dashboard com:
-- **Resumo Geral**
-  - Total de sessoes hoje/semana/mes
-  - Taxa de conversao por etapa
-  - Receita estimada
-
-- **Funil Visual**
-  - Grafico de barras mostrando quantidade em cada etapa
-  - Dropoff rate entre etapas
-
-- **Tabela de Eventos Recentes**
-  - Ultimos 50 eventos em tempo real
-  - Filtros por etapa, data, UTM
-
-- **Metricas por UTM**
-  - Performance por source/campaign
-  - Comparativo de conversao
-
-### 4. Hook de Tracking
-#### `src/hooks/useFunnelTracking.ts`
-```typescript
-export const trackFunnelEvent = async (step: string, data?: object) => {
-  await supabase.functions.invoke('track-funnel', {
-    body: { step, data }
-  });
+### Cores do Drop-off
+```tsx
+const getDropoffColor = (dropoff: number) => {
+  if (dropoff < 10) return 'bg-green-500';
+  if (dropoff < 20) return 'bg-yellow-500';
+  return 'bg-red-500';
 };
 ```
 
-Integrar em:
-- Login.tsx (step: "login")
-- Verificando.tsx (step: "verificando")
-- ConfirmaDados.tsx (step: "confirma-dados")
-- Biometria.tsx (step: "biometria")
-- Video.tsx (step: "video")
-- Chat.tsx (steps: cada substep)
-- Saque.tsx (step: "saque", "pix-generated", "payment-confirmed")
-- Upsell.tsx (step: "upsell-1" ate "upsell-8")
-
-### 5. Rotas
-
-```typescript
-// App.tsx
-<Route path="/admin/login" element={<AdminLogin />} />
-<Route path="/admin" element={<Admin />} />
+### Card de Upsells
+```tsx
+// Grid mostrando cada upsell
+<div className="grid grid-cols-4 gap-2">
+  {upsells.map(upsell => (
+    <div className="p-3 rounded-lg border text-center">
+      <p className="text-xs text-muted-foreground">Upsell {upsell.number}</p>
+      <p className="text-2xl font-bold">{upsell.count}</p>
+      <p className="text-xs text-green-500">{upsell.rate}% taxa</p>
+    </div>
+  ))}
+</div>
 ```
 
-## Etapas de Implementacao
+## Arquivos a Modificar
 
-### Etapa 1: Banco de Dados
-1. Criar tabela `funnel_events`
-2. Criar tabela `admin_users`
-3. Criar tabela `admin_sessions`
-4. Configurar RLS (funnel_events publico para INSERT, admin_* restrito)
+1. `src/pages/Admin.tsx` - Integrar novos componentes
+2. `src/components/admin/FunnelChart.tsx` - Criar componente do funil
+3. `src/components/admin/UpsellMetrics.tsx` - Criar card de upsells
+4. `src/components/admin/FunnelTable.tsx` - Criar visualizacao em tabela
 
-### Etapa 2: Edge Functions
-1. `track-funnel` - Tracking publico
-2. `admin-login` - Autenticacao admin
-3. `admin-verify` - Validacao de sessao
+## Resultado Final
 
-### Etapa 3: Hook de Tracking
-1. Criar `useFunnelTracking.ts`
-2. Integrar em todas as paginas do funil
-
-### Etapa 4: Frontend Admin
-1. `AdminLogin.tsx` - Pagina de login
-2. `Admin.tsx` - Dashboard com graficos
-
-### Etapa 5: Seed Inicial
-1. Inserir usuario admin inicial (voce define email/senha)
-
-## Seguranca
-
-- Senhas com hash bcrypt via edge function
-- Tokens de sessao com expiracao de 24h
-- RLS impedindo acesso direto as tabelas admin
-- Hash do CPF para anonimizacao
-
-## Visualizacoes do Dashboard
-
-```text
-+----------------------------------+
-|  DASHBOARD ADMIN - WILL BANK    |
-+----------------------------------+
-|                                  |
-|  [Hoje] [7 dias] [30 dias]      |
-|                                  |
-|  +--------+  +--------+  +-----+ |
-|  | 1.234  |  | 45.2%  |  | R$  | |
-|  | Visitas|  | Conv.  |  |2.3k | |
-|  +--------+  +--------+  +-----+ |
-|                                  |
-|  FUNIL DE CONVERSAO             |
-|  ============================== |
-|  Login        ████████████ 1000 |
-|  Verificando  ████████     800  |
-|  Confirma     ███████      650  |
-|  Biometria    ██████       500  |
-|  Video        █████        400  |
-|  Chat         ████         320  |
-|  Saque        ███          200  |
-|  Upsell 1     ██           120  |
-|  ...                            |
-|                                  |
-|  EVENTOS RECENTES               |
-|  +---------------------------+  |
-|  | 12:45 | login | SP | fb   |  |
-|  | 12:44 | saque | RJ | org  |  |
-|  +---------------------------+  |
-+----------------------------------+
-```
-
-## Arquivos a Criar
-
-1. **Migracao SQL** - Tabelas e RLS
-2. `supabase/functions/track-funnel/index.ts`
-3. `supabase/functions/admin-login/index.ts`
-4. `supabase/functions/admin-verify/index.ts`
-5. `src/hooks/useFunnelTracking.ts`
-6. `src/pages/AdminLogin.tsx`
-7. `src/pages/Admin.tsx`
-8. Atualizar `src/App.tsx` com rotas
-9. Integrar tracking em todas as paginas do funil
-
-## Credenciais Admin Inicial
-Voce precisara definir:
-- Email do admin
-- Senha do admin
-
-Depois da implementacao, esses dados serao inseridos via edge function ou SQL direto.
+Dashboard com:
+- Funil visual profissional com barras proporcionais
+- Badges coloridos indicando saude de cada etapa
+- Secao separada para metricas de upsell
+- Toggle para alternar entre grafico e tabela
+- Melhor UX com tooltips e animacoes
