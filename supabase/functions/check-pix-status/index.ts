@@ -34,13 +34,30 @@ serve(async (req) => {
 
     console.log('Checking PIX status for external_id:', external_id);
 
-    const response = await fetch(`https://api.realtechdev.com.br/v1/transactions/external_id/${external_id}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'User-Agent': userAgent,
-      },
-    });
+    // Add timeout to prevent edge function from hanging on slow API responses
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
+    let response: Response;
+    try {
+      response = await fetch(`https://api.realtechdev.com.br/v1/transactions/external_id/${external_id}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'User-Agent': userAgent,
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+    } catch (fetchError: unknown) {
+      clearTimeout(timeoutId);
+      const isTimeout = fetchError instanceof Error && fetchError.name === 'AbortError';
+      console.error('Fetch error:', isTimeout ? 'Request timeout' : fetchError);
+      return new Response(
+        JSON.stringify({ error: isTimeout ? 'Request timeout' : 'Failed to connect to payment provider' }),
+        { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const data = await response.json();
     console.log('BuckPay status response:', JSON.stringify(data, null, 2));
