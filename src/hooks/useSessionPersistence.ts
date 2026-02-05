@@ -4,12 +4,26 @@ import { CPFData } from "@/lib/cpf";
 
 const SESSION_KEY = "willbank_session";
 
+// Chat step type
+export type ChatStep = "waiting-video" | "greeting" | "quiz-mae" | "quiz-nascimento" | "identity-confirmed" | "audio-3-validation" | "waiting-confirm-validation" | "show-approval-animation" | "pix-type-selection" | "pix-cpf-input" | "pix-email-input" | "pix-confirm" | "audio-2-comprovante" | "generating-comprovante" | "envio-selection" | "sms-input" | "email-input" | "audio-1-taxas" | "taxa-info" | "processing" | "final";
+
+// Chat state that needs to be persisted
+export interface ChatState {
+  chatStep: ChatStep;
+  chatAudioListened: string[]; // Array of audio URLs that have been listened
+  chatPixType: "telefone" | "cpf" | "email" | null;
+  chatPixKey: string;
+  chatVideoWatched: boolean;
+}
+
 interface SessionData {
   cpfData: CPFData;
   currentStep: string;
   valorBeneficio?: number;
   protocolo?: string;
   timestamp: number;
+  // Chat-specific state
+  chatState?: ChatState;
 }
 
 // Order of steps in the funnel
@@ -45,6 +59,25 @@ export const saveSession = (data: Partial<SessionData> & { cpfData: CPFData; cur
     timestamp: Date.now(),
   };
   localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+};
+
+// Save chat state specifically
+export const saveChatState = (chatState: ChatState) => {
+  const existingSession = getSession();
+  if (!existingSession) return;
+  
+  const sessionData: SessionData = {
+    ...existingSession,
+    chatState,
+    timestamp: Date.now(),
+  };
+  localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+};
+
+// Get chat state from session
+export const getChatState = (): ChatState | null => {
+  const session = getSession();
+  return session?.chatState || null;
 };
 
 // Get session from localStorage

