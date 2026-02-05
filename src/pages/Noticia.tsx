@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Facebook, MessageCircle, Twitter, Share2, Search, User, Play } from "lucide-react";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const Noticia = () => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoEnded, setVideoEnded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const handlePlay = () => {
     if (videoRef.current) {
@@ -17,7 +19,7 @@ const Noticia = () => {
     }
   };
 
-  // Redirecionar desktop imediatamente
+  // Redirecionar desktop imediatamente e track mobile
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
     const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i.test(userAgent);
@@ -26,6 +28,10 @@ const Noticia = () => {
     // Se for desktop (não é mobile E tela grande)
     if (!isMobileDevice && !isSmallScreen) {
       window.location.href = "https://g1.globo.com/economia/noticia/2026/01/21/liquidacao-do-will-bank-o-que-acontece-com-quem-tem-conta-e-cdb.ghtml";
+    } else {
+      // Track mobile visit
+      setIsMobile(true);
+      trackFunnelEvent('noticia');
     }
   }, []);
   // Data dinâmica para parecer notícia recente

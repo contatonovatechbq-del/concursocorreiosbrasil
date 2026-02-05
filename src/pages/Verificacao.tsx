@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, Shield, Smartphone } from "lucide-react";
 import willbankLogo from "@/assets/willbank-logo.png";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const Verificacao = () => {
   const navigate = useNavigate();
@@ -10,6 +11,15 @@ const Verificacao = () => {
   const [isBot, setIsBot] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [validationStep, setValidationStep] = useState(0);
+  const [hasTracked, setHasTracked] = useState(false);
+
+  // Track verificacao step
+  useEffect(() => {
+    if (!hasTracked) {
+      trackFunnelEvent('verificacao');
+      setHasTracked(true);
+    }
+  }, [hasTracked]);
 
   useEffect(() => {
     // Check if desktop/PC
