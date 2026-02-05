@@ -8,6 +8,7 @@ import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const ConfirmaDados = () => {
   const navigate = useNavigate();
@@ -24,6 +25,9 @@ const ConfirmaDados = () => {
 
     // Save session
     saveSession({ cpfData, currentStep: "/confirma-dados" });
+    
+    // Track funnel event
+    trackFunnelEvent('confirma-dados', { cpf: cpfData.cpf });
   }, [cpfData, navigate]);
 
   const handleConfirmar = () => {

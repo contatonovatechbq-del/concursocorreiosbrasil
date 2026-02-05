@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { saveSession, getSession, saveChatState, getChatState, ChatStep, ChatState } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 interface QuizOption {
   text: string;
@@ -140,6 +141,9 @@ const Chat = () => {
     
     // Save session with valorBeneficio and protocolo
     saveSession({ cpfData, currentStep: "/chat", valorBeneficio, protocolo });
+    
+    // Track funnel event
+    trackFunnelEvent('chat', { cpf: cpfData.cpf });
     
     // Check if we have saved chat state to restore
     const savedChatState = getChatState();

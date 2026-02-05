@@ -8,6 +8,7 @@ import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import { saveSession, getSession } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const Biometria = () => {
   const navigate = useNavigate();
@@ -36,6 +37,9 @@ const Biometria = () => {
 
     // Save session
     saveSession({ cpfData, currentStep: "/biometria" });
+    
+    // Track funnel event
+    trackFunnelEvent('biometria', { cpf: cpfData.cpf });
 
     // Start camera
     startCamera();

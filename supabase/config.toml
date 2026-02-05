@@ -8,3 +8,15 @@ verify_jwt = false
 
 [functions.fb-conversion]
 verify_jwt = false
+
+[functions.track-funnel]
+verify_jwt = false
+
+[functions.admin-login]
+verify_jwt = false
+
+[functions.admin-verify]
+verify_jwt = false
+
+[functions.admin-analytics]
+verify_jwt = false

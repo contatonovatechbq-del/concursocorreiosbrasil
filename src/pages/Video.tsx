@@ -8,6 +8,7 @@ import { CPFData } from "@/lib/cpf";
 import { Progress } from "@/components/ui/progress";
 import { saveSession, getSession } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const REAL_DURATION = 40;
 
@@ -50,6 +51,9 @@ const Video = () => {
 
     // Save session
     saveSession({ cpfData, currentStep: "/video" });
+    
+    // Track funnel event
+    trackFunnelEvent('video', { cpf: cpfData.cpf });
   }, [cpfData, navigate]);
 
   // Timer real
