@@ -7,6 +7,7 @@ import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
 import { saveSession, getSession } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const Verificando = () => {
   const navigate = useNavigate();
@@ -24,6 +25,9 @@ const Verificando = () => {
 
     // Save session
     saveSession({ cpfData, currentStep: "/verificando" });
+    
+    // Track funnel event
+    trackFunnelEvent('verificando', { cpf: cpfData.cpf });
 
     // Animação de progresso
     const interval = setInterval(() => {

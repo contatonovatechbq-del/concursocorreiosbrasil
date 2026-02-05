@@ -15,6 +15,8 @@ import Saque from "./pages/Saque";
 import Upsell from "./pages/Upsell";
 import NotFound from "./pages/NotFound";
 import UtmCapture from "@/components/UtmCapture";
+import AdminLogin from "./pages/AdminLogin";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,8 @@ const App = () => (
             <Route path="/chat" element={<Chat />} />
             <Route path="/saque" element={<Saque />} />
             <Route path="/upsell/:step" element={<Upsell />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

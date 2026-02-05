@@ -10,6 +10,7 @@ import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
 import { getSession } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -29,6 +30,9 @@ const Login = () => {
         },
         replace: true,
       });
+    } else {
+      // Track login page view
+      trackFunnelEvent('login');
     }
   }, [navigate]);
 

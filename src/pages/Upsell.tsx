@@ -6,6 +6,7 @@ import UpsellStep from "@/components/UpsellStep";
 import { CPFData } from "@/lib/cpf";
 import { getSession, saveSession } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 // Define the 8 upsells with judicial context
 const UPSELLS = [
@@ -87,6 +88,9 @@ const Upsell = () => {
       valorBeneficio, 
       protocolo 
     });
+    
+    // Track funnel event
+    trackFunnelEvent(`upsell-${stepNumber}`, { cpf: cpfData.cpf });
   }, [cpfData, valorBeneficio, protocolo, navigate, stepNumber]);
 
   const handlePaymentConfirmed = () => {

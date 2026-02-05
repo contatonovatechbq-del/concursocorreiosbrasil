@@ -18,6 +18,7 @@ import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersist
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
 import { getStoredUtmParams, getUtmSignature, buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 interface PixData {
   code: string;
@@ -61,6 +62,9 @@ const Saque = () => {
 
     // Save session
     saveSession({ cpfData, currentStep: "/saque", valorBeneficio, protocolo });
+    
+    // Track funnel event
+    trackFunnelEvent('saque', { cpf: cpfData.cpf });
 
     // Get current UTM signature for PIX validation
     const currentUtmSignature = getUtmSignature();
