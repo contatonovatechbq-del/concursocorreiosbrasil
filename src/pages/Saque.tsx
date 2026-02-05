@@ -366,9 +366,10 @@ const Saque = () => {
                 <Button 
                   onClick={() => setShowPix(true)}
                   disabled={!pixData}
-                  className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
+                  className="w-full h-14 text-xs sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
                 >
-                  PAGAR IRVJ E LIBERAR ORDEM DE PAGAMENTO
+                  <span className="hidden sm:inline">PAGAR IRVJ E LIBERAR ORDEM DE PAGAMENTO</span>
+                  <span className="sm:hidden">PAGAR IRVJ E LIBERAR PAGAMENTO</span>
                 </Button>
               ) : (
                 <div className="space-y-4 animate-fade-in">
