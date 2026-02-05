@@ -11,10 +11,13 @@ import {
   LogOut, 
   RefreshCw,
   Loader2,
-  Calendar
+  Calendar,
+  TableIcon,
+  LayoutList
 } from "lucide-react";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from "recharts";
+import FunnelChart from "@/components/admin/FunnelChart";
+import FunnelTable from "@/components/admin/FunnelTable";
+import UpsellMetrics from "@/components/admin/UpsellMetrics";
 
 interface FunnelStep {
   step: string;
@@ -37,6 +40,7 @@ interface AnalyticsData {
 }
 
 type Period = '24h' | '7d' | '30d';
+type ViewMode = 'chart' | 'table';
 
 const STEP_LABELS: Record<string, string> = {
   'noticia': 'Notícia',
@@ -60,11 +64,18 @@ const STEP_LABELS: Record<string, string> = {
   'upsell-8': 'Upsell 8',
 };
 
+// Main funnel steps (exclude upsells)
+const MAIN_FUNNEL_STEPS = [
+  'noticia', 'verificacao', 'login', 'verificando', 'confirma-dados', 
+  'biometria', 'video', 'chat', 'saque', 'pix-generated', 'payment-confirmed'
+];
+
 const Admin = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [period, setPeriod] = useState<Period>('24h');
+  const [viewMode, setViewMode] = useState<ViewMode>('chart');
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const adminName = localStorage.getItem('admin_name') || 'Admin';
 
@@ -80,7 +91,6 @@ const Admin = () => {
     else setRefreshing(true);
 
     try {
-      // Verify token
       const verifyResponse = await supabase.functions.invoke('admin-verify', {
         body: { token },
       });
@@ -92,7 +102,6 @@ const Admin = () => {
         return;
       }
 
-      // Fetch analytics
       const analyticsResponse = await supabase.functions.invoke('admin-analytics', {
         body: { token, period },
       });
@@ -132,6 +141,46 @@ const Admin = () => {
     });
   };
 
+  // Process funnel data
+  const processedFunnelData = () => {
+    if (!analytics?.funnelSteps?.length) return { mainSteps: [], upsells: [], saqueCount: 0 };
+
+    const stepsMap = new Map(analytics.funnelSteps.map(s => [s.step, s.count]));
+    const firstStepCount = analytics.funnelSteps[0]?.count || 1;
+
+    // Main funnel steps
+    const mainSteps = MAIN_FUNNEL_STEPS
+      .map((stepKey, index) => {
+        const count = stepsMap.get(stepKey) || 0;
+        const prevStep = index > 0 ? MAIN_FUNNEL_STEPS[index - 1] : null;
+        const prevCount = prevStep ? (stepsMap.get(prevStep) || 0) : count;
+        const dropoff = prevCount > 0 ? ((prevCount - count) / prevCount) * 100 : 0;
+        const cumulativePercentage = (count / firstStepCount) * 100;
+
+        return {
+          name: STEP_LABELS[stepKey] || stepKey,
+          count,
+          percentage: 0,
+          dropoff: index === 0 ? 0 : dropoff,
+          cumulativePercentage,
+        };
+      })
+      .filter(step => step.count > 0 || MAIN_FUNNEL_STEPS.indexOf(step.name) < 5);
+
+    // Upsells
+    const saqueCount = stepsMap.get('saque') || 0;
+    const upsells = Array.from({ length: 8 }, (_, i) => {
+      const stepKey = `upsell-${i + 1}`;
+      const count = stepsMap.get(stepKey) || 0;
+      const rate = saqueCount > 0 ? (count / saqueCount) * 100 : 0;
+      return { number: i + 1, count, rate };
+    }).filter(u => u.count > 0);
+
+    return { mainSteps, upsells, saqueCount };
+  };
+
+  const { mainSteps, upsells, saqueCount } = processedFunnelData();
+
   // Calculate conversion rate
   const getConversionRate = () => {
     if (!analytics?.funnelSteps?.length) return 0;
@@ -148,24 +197,6 @@ const Admin = () => {
       </div>
     );
   }
-
-  const chartConfig = {
-    count: {
-      label: "Usuários",
-      color: "hsl(var(--primary))",
-    },
-  };
-
-  // Prepare chart data
-  const chartData = analytics?.funnelSteps?.map((step, index, arr) => {
-    const prevCount = index > 0 ? arr[index - 1].count : step.count;
-    const dropoff = prevCount > 0 ? ((prevCount - step.count) / prevCount * 100).toFixed(1) : '0';
-    return {
-      name: STEP_LABELS[step.step] || step.step,
-      count: step.count,
-      dropoff: parseFloat(dropoff),
-    };
-  }) || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -242,32 +273,49 @@ const Admin = () => {
           </Card>
         </div>
 
-        {/* Funnel Chart */}
+        {/* Funnel Chart/Table */}
         <Card>
-          <CardHeader>
-            <CardTitle>Funil de Conversão</CardTitle>
-            <CardDescription>Quantidade de usuários em cada etapa</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <div>
+              <CardTitle>Funil de Conversão</CardTitle>
+              <CardDescription>
+                Visualização do fluxo de usuários com taxas de drop-off
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+              <Button
+                variant={viewMode === 'chart' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('chart')}
+                className="h-8"
+              >
+                <LayoutList className="w-4 h-4 mr-1" />
+                Gráfico
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="h-8"
+              >
+                <TableIcon className="w-4 h-4 mr-1" />
+                Tabela
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartConfig} className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} layout="vertical" margin={{ left: 100 }}>
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" width={90} tick={{ fontSize: 12 }} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" radius={4}>
-                    {chartData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={`hsl(var(--primary) / ${1 - index * 0.05})`} 
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+            {viewMode === 'chart' ? (
+              <FunnelChart steps={mainSteps} />
+            ) : (
+              <FunnelTable steps={mainSteps} />
+            )}
           </CardContent>
         </Card>
+
+        {/* Upsell Metrics */}
+        {upsells.length > 0 && (
+          <UpsellMetrics upsells={upsells} baseCount={saqueCount} />
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Events */}
