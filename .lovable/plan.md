@@ -1,24 +1,50 @@
 
-# Plano: Deploy de Edge Functions e Tracking Completo
+# Plano: Deploy das Edge Functions de PIX
 
-## ✅ CONCLUÍDO
+## Problema Identificado
 
-### O Que Foi Feito
+O erro "Erro ao gerar PIX" ocorre porque a edge function `create-pix` **não está deployada** no Supabase. Quando o frontend chama a função, recebe 404 (NOT_FOUND).
 
-1. **Edge function `track-funnel` deployada** - Corrigido import e deployado com sucesso
-2. **Tracking adicionado em `Noticia.tsx`** - Primeiro passo do funil
-3. **Tracking adicionado em `Verificacao.tsx`** - Segundo passo do funil
-4. **Testado todas as APIs:**
-   - `track-funnel` → ✅ Retorna 200, eventos salvos no banco
-   - `admin-login` → ✅ Retorna token válido
-   - `admin-analytics` → ✅ Retorna métricas do funil
+**Status das Edge Functions:**
+| Função | Status |
+|--------|--------|
+| `create-pix` | NAO DEPLOYADA (404) |
+| `check-pix-status` | OK (funcionando) |
+| `fb-conversion` | NAO DEPLOYADA (404) |
+| `track-funnel` | OK (recém deployada) |
+| `admin-login` | OK |
+| `admin-verify` | OK |
+| `admin-analytics` | OK |
 
-## Credenciais Admin
-- **Email**: admin@willbank.com
-- **Senha**: admin123
+## Solucao
 
-## O Que Está Funcionando Agora
-- **Total de Sessões**: 1 sessão registrada (teste)
-- **Eventos Recentes**: Mostrando evento de login
-- **Fontes UTM**: Mostrando "direct" (sem UTM)
-- **Funil de Conversão**: Todos os steps configurados
+### 1. Deploy da Edge Function `create-pix`
+Deployar a função que gera o código PIX via API BuckPay.
+
+### 2. Deploy da Edge Function `fb-conversion`
+Deployar a função que envia eventos pro Facebook Pixel (necessária para tracking).
+
+## Acao Imediata
+
+Vou deployar as duas funções que estão faltando:
+- `create-pix` - para geração do PIX
+- `fb-conversion` - para tracking do Facebook
+
+## Teste Pos-Deploy
+
+Após o deploy, testar a chamada direta para confirmar funcionamento:
+```
+POST /create-pix
+{
+  "amount": 4797,
+  "external_id": "TEST-123",
+  "buyer": { "name": "Test", "email": "test@api.com", "document": "12345678901" }
+}
+```
+
+## Resultado Esperado
+
+- PIX funcionando na página de Saque
+- PIX funcionando em todos os Upsells (UP1 a UP8)
+- Tracking do Facebook funcionando
+- QR Code sendo exibido normalmente
