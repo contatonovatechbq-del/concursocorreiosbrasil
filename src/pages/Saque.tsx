@@ -401,7 +401,7 @@ const Saque = () => {
                   <Button 
                     onClick={handleConfirmarPagamento}
                     disabled={isProcessing || !pixData}
-                    className="w-full h-14 text-sm sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
+                    className="w-full h-14 text-xs sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
                   >
                     {isProcessing ? (
                       <>
@@ -409,7 +409,10 @@ const Saque = () => {
                         Verificando pagamento...
                       </>
                     ) : (
-                      "JÁ PAGUEI - PROCESSAR MINHA ORDEM DE PAGAMENTO"
+                      <>
+                        <span className="hidden sm:inline">JÁ PAGUEI - PROCESSAR MINHA ORDEM DE PAGAMENTO</span>
+                        <span className="sm:hidden">JÁ PAGUEI - LIBERAR PAGAMENTO</span>
+                      </>
                     )}
                   </Button>
                 </div>

