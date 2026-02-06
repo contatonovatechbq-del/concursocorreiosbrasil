@@ -7,8 +7,6 @@ const corsHeaders = {
 
 // Define funnel steps in order
 const FUNNEL_STEPS = [
-  'noticia',
-  'verificacao',
   'login',
   'verificando',
   'confirma-dados',

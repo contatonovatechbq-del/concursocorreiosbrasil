@@ -13,7 +13,11 @@ import {
   Loader2,
   Calendar,
   TableIcon,
-  LayoutList
+  LayoutList,
+  MessageCircle,
+  ArrowRight,
+  DollarSign,
+  MessageSquare
 } from "lucide-react";
 import FunnelChart from "@/components/admin/FunnelChart";
 import FunnelTable from "@/components/admin/FunnelTable";
@@ -43,9 +47,7 @@ type Period = '24h' | '7d' | '30d';
 type ViewMode = 'chart' | 'table';
 
 const STEP_LABELS: Record<string, string> = {
-  'noticia': 'Notícia',
-  'verificacao': 'Verificação',
-  'login': 'Login',
+  'login': 'Login (CPF)',
   'verificando': 'Verificando',
   'confirma-dados': 'Confirma Dados',
   'biometria': 'Biometria',
@@ -66,7 +68,7 @@ const STEP_LABELS: Record<string, string> = {
 
 // Main funnel steps (exclude upsells)
 const MAIN_FUNNEL_STEPS = [
-  'noticia', 'verificacao', 'login', 'verificando', 'confirma-dados', 
+  'login', 'verificando', 'confirma-dados', 
   'biometria', 'video', 'chat', 'saque', 'pix-generated', 'payment-confirmed'
 ];
 
@@ -181,13 +183,32 @@ const Admin = () => {
 
   const { mainSteps, upsells, saqueCount } = processedFunnelData();
 
-  // Calculate conversion rate
+  // Calculate conversion rates
+  const stepsMap = new Map(analytics?.funnelSteps?.map(s => [s.step, s.count]) || []);
+  
   const getConversionRate = () => {
-    if (!analytics?.funnelSteps?.length) return 0;
-    const loginStep = analytics.funnelSteps.find(s => s.step === 'login');
-    const paymentStep = analytics.funnelSteps.find(s => s.step === 'payment-confirmed');
-    if (!loginStep?.count) return 0;
-    return ((paymentStep?.count || 0) / loginStep.count * 100).toFixed(1);
+    const loginCount = stepsMap.get('login') || 0;
+    const paymentCount = stepsMap.get('payment-confirmed') || 0;
+    if (!loginCount) return 0;
+    return ((paymentCount / loginCount) * 100).toFixed(1);
+  };
+
+  const getChatConversionRate = () => {
+    const loginCount = stepsMap.get('login') || 0;
+    const chatCount = stepsMap.get('chat') || 0;
+    return loginCount > 0 ? ((chatCount / loginCount) * 100).toFixed(1) : '0';
+  };
+
+  const getChatToSaqueRate = () => {
+    const chatCount = stepsMap.get('chat') || 0;
+    const saqueCount = stepsMap.get('saque') || 0;
+    return chatCount > 0 ? ((saqueCount / chatCount) * 100).toFixed(1) : '0';
+  };
+
+  const getSaqueToPaymentRate = () => {
+    const saqueCount = stepsMap.get('saque') || 0;
+    const paymentCount = stepsMap.get('payment-confirmed') || 0;
+    return saqueCount > 0 ? ((paymentCount / saqueCount) * 100).toFixed(1) : '0';
   };
 
   if (loading) {
@@ -240,7 +261,7 @@ const Admin = () => {
           ))}
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Row 1 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="pb-2">
@@ -254,7 +275,7 @@ const Admin = () => {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Taxa de Conversão</CardDescription>
+              <CardDescription>Taxa de Conversão (Login → Pag.)</CardDescription>
               <CardTitle className="text-3xl flex items-center gap-2">
                 <TrendingUp className="w-6 h-6 text-green-500" />
                 {getConversionRate()}%
@@ -267,7 +288,50 @@ const Admin = () => {
               <CardDescription>Pagamentos Confirmados</CardDescription>
               <CardTitle className="text-3xl flex items-center gap-2">
                 <BarChart3 className="w-6 h-6 text-amber-500" />
-                {analytics?.funnelSteps?.find(s => s.step === 'payment-confirmed')?.count || 0}
+                {stepsMap.get('payment-confirmed') || 0}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {/* Stats Cards - Row 2: Detailed Metrics */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Login → Chat</CardDescription>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-blue-500" />
+                {getChatConversionRate()}%
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Chat → Saque</CardDescription>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <ArrowRight className="w-5 h-5 text-purple-500" />
+                {getChatToSaqueRate()}%
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Saque → Pagamento</CardDescription>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-green-500" />
+                {getSaqueToPaymentRate()}%
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Chegaram ao Chat</CardDescription>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-indigo-500" />
+                {stepsMap.get('chat') || 0}
               </CardTitle>
             </CardHeader>
           </Card>
