@@ -38,7 +38,7 @@ const Saque = () => {
   const [pixError, setPixError] = useState<string | null>(null);
   const [showPix, setShowPix] = useState(false);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
+  const hasTrackedRef = useRef(false);
   const pixStorageKey = getPixStorageKey("saque");
 
   // Try to get data from location state or session
@@ -63,8 +63,11 @@ const Saque = () => {
     // Save session
     saveSession({ cpfData, currentStep: "/saque", valorBeneficio, protocolo });
     
-    // Track funnel event
-    trackFunnelEvent('saque', { cpf: cpfData.cpf });
+    // Track funnel event (only once)
+    if (!hasTrackedRef.current) {
+      hasTrackedRef.current = true;
+      trackFunnelEvent('saque', { cpf: cpfData.cpf });
+    }
 
     // Get current UTM signature for PIX validation
     const currentUtmSignature = getUtmSignature();
