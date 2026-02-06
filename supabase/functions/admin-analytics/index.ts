@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token, period = '24h' } = await req.json();
+    const { token, period = '24h', utmFilter = null } = await req.json();
 
     if (!token) {
       return new Response(
@@ -77,12 +77,22 @@ Deno.serve(async (req) => {
         startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     }
 
-    // Fetch all events in the period
-    const { data: events, error: eventsError } = await supabase
+    // Build query with optional UTM filter
+    let query = supabase
       .from('funnel_events')
       .select('*')
       .gte('created_at', startDate.toISOString())
       .order('created_at', { ascending: false });
+
+    if (utmFilter) {
+      if (utmFilter === 'direct' || utmFilter === 'direto') {
+        query = query.is('utm_source', null);
+      } else {
+        query = query.ilike('utm_source', `%${utmFilter}%`);
+      }
+    }
+
+    const { data: events, error: eventsError } = await query;
 
     if (eventsError) {
       console.error('[admin-analytics] Events fetch error:', eventsError);
@@ -107,9 +117,15 @@ Deno.serve(async (req) => {
       count: stepCounts[step] || 0,
     }));
 
-    // UTM source breakdown
+    // UTM source breakdown (always from all events, not filtered)
+    const allEventsQuery = await supabase
+      .from('funnel_events')
+      .select('utm_source')
+      .gte('created_at', startDate.toISOString());
+
+    const allEvents = allEventsQuery.data || [];
     const utmSourceCounts: Record<string, number> = {};
-    for (const event of events || []) {
+    for (const event of allEvents) {
       const source = event.utm_source || 'direct';
       utmSourceCounts[source] = (utmSourceCounts[source] || 0) + 1;
     }
@@ -119,23 +135,35 @@ Deno.serve(async (req) => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    // Recent events (last 20)
-    const recentEvents = (events || []).slice(0, 20).map(e => ({
+    // Get available sources for filter
+    const availableSources = Object.keys(utmSourceCounts).filter(s => s !== 'direct');
+    if (utmSourceCounts['direct']) {
+      availableSources.push('direct');
+    }
+
+    // Recent events (last 50)
+    const recentEvents = (events || []).slice(0, 50).map(e => ({
       step: e.step,
       created_at: e.created_at,
       utm_source: e.utm_source,
+      session_id: e.session_id,
     }));
 
-    console.log('[admin-analytics] Analytics fetched for period:', period);
+    // Total events for percentage calculations
+    const totalEvents = allEvents.length;
+
+    console.log('[admin-analytics] Analytics fetched for period:', period, 'filter:', utmFilter);
 
     return new Response(
       JSON.stringify({
         success: true,
         data: {
           totalSessions: uniqueSessions.size,
+          totalEvents,
           funnelSteps,
           recentEvents,
           utmSources,
+          availableSources,
         },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
