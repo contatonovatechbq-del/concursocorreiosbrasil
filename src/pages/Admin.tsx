@@ -1,27 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { 
-  BarChart3, 
-  Users, 
-  TrendingUp, 
   LogOut, 
   RefreshCw,
   Loader2,
   Calendar,
   TableIcon,
   LayoutList,
-  MessageCircle,
-  ArrowRight,
-  DollarSign,
-  MessageSquare
+  Clock
 } from "lucide-react";
 import FunnelChart from "@/components/admin/FunnelChart";
 import FunnelTable from "@/components/admin/FunnelTable";
 import UpsellMetrics from "@/components/admin/UpsellMetrics";
+import StatsCards from "@/components/admin/StatsCards";
+import TrafficSources from "@/components/admin/TrafficSources";
+import LiveEvents from "@/components/admin/LiveEvents";
+import SourceFilter from "@/components/admin/SourceFilter";
 
 interface FunnelStep {
   step: string;
@@ -31,16 +29,19 @@ interface FunnelStep {
 
 interface AnalyticsData {
   totalSessions: number;
+  totalEvents: number;
   funnelSteps: FunnelStep[];
   recentEvents: Array<{
     step: string;
     created_at: string;
     utm_source: string | null;
+    session_id: string;
   }>;
   utmSources: Array<{
     source: string;
     count: number;
   }>;
+  availableSources: string[];
 }
 
 type Period = '24h' | '7d' | '30d';
@@ -55,7 +56,7 @@ const STEP_LABELS: Record<string, string> = {
   'chat': 'Chat',
   'saque': 'Saque',
   'pix-generated': 'PIX Gerado',
-  'payment-confirmed': 'Pagamento',
+  'payment-confirmed': 'Pagamento ✅',
   'upsell-1': 'Upsell 1',
   'upsell-2': 'Upsell 2',
   'upsell-3': 'Upsell 3',
@@ -79,9 +80,11 @@ const Admin = () => {
   const [period, setPeriod] = useState<Period>('24h');
   const [viewMode, setViewMode] = useState<ViewMode>('chart');
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const adminName = localStorage.getItem('admin_name') || 'Admin';
 
-  const verifyAndFetchData = async (showLoading = true) => {
+  const verifyAndFetchData = useCallback(async (showLoading = true) => {
     const token = localStorage.getItem('admin_token');
     
     if (!token) {
@@ -105,11 +108,12 @@ const Admin = () => {
       }
 
       const analyticsResponse = await supabase.functions.invoke('admin-analytics', {
-        body: { token, period },
+        body: { token, period, utmFilter: selectedSource },
       });
 
       if (analyticsResponse.data?.success) {
         setAnalytics(analyticsResponse.data.data);
+        setLastUpdate(new Date());
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -122,11 +126,21 @@ const Admin = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [navigate, period, selectedSource]);
 
+  // Initial load and period/filter changes
   useEffect(() => {
     verifyAndFetchData();
-  }, [period]);
+  }, [verifyAndFetchData]);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      verifyAndFetchData(false);
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [verifyAndFetchData]);
 
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
@@ -134,14 +148,14 @@ const Admin = () => {
     navigate('/admin/login');
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  // Calculate seconds since last update
+  const [secondsSinceUpdate, setSecondsSinceUpdate] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSecondsSinceUpdate(Math.floor((Date.now() - lastUpdate.getTime()) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lastUpdate]);
 
   // Process funnel data
   const processedFunnelData = () => {
@@ -157,7 +171,7 @@ const Admin = () => {
         const prevStep = index > 0 ? MAIN_FUNNEL_STEPS[index - 1] : null;
         const prevCount = prevStep ? (stepsMap.get(prevStep) || 0) : count;
         const dropoff = prevCount > 0 ? ((prevCount - count) / prevCount) * 100 : 0;
-        const cumulativePercentage = (count / firstStepCount) * 100;
+        const cumulativePercentage = firstStepCount > 0 ? (count / firstStepCount) * 100 : 0;
 
         return {
           name: STEP_LABELS[stepKey] || stepKey,
@@ -166,8 +180,7 @@ const Admin = () => {
           dropoff: index === 0 ? 0 : dropoff,
           cumulativePercentage,
         };
-      })
-      .filter(step => step.count > 0 || MAIN_FUNNEL_STEPS.indexOf(step.name) < 5);
+      });
 
     // Upsells
     const saqueCount = stepsMap.get('saque') || 0;
@@ -183,33 +196,8 @@ const Admin = () => {
 
   const { mainSteps, upsells, saqueCount } = processedFunnelData();
 
-  // Calculate conversion rates
+  // Create steps map for stats cards
   const stepsMap = new Map(analytics?.funnelSteps?.map(s => [s.step, s.count]) || []);
-  
-  const getConversionRate = () => {
-    const loginCount = stepsMap.get('login') || 0;
-    const paymentCount = stepsMap.get('payment-confirmed') || 0;
-    if (!loginCount) return 0;
-    return ((paymentCount / loginCount) * 100).toFixed(1);
-  };
-
-  const getChatConversionRate = () => {
-    const loginCount = stepsMap.get('login') || 0;
-    const chatCount = stepsMap.get('chat') || 0;
-    return loginCount > 0 ? ((chatCount / loginCount) * 100).toFixed(1) : '0';
-  };
-
-  const getChatToSaqueRate = () => {
-    const chatCount = stepsMap.get('chat') || 0;
-    const saqueCount = stepsMap.get('saque') || 0;
-    return chatCount > 0 ? ((saqueCount / chatCount) * 100).toFixed(1) : '0';
-  };
-
-  const getSaqueToPaymentRate = () => {
-    const saqueCount = stepsMap.get('saque') || 0;
-    const paymentCount = stepsMap.get('payment-confirmed') || 0;
-    return saqueCount > 0 ? ((paymentCount / saqueCount) * 100).toFixed(1) : '0';
-  };
 
   if (loading) {
     return (
@@ -228,7 +216,11 @@ const Admin = () => {
             <h1 className="text-xl font-bold">Dashboard Admin</h1>
             <p className="text-sm text-muted-foreground">Olá, {adminName}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="w-3 h-3" />
+              <span>{secondsSinceUpdate}s</span>
+            </div>
             <Button 
               variant="outline" 
               size="icon"
@@ -261,81 +253,17 @@ const Admin = () => {
           ))}
         </div>
 
-        {/* Stats Cards - Row 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Total de Sessões</CardDescription>
-              <CardTitle className="text-3xl flex items-center gap-2">
-                <Users className="w-6 h-6 text-primary" />
-                {analytics?.totalSessions || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Taxa de Conversão (Login → Pag.)</CardDescription>
-              <CardTitle className="text-3xl flex items-center gap-2">
-                <TrendingUp className="w-6 h-6 text-green-500" />
-                {getConversionRate()}%
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Pagamentos Confirmados</CardDescription>
-              <CardTitle className="text-3xl flex items-center gap-2">
-                <BarChart3 className="w-6 h-6 text-amber-500" />
-                {stepsMap.get('payment-confirmed') || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
+        {/* Stats Cards */}
+        <StatsCards 
+          totalSessions={analytics?.totalSessions || 0} 
+          stepsMap={stepsMap} 
+        />
 
-        {/* Stats Cards - Row 2: Detailed Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Login → Chat</CardDescription>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-blue-500" />
-                {getChatConversionRate()}%
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Chat → Saque</CardDescription>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <ArrowRight className="w-5 h-5 text-purple-500" />
-                {getChatToSaqueRate()}%
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Saque → Pagamento</CardDescription>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-green-500" />
-                {getSaqueToPaymentRate()}%
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Chegaram ao Chat</CardDescription>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-indigo-500" />
-                {stepsMap.get('chat') || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
+        {/* Traffic Sources */}
+        <TrafficSources 
+          utmSources={analytics?.utmSources || []} 
+          totalEvents={analytics?.totalEvents || 0} 
+        />
 
         {/* Funnel Chart/Table */}
         <Card>
@@ -367,7 +295,14 @@ const Admin = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            {/* Source Filter */}
+            <SourceFilter
+              sources={analytics?.availableSources || []}
+              selectedSource={selectedSource}
+              onSelectSource={setSelectedSource}
+            />
+            
             {viewMode === 'chart' ? (
               <FunnelChart steps={mainSteps} />
             ) : (
@@ -381,74 +316,11 @@ const Admin = () => {
           <UpsellMetrics upsells={upsells} baseCount={saqueCount} />
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Events */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Eventos Recentes</CardTitle>
-              <CardDescription>Últimos 20 eventos do funil</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 max-h-[400px] overflow-auto">
-                {analytics?.recentEvents?.length ? (
-                  analytics.recentEvents.map((event, index) => (
-                    <div 
-                      key={index} 
-                      className="flex items-center justify-between p-2 rounded-lg bg-muted/50 text-sm"
-                    >
-                      <span className="font-medium">
-                        {STEP_LABELS[event.step] || event.step}
-                      </span>
-                      <div className="flex items-center gap-3 text-muted-foreground">
-                        <span className="text-xs bg-primary/10 px-2 py-0.5 rounded">
-                          {event.utm_source || 'direto'}
-                        </span>
-                        <span className="text-xs">{formatDate(event.created_at)}</span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground text-sm">Nenhum evento encontrado</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* UTM Sources */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Fontes de Tráfego (UTM)</CardTitle>
-              <CardDescription>Performance por fonte</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {analytics?.utmSources?.length ? (
-                  analytics.utmSources.map((source, index) => {
-                    const maxCount = analytics.utmSources[0]?.count || 1;
-                    const percentage = (source.count / maxCount) * 100;
-                    
-                    return (
-                      <div key={index} className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="font-medium">{source.source || 'Direto'}</span>
-                          <span className="text-muted-foreground">{source.count}</span>
-                        </div>
-                        <div className="h-2 bg-muted rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-primary rounded-full transition-all"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-muted-foreground text-sm">Nenhuma fonte encontrada</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Live Events */}
+        <LiveEvents 
+          events={analytics?.recentEvents || []} 
+          stepLabels={STEP_LABELS} 
+        />
       </main>
     </div>
   );
