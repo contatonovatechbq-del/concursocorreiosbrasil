@@ -91,7 +91,7 @@ const Verificacao = () => {
     // Complete validation and redirect to login
     setTimeout(() => {
       setIsValidating(false);
-      navigate(buildUrlWithUtm("/login"));
+      navigate(buildUrlWithUtm("/"));
     }, 2500);
   }, [navigate]);
 
