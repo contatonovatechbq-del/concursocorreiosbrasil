@@ -2,30 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Will Bank Design System - Premium Yellow Theme */
+/* Correios Design System - Institutional Blue/Yellow Theme */
 
 @layer base {
 :root {
-    --background: 45 10% 96%;
-    --foreground: 220 15% 15%;
+    --background: 215 25% 96%;
+    --foreground: 215 25% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 15%;
+    --card-foreground: 215 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 15%;
+    --popover-foreground: 215 25% 12%;
 
-    --primary: 47 100% 50%;
-    --primary-foreground: 220 15% 10%;
+    --primary: 209 100% 26%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 20% 92%;
-    --secondary-foreground: 220 15% 20%;
+    --secondary: 215 15% 92%;
+    --secondary-foreground: 215 25% 20%;
 
-    --muted: 45 15% 94%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 215 15% 94%;
+    --muted-foreground: 215 10% 45%;
 
     --accent: 47 100% 50%;
-    --accent-foreground: 220 15% 10%;
+    --accent-foreground: 215 25% 12%;
 
     --destructive: 0 80% 55%;
     --destructive-foreground: 0 0% 100%;
@@ -33,11 +33,11 @@
     --success: 142 72% 40%;
     --success-foreground: 0 0% 100%;
 
-    --border: 45 15% 88%;
-    --input: 45 15% 88%;
-    --ring: 47 100% 50%;
+    --border: 215 15% 88%;
+    --input: 215 15% 88%;
+    --ring: 209 100% 26%;
 
-    --radius: 0.875rem;
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -50,33 +50,33 @@
   }
 
   .dark {
-    --background: 220 20% 8%;
-    --foreground: 45 10% 95%;
+    --background: 215 25% 8%;
+    --foreground: 215 10% 95%;
 
-    --card: 220 20% 12%;
-    --card-foreground: 45 10% 95%;
+    --card: 215 25% 12%;
+    --card-foreground: 215 10% 95%;
 
-    --popover: 220 20% 12%;
-    --popover-foreground: 45 10% 95%;
+    --popover: 215 25% 12%;
+    --popover-foreground: 215 10% 95%;
 
-    --primary: 47 100% 50%;
-    --primary-foreground: 220 15% 10%;
+    --primary: 209 100% 26%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 18%;
-    --secondary-foreground: 45 10% 90%;
+    --secondary: 215 15% 18%;
+    --secondary-foreground: 215 10% 90%;
 
-    --muted: 220 15% 18%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 215 15% 18%;
+    --muted-foreground: 215 10% 60%;
 
-    --accent: 220 15% 20%;
-    --accent-foreground: 45 10% 95%;
+    --accent: 47 100% 50%;
+    --accent-foreground: 215 25% 12%;
 
     --destructive: 0 70% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 20%;
-    --input: 220 15% 20%;
-    --ring: 47 100% 50%;
+    --border: 215 15% 20%;
+    --input: 215 15% 20%;
+    --ring: 209 100% 26%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -96,7 +96,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 }
 
@@ -105,21 +105,19 @@
     text-wrap: balance;
   }
   
-  .gradient-primary {
+  .gradient-correios {
+    background: linear-gradient(135deg, hsl(209 100% 26%), hsl(209 100% 35%));
+  }
+  
+  .gradient-correios-accent {
     background: linear-gradient(135deg, hsl(47 100% 50%), hsl(40 100% 55%));
   }
   
-  .shadow-premium {
-    box-shadow: 0 10px 40px -10px hsl(47 100% 50% / 0.25),
-                0 4px 15px -4px hsl(0 0% 0% / 0.1);
+  .shadow-correios {
+    box-shadow: 0 4px 20px -4px hsl(209 100% 26% / 0.2),
+                0 2px 8px -2px hsl(0 0% 0% / 0.08);
   }
   
-  .glass-card {
-    background: hsl(0 0% 100% / 0.95);
-    backdrop-filter: blur(20px);
-  }
-  
-  /* Safe area for mobile devices */
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
