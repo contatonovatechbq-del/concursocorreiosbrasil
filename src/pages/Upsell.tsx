@@ -9,15 +9,15 @@ import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const UPSELLS = [
-  { valor: 47, title: "Taxa de Homologação da Inscrição", description: "OBRIGATÓRIA para validar sua inscrição no sistema federal. Sem homologação, a inscrição será automaticamente cancelada." },
-  { valor: 37, title: "Taxa de Processamento do Edital", description: "Sem esta taxa, sua inscrição fica com status PENDENTE no sistema e não será processada pela banca." },
-  { valor: 39, title: "Seguro Obrigatório do Candidato", description: "Exigido pelo edital para garantir reembolso integral em caso de cancelamento ou adiamento do concurso." },
-  { valor: 27, title: "Taxa de Alocação de Local de Prova", description: "Necessária para reservar seu local de prova. Candidatos sem alocação ficam em lista de espera." },
-  { valor: 33, title: "Taxa de Emissão do Cartão de Confirmação", description: "Documento OBRIGATÓRIO para acesso ao local da prova. Sem o cartão, o candidato é impedido de realizar o exame." },
-  { valor: 24, title: "Taxa de Autenticação Digital", description: "Autenticação ICP-Brasil exigida pelo edital para validação eletrônica da inscrição." },
-  { valor: 19, title: "Taxa de Registro no Diário Oficial", description: "Publicação obrigatória conforme legislação vigente. Necessária para oficializar a inscrição." },
-  { valor: 15, title: "Taxa de Protocolo Final", description: "Encerramento do protocolo de inscrição no sistema. Sem protocolo final, a inscrição não é concluída." },
-  { valor: 97, title: "Garantia de Vaga na Região", description: "ÚLTIMA ETAPA — Garante sua vaga na agência mais próxima da sua residência com prioridade na alocação." },
+  { valor: 47, title: "Confirmação da Inscrição", description: "Você fez a inscrição, mas ela ainda não foi confirmada no sistema. Sem a confirmação, sua vaga não fica reservada." },
+  { valor: 37, title: "Escolha do Local de Prova", description: "Pague esta taxa para garantir que você faça a prova no local mais perto da sua casa. Quem não paga, vai pra onde sobrar vaga." },
+  { valor: 39, title: "Cartão de Acesso à Prova", description: "Este cartão é o documento que você apresenta no dia da prova. Sem ele, você não entra na sala." },
+  { valor: 27, title: "Seguro do Candidato", description: "Se o concurso for cancelado ou adiado, você recebe todo o dinheiro de volta. Sem o seguro, você perde tudo que pagou." },
+  { valor: 33, title: "Apostila Digital Oficial", description: "Apostila completa com todo o conteúdo que cai na prova, feita pela banca organizadora." },
+  { valor: 24, title: "Simulado Online da Banca", description: "Faça um simulado no mesmo formato da prova real. Você vai saber exatamente como vai ser no dia." },
+  { valor: 19, title: "Certificado de Pré-Aprovação", description: "Documento que comprova que você cumpriu todos os requisitos. Pode usar pra pedir folga no trabalho no dia da prova." },
+  { valor: 15, title: "Acompanhamento por SMS e E-mail", description: "Fique sabendo de tudo: mudança de data, local, gabarito, resultado. Quem não se cadastra, perde prazo e perde vaga." },
+  { valor: 97, title: "Garantia de Vaga na Região", description: "Essa é a última taxa. Com ela, você garante que se passar, vai trabalhar na agência mais perto da sua casa." },
 ];
 
 const Upsell = () => {
