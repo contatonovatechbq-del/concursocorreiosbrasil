@@ -9,6 +9,7 @@ import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
+import { getSession, saveSession, CepData } from "@/hooks/useSessionPersistence";
 
 const Inscricao = () => {
   const navigate = useNavigate();
@@ -16,11 +17,16 @@ const Inscricao = () => {
   const [cpf, setCpf] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const cepData = location.state?.cepData;
+  
+  const session = getSession();
+  const cepData: CepData | undefined = location.state?.cepData || session?.cepData;
 
   useEffect(() => {
     trackFunnelEvent('inscricao-cpf');
     window.scrollTo(0, 0);
+    if (cepData && session?.cpfData) {
+      saveSession({ ...session, cpfData: session.cpfData, currentStep: '/inscricao', cepData });
+    }
   }, []);
 
   const handleConsultar = async () => {
