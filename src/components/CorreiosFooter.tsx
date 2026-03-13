@@ -52,7 +52,7 @@ const CorreiosFooter = () => {
             <div className="bg-[hsl(209,100%,20%)] rounded-sm p-1">
               <span className="text-[hsl(47,100%,50%)] font-black text-sm">✉</span>
             </div>
-            <span className="text-[hsl(209,100%,20%)] font-bold text-sm">CORREIOS</span>
+            <span className="text-[hsl(220,10%,15%)] font-bold text-sm">CORREIOS</span>
           </div>
           <p className="text-[10px] sm:text-xs text-[hsl(209,100%,20%)]/80 text-center">
             © 2026 Empresa Brasileira de Correios e Telégrafos. CNPJ: 34.028.316/0001-03 - Todos os direitos reservados.
