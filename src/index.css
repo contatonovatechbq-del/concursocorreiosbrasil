@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 12%;
 
-    --primary: 209 100% 26%;
+    --primary: 220 10% 22%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 15% 96%;
@@ -35,7 +35,7 @@
 
     --border: 215 15% 88%;
     --input: 215 15% 88%;
-    --ring: 209 100% 26%;
+    --ring: 220 10% 22%;
 
     --radius: 0.25rem;
 
@@ -59,7 +59,7 @@
     --popover: 215 25% 12%;
     --popover-foreground: 215 10% 95%;
 
-    --primary: 209 100% 26%;
+    --primary: 220 10% 22%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 15% 18%;
@@ -76,7 +76,7 @@
 
     --border: 215 15% 20%;
     --input: 215 15% 20%;
-    --ring: 209 100% 26%;
+    --ring: 220 10% 22%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -106,7 +106,7 @@
   }
   
   .gradient-correios {
-    background: linear-gradient(135deg, hsl(209 100% 26%), hsl(209 100% 35%));
+    background: linear-gradient(135deg, hsl(220 10% 22%), hsl(220 10% 28%));
   }
   
   .gradient-correios-accent {

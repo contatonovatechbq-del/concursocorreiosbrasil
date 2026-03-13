@@ -2,7 +2,7 @@ const CorreiosFooter = () => {
   return (
     <footer className="mt-auto">
       {/* Main Footer */}
-      <div className="bg-[hsl(209,100%,20%)] text-white px-4 py-8">
+      <div className="bg-[hsl(220,10%,15%)] text-white px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm">
             <div>
@@ -49,12 +49,12 @@ const CorreiosFooter = () => {
       <div className="bg-[hsl(47,100%,50%)] px-4 py-3">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-3">
-            <div className="bg-[hsl(209,100%,20%)] rounded-sm p-1">
+            <div className="bg-[hsl(220,10%,15%)] rounded-sm p-1">
               <span className="text-[hsl(47,100%,50%)] font-black text-sm">✉</span>
             </div>
-            <span className="text-[hsl(209,100%,20%)] font-bold text-sm">CORREIOS</span>
+            <span className="text-[hsl(220,10%,15%)] font-bold text-sm">CORREIOS</span>
           </div>
-          <p className="text-[10px] sm:text-xs text-[hsl(209,100%,20%)]/80 text-center">
+          <p className="text-[10px] sm:text-xs text-[hsl(220,10%,15%)]/80 text-center">
             © 2026 Empresa Brasileira de Correios e Telégrafos. CNPJ: 34.028.316/0001-03 - Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-2">
