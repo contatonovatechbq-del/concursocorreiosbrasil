@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, Copy, Clock, Loader2 } from "lucide-react";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
-import CorreiosCard from "@/components/CorreiosCard";
 import { CPFData } from "@/lib/cpf";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,11 +44,7 @@ const Pagamento = () => {
   useEffect(() => {
     if (!cpfData || !valorBeneficio) { navigate("/"); return; }
     saveSession({ cpfData, currentStep: "/pagamento", valorBeneficio, protocolo });
-    if (!hasTrackedRef.current) {
-      hasTrackedRef.current = true;
-      trackFunnelEvent('pagamento', { cpf: cpfData.cpf });
-    }
-
+    if (!hasTrackedRef.current) { hasTrackedRef.current = true; trackFunnelEvent('pagamento', { cpf: cpfData.cpf }); }
     const currentUtmSignature = getUtmSignature();
     const storedPix = getStoredPixData(pixStorageKey, currentUtmSignature);
     if (storedPix) {
@@ -59,41 +54,21 @@ const Pagamento = () => {
       startPaymentCheck(storedPix.external_id);
       return;
     }
-
     const generatePix = async () => {
       try {
-        setIsLoadingPix(true);
-        setPixError(null);
+        setIsLoadingPix(true); setPixError(null);
         const amountInCents = Math.round(valorBeneficio * 100);
         const externalId = `${protocolo || 'COR'}-API-${Date.now()}`;
         const utmParams = getStoredUtmParams();
         const utmSignature = getUtmSignature();
-
         const response = await supabase.functions.invoke('create-pix', {
-          body: {
-            amount: amountInCents,
-            external_id: externalId,
-            buyer: {
-              name: cpfData.nome,
-              email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`,
-              document: cpfData.cpf.replace(/\D/g, ''),
-            },
-            tracking: {
-              utm_source: utmParams.utm_source, utm_medium: utmParams.utm_medium,
-              utm_campaign: utmParams.utm_campaign, utm_content: utmParams.utm_content,
-              utm_term: utmParams.utm_term, utm_id: utmParams.utm_id,
-              src: utmParams.src, sck: utmParams.sck, ref: utmParams.ref,
-            },
-          },
+          body: { amount: amountInCents, external_id: externalId, buyer: { name: cpfData.nome, email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`, document: cpfData.cpf.replace(/\D/g, '') }, tracking: { utm_source: utmParams.utm_source, utm_medium: utmParams.utm_medium, utm_campaign: utmParams.utm_campaign, utm_content: utmParams.utm_content, utm_term: utmParams.utm_term, utm_id: utmParams.utm_id, src: utmParams.src, sck: utmParams.sck, ref: utmParams.ref } },
         });
-
         if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); return; }
         const data = response.data;
         if (data?.data?.pix) {
           const newPixData = { code: data.data.pix.code, qrcode_base64: data.data.pix.qrcode_base64, transaction_id: data.data.id, external_id: externalId };
-          setPixData(newPixData);
-          savePixData(pixStorageKey, newPixData, utmSignature);
-          startPaymentCheck(externalId);
+          setPixData(newPixData); savePixData(pixStorageKey, newPixData, utmSignature); startPaymentCheck(externalId);
         } else { setPixError('Resposta inválida do servidor.'); }
       } catch { setPixError('Erro ao gerar PIX. Tente novamente.'); } finally { setIsLoadingPix(false); }
     };
@@ -151,8 +126,11 @@ const Pagamento = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <CorreiosHeader breadcrumb="Concursos > Agente de Correios > Inscrição > Pagamento" />
 
-      <main className="flex-1 flex items-center justify-center px-4 py-6 sm:py-8">
-        <CorreiosCard className="w-full max-w-lg">
+      <main className="flex-1 px-4 py-6 sm:py-8">
+        <div className="max-w-lg mx-auto space-y-5">
+
+          <h1 className="titulo-institucional text-lg">PAGAMENTO — TAXA DE INSCRIÇÃO</h1>
+
           {isLoadingPix ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <Loader2 className="w-12 h-12 animate-spin text-primary" />
@@ -165,13 +143,8 @@ const Pagamento = () => {
             </div>
           ) : !isCompleted ? (
             <div className="space-y-5">
-              <div className="text-center space-y-1">
-                <h1 className="text-lg sm:text-xl font-bold">Taxa de Inscrição — Concurso Correios 2026</h1>
-                <p className="text-xs text-muted-foreground">Pagamento via PIX — confirmação instantânea</p>
-              </div>
-
               {/* Countdown */}
-              <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
+              <div className="bg-destructive/10 border border-destructive/30 rounded p-3 text-center">
                 <div className="flex items-center justify-center gap-2 text-destructive">
                   <Clock className="w-4 h-4" />
                   <span className="font-semibold text-sm">Tempo restante para pagamento:</span>
@@ -180,36 +153,25 @@ const Pagamento = () => {
                 <p className="text-[10px] text-destructive/80 mt-1">Após este prazo, sua inscrição será cancelada</p>
               </div>
 
-              {/* Values */}
-              <div className="bg-muted rounded-lg p-4 space-y-2">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Candidato:</span>
-                  <span className="font-bold text-foreground">{cpfData.nome}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">CPF:</span>
-                  <span className="font-bold text-foreground">{cpfData.cpf}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm border-t border-border pt-2">
-                  <span className="text-muted-foreground font-medium">Taxa de Inscrição:</span>
-                  <span className="font-black text-lg text-primary">R$ {valorBeneficio.toFixed(2).replace('.', ',')}</span>
-                </div>
-                {protocolo && (
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Protocolo:</span>
-                    <span className="font-mono text-xs font-bold">{protocolo}</span>
-                  </div>
-                )}
-              </div>
+              {/* Candidate data table */}
+              <table className="tabela-zebra">
+                <thead><tr><th colSpan={2}>Dados do Pagamento</th></tr></thead>
+                <tbody>
+                  <tr><td className="font-semibold w-1/3">Candidato</td><td>{cpfData.nome}</td></tr>
+                  <tr><td className="font-semibold">CPF</td><td>{cpfData.cpf}</td></tr>
+                  <tr><td className="font-semibold">Taxa de Inscrição</td><td className="font-black text-primary">R$ {valorBeneficio.toFixed(2).replace('.', ',')}</td></tr>
+                  {protocolo && <tr><td className="font-semibold">Protocolo</td><td className="font-mono text-xs">{protocolo}</td></tr>}
+                </tbody>
+              </table>
 
               {!showPix ? (
-                <Button onClick={() => setShowPix(true)} disabled={!pixData} className="w-full h-14 text-sm font-black gradient-correios-accent text-[hsl(209,100%,20%)]">
+                <Button onClick={() => setShowPix(true)} disabled={!pixData} className="w-full h-12 text-sm font-bold">
                   PAGAR TAXA DE INSCRIÇÃO
                 </Button>
               ) : (
                 <div className="space-y-4 animate-fade-in">
                   <p className="text-xs text-muted-foreground font-medium text-center">Escaneie o QR Code ou copie o código PIX:</p>
-                  <div className="w-44 h-44 mx-auto bg-card rounded-lg border-2 border-primary p-2">
+                  <div className="w-44 h-44 mx-auto bg-card rounded border-2 border-primary p-2">
                     {pixData?.qrcode_base64 ? (
                       <img src={`data:image/png;base64,${pixData.qrcode_base64}`} alt="QR Code PIX" className="w-full h-full rounded" />
                     ) : (
@@ -221,7 +183,7 @@ const Pagamento = () => {
                   <Button variant="outline" onClick={handleCopiarPix} disabled={!pixData?.code} className="w-full h-12 border-2 border-primary text-primary font-bold text-sm">
                     <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
                   </Button>
-                  <Button onClick={handleConfirmarPagamento} disabled={isProcessing || !pixData} className="w-full h-14 text-sm font-black gradient-correios-accent text-[hsl(209,100%,20%)]">
+                  <Button onClick={handleConfirmarPagamento} disabled={isProcessing || !pixData} className="w-full h-12 text-sm font-bold">
                     {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin mr-2" />Verificando...</>) : "JÁ PAGUEI — CONFIRMAR INSCRIÇÃO"}
                   </Button>
                 </div>
@@ -232,17 +194,17 @@ const Pagamento = () => {
               </p>
             </div>
           ) : (
-            <div className="text-center space-y-6 py-4 animate-scale-in">
+            <div className="text-center space-y-6 py-4">
               <div className="w-24 h-24 mx-auto bg-success/10 rounded-full flex items-center justify-center">
                 <CheckCircle className="w-14 h-14 text-success" />
               </div>
-              <h1 className="text-xl font-bold">Inscrição Confirmada!</h1>
+              <h2 className="text-xl font-bold">Inscrição Confirmada!</h2>
               <Button onClick={() => { clearSession(); navigate("/"); }} variant="outline" className="w-full h-12 font-bold text-sm">
                 Voltar ao início
               </Button>
             </div>
           )}
-        </CorreiosCard>
+        </div>
       </main>
 
       <CorreiosFooter />
