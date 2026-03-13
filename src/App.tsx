@@ -10,6 +10,7 @@ import ConfirmaDados from "./pages/ConfirmaDados";
 import DetalhesInscricao from "./pages/DetalhesInscricao";
 import Pagamento from "./pages/Pagamento";
 import Upsell from "./pages/Upsell";
+import UpsellInfo from "./pages/UpsellInfo";
 import NotFound from "./pages/NotFound";
 import UtmCapture from "@/components/UtmCapture";
 import AdminLogin from "./pages/AdminLogin";
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/confirma-dados" element={<ConfirmaDados />} />
           <Route path="/detalhes-inscricao" element={<DetalhesInscricao />} />
           <Route path="/pagamento" element={<Pagamento />} />
+          <Route path="/upsell-info/:step" element={<UpsellInfo />} />
           <Route path="/upsell/:step" element={<Upsell />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<Admin />} />
