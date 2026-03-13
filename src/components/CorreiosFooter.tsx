@@ -2,7 +2,7 @@ const CorreiosFooter = () => {
   return (
     <footer className="mt-auto">
       {/* Main Footer */}
-      <div className="bg-[hsl(209,100%,20%)] text-white px-4 py-8">
+      <div className="bg-[hsl(220,10%,15%)] text-white px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm">
             <div>
