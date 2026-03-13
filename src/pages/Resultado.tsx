@@ -6,14 +6,7 @@ import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
-
-interface CepData {
-  cep: string;
-  logradouro: string;
-  bairro: string;
-  localidade: string;
-  uf: string;
-}
+import { saveSession, getSession, CepData } from "@/hooks/useSessionPersistence";
 
 const getProvaDate = () => {
   const d = new Date();
@@ -24,10 +17,11 @@ const getProvaDate = () => {
 const Resultado = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const cepData: CepData | undefined = location.state?.cepData;
+  const cepData: CepData | undefined = location.state?.cepData || getSession()?.cepData;
 
   useEffect(() => {
     if (!cepData) { navigate("/"); return; }
+    saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData });
     trackFunnelEvent('resultado-cep');
     window.scrollTo(0, 0);
   }, [cepData, navigate]);
