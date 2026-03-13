@@ -9,8 +9,8 @@ import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const UPSELLS = [
-  { valor: 37, title: "Escolha do Local de Prova", description: "Pague esta taxa para garantir que você faça a prova no local mais perto da sua casa. Quem não paga, vai pra onde sobrar vaga." },
   { valor: 47, title: "Confirmação da Inscrição", description: "Você fez a inscrição, mas ela ainda não foi confirmada no sistema. Sem a confirmação, sua vaga não fica reservada." },
+  { valor: 37, title: "Confirmação do Local da Prova", description: "Confirme o local da prova mais perto de você. Sem a confirmação, você será alocado em qualquer local com vaga disponível." },
   { valor: 39, title: "Cartão de Acesso à Prova", description: "Este cartão é o documento que você apresenta no dia da prova. Sem ele, você não entra na sala." },
   { valor: 27, title: "Seguro do Candidato", description: "Se o concurso for cancelado ou adiado, você recebe todo o dinheiro de volta. Sem o seguro, você perde tudo que pagou." },
   { valor: 33, title: "Apostila Digital Oficial", description: "Apostila completa com todo o conteúdo que cai na prova, feita pela banca organizadora." },

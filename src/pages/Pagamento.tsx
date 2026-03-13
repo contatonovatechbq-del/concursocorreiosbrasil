@@ -43,7 +43,8 @@ const Pagamento = () => {
 
   useEffect(() => {
     if (!cpfData || !valorBeneficio) { navigate("/"); return; }
-    saveSession({ cpfData, currentStep: "/pagamento", valorBeneficio, protocolo });
+    const cepData = location.state?.cepData || session?.cepData;
+    saveSession({ cpfData, currentStep: "/pagamento", valorBeneficio, protocolo, cepData });
     if (!hasTrackedRef.current) { hasTrackedRef.current = true; trackFunnelEvent('pagamento', { cpf: cpfData.cpf }); }
     const currentUtmSignature = getUtmSignature();
     const storedPix = getStoredPixData(pixStorageKey, currentUtmSignature);

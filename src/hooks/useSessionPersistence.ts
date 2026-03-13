@@ -14,6 +14,14 @@ export interface ChatState {
   chatVideoWatched: boolean;
 }
 
+export interface CepData {
+  cep: string;
+  logradouro: string;
+  bairro: string;
+  localidade: string;
+  uf: string;
+}
+
 interface SessionData {
   cpfData: CPFData;
   currentStep: string;
@@ -21,6 +29,7 @@ interface SessionData {
   protocolo?: string;
   timestamp: number;
   chatState?: ChatState;
+  cepData?: CepData;
 }
 
 const FUNNEL_STEPS = [

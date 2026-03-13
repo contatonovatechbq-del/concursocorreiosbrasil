@@ -16,7 +16,7 @@ const ConfirmaDados = () => {
 
   useEffect(() => {
     if (!cpfData) { navigate("/"); return; }
-    saveSession({ cpfData, currentStep: "/confirma-dados" });
+    saveSession({ cpfData, currentStep: "/confirma-dados", cepData });
     trackFunnelEvent('confirma-dados', { cpf: cpfData.cpf });
     window.scrollTo(0, 0);
   }, [cpfData, navigate]);

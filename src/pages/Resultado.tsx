@@ -6,14 +6,7 @@ import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
-
-interface CepData {
-  cep: string;
-  logradouro: string;
-  bairro: string;
-  localidade: string;
-  uf: string;
-}
+import { saveSession, getSession, CepData } from "@/hooks/useSessionPersistence";
 
 const getProvaDate = () => {
   const d = new Date();

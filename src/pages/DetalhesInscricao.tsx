@@ -18,7 +18,7 @@ const DetalhesInscricao = () => {
 
   useEffect(() => {
     if (!cpfData) { navigate("/"); return; }
-    saveSession({ cpfData, currentStep: "/detalhes-inscricao" });
+    saveSession({ cpfData, currentStep: "/detalhes-inscricao", cepData });
     trackFunnelEvent("detalhes-inscricao", { cpf: cpfData.cpf });
     window.scrollTo(0, 0);
   }, [cpfData, navigate]);
