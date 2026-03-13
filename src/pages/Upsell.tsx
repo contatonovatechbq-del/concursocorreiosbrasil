@@ -9,7 +9,7 @@ import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const UPSELLS = [
-  { valor: 78, title: "Material Completo de Estudos", description: "Apostila completa + simulados + videoaulas para o Concurso Correios 2026. Conteúdo atualizado conforme o edital." },
+  { valor: 34, title: "Material para Dia da Prova", description: "Kit completo com caderno de questões, folha de respostas e caneta homologada para o dia da prova." },
   { valor: 29, title: "Taxa de Processamento Digital", description: "Taxa obrigatória para processamento digital da inscrição no sistema dos Correios." },
   { valor: 34, title: "Seguro de Inscrição", description: "Seguro que garante reembolso integral caso o concurso seja cancelado ou adiado." },
   { valor: 19, title: "Taxa de Confirmação de Vaga", description: "Confirmação e reserva da sua vaga para a data de prova selecionada." },
