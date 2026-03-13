@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Resultado from "./pages/Resultado";
 import Inscricao from "./pages/Inscricao";
 import ConfirmaDados from "./pages/ConfirmaDados";
+import DetalhesInscricao from "./pages/DetalhesInscricao";
 import Pagamento from "./pages/Pagamento";
 import Upsell from "./pages/Upsell";
 import NotFound from "./pages/NotFound";
