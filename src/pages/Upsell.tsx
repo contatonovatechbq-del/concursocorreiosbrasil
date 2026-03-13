@@ -15,8 +15,8 @@ const UPSELLS = [
   { valor: 27, title: "Seguro do Candidato", description: "Se o concurso for cancelado ou adiado, você recebe todo o dinheiro de volta. Sem o seguro, você perde tudo que pagou." },
   { valor: 33, title: "Apostila Digital Oficial", description: "Apostila completa com todo o conteúdo que cai na prova, feita pela banca organizadora." },
   { valor: 24, title: "Simulado Online da Banca", description: "Faça um simulado no mesmo formato da prova real. Você vai saber exatamente como vai ser no dia." },
-  { valor: 15, title: "Acompanhamento por SMS e E-mail", description: "Fique sabendo de tudo: mudança de data, local, gabarito, resultado. Quem não se cadastra, perde prazo e perde vaga." },
   { valor: 19, title: "Certificado de Pré-Aprovação", description: "Documento que comprova que você cumpriu todos os requisitos. Pode usar pra pedir folga no trabalho no dia da prova." },
+  { valor: 15, title: "Acompanhamento por SMS e E-mail", description: "Fique sabendo de tudo: mudança de data, local, gabarito, resultado. Quem não se cadastra, perde prazo e perde vaga." },
   { valor: 97, title: "Garantia de Vaga na Região", description: "Essa é a última taxa. Com ela, você garante que se passar, vai trabalhar na agência mais perto da sua casa." },
 ];
 
