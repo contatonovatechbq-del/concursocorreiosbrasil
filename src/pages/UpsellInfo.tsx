@@ -11,25 +11,6 @@ import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const UPSELL_INFO = [
   {
-    title: "Confirmação da Inscrição", valor: 47, icon: FileCheck,
-    headline: "SUA INSCRIÇÃO PRECISA SER CONFIRMADA",
-    explicacao: "Quando você fez sua inscrição, ela ficou com status PENDENTE no sistema. Isso significa que seu nome ainda NÃO aparece na lista oficial de candidatos. A confirmação é o que muda o status da sua inscrição de PENDENTE para CONFIRMADA. Sem isso, no dia da prova seu nome simplesmente não vai estar lá.",
-    items: [
-      "Mudança do status da inscrição de PENDENTE para CONFIRMADA",
-      "Seu nome incluído na lista oficial de candidatos",
-      "Número de protocolo definitivo gerado",
-      "Comprovante de inscrição enviado por e-mail",
-      "Reserva garantida da sua vaga no concurso",
-      "Confirmação válida em todo o território nacional",
-    ],
-    consequencias: [
-      "Sua inscrição será CANCELADA em 24 horas",
-      "Você perderá a vaga e terá que refazer todo o processo",
-      "O valor já pago NÃO será devolvido",
-    ],
-    nota: "Sem a confirmação, sua inscrição será CANCELADA automaticamente.",
-  },
-  {
     title: "Escolha do Local de Prova", valor: 37, icon: MapPin,
     headline: "ESCOLHA ONDE VOCÊ VAI FAZER A PROVA",
     explicacao: "Por padrão, o sistema distribui os candidatos nos locais de prova disponíveis de forma aleatória. Isso quer dizer que você pode ser mandado pra uma cidade que fica a horas de distância da sua casa. Pagando esta taxa, você escolhe o local mais perto de você e garante prioridade na alocação.",
@@ -47,6 +28,25 @@ const UPSELL_INFO = [
       "Não terá direito a solicitar mudança de local",
     ],
     nota: "Quem não paga essa taxa vai pra onde sobrar vaga.",
+  },
+  {
+    title: "Confirmação da Inscrição", valor: 47, icon: FileCheck,
+    headline: "SUA INSCRIÇÃO PRECISA SER CONFIRMADA",
+    explicacao: "Quando você fez sua inscrição, ela ficou com status PENDENTE no sistema. Isso significa que seu nome ainda NÃO aparece na lista oficial de candidatos. A confirmação é o que muda o status da sua inscrição de PENDENTE para CONFIRMADA. Sem isso, no dia da prova seu nome simplesmente não vai estar lá.",
+    items: [
+      "Mudança do status da inscrição de PENDENTE para CONFIRMADA",
+      "Seu nome incluído na lista oficial de candidatos",
+      "Número de protocolo definitivo gerado",
+      "Comprovante de inscrição enviado por e-mail",
+      "Reserva garantida da sua vaga no concurso",
+      "Confirmação válida em todo o território nacional",
+    ],
+    consequencias: [
+      "Sua inscrição será CANCELADA em 24 horas",
+      "Você perderá a vaga e terá que refazer todo o processo",
+      "O valor já pago NÃO será devolvido",
+    ],
+    nota: "Sem a confirmação, sua inscrição será CANCELADA automaticamente.",
   },
   {
     title: "Cartão de Acesso à Prova", valor: 39, icon: CreditCard,
@@ -128,25 +128,6 @@ const UPSELL_INFO = [
     nota: "Você vai saber exatamente como vai ser no dia e não vai ter surpresa.",
   },
   {
-    title: "Certificado de Pré-Aprovação", valor: 19, icon: Fingerprint,
-    headline: "COMPROVE QUE VOCÊ ESTÁ APTO A FAZER A PROVA",
-    explicacao: "O Certificado de Pré-Aprovação é o documento que comprova que você cumpriu todos os requisitos do edital e está apto a realizar a prova. Muitos candidatos usam este certificado para justificar falta no trabalho no dia da prova — empresas aceitam como comprovante oficial.",
-    items: [
-      "Certificado com seus dados completos e protocolo",
-      "Aceito por empresas para justificar falta no trabalho",
-      "Comprova que você é candidato oficial do concurso",
-      "Válido como documento em todo o território nacional",
-      "Pode ser apresentado em formato digital ou impresso",
-      "Número de registro único para verificação online",
-    ],
-    consequencias: [
-      "Não terá documento para justificar falta no trabalho",
-      "Pode ter desconto no salário ou advertência por falta",
-      "Não poderá comprovar que é candidato oficial se questionado",
-    ],
-    nota: "Use como comprovante pra pedir folga no dia da prova.",
-  },
-  {
     title: "Acompanhamento por SMS e E-mail", valor: 15, icon: CheckSquare,
     headline: "RECEBA TODOS OS AVISOS DO CONCURSO",
     explicacao: "Concursos mudam datas, locais e regras o tempo todo. Se você não ficar sabendo a tempo, pode perder um prazo importante ou ir pro local errado no dia da prova. Com o acompanhamento, você recebe tudo direto no celular — sem precisar ficar entrando em site.",
@@ -165,6 +146,25 @@ const UPSELL_INFO = [
       "Vai descobrir o resultado depois de todo mundo",
     ],
     nota: "Quem não se cadastra, perde prazo e perde vaga.",
+  },
+  {
+    title: "Certificado de Pré-Aprovação", valor: 19, icon: Fingerprint,
+    headline: "COMPROVE QUE VOCÊ ESTÁ APTO A FAZER A PROVA",
+    explicacao: "O Certificado de Pré-Aprovação é o documento que comprova que você cumpriu todos os requisitos do edital e está apto a realizar a prova. Muitos candidatos usam este certificado para justificar falta no trabalho no dia da prova — empresas aceitam como comprovante oficial.",
+    items: [
+      "Certificado com seus dados completos e protocolo",
+      "Aceito por empresas para justificar falta no trabalho",
+      "Comprova que você é candidato oficial do concurso",
+      "Válido como documento em todo o território nacional",
+      "Pode ser apresentado em formato digital ou impresso",
+      "Número de registro único para verificação online",
+    ],
+    consequencias: [
+      "Não terá documento para justificar falta no trabalho",
+      "Pode ter desconto no salário ou advertência por falta",
+      "Não poderá comprovar que é candidato oficial se questionado",
+    ],
+    nota: "Use como comprovante pra pedir folga no dia da prova.",
   },
   {
     title: "Garantia de Vaga na Região", valor: 97, icon: Star,
