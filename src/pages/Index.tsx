@@ -7,6 +7,7 @@ import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { getSession } from "@/hooks/useSessionPersistence";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const getContestDates = () => {
   const now = new Date();
@@ -45,7 +46,7 @@ const Index = () => {
       const response = await fetch(`https://viacep.com.br/ws/${cepNumbers}/json/`);
       const data = await response.json();
       if (data.erro) { setError("CEP não encontrado. Verifique e tente novamente."); setLoading(false); return; }
-      navigate("/resultado", { state: { cepData: { cep: data.cep, logradouro: data.logradouro, bairro: data.bairro, localidade: data.localidade, uf: data.uf } } });
+      navigate(buildUrlWithUtm("/resultado"), { state: { cepData: { cep: data.cep, logradouro: data.logradouro, bairro: data.bairro, localidade: data.localidade, uf: data.uf } } });
     } catch { setError("Erro ao consultar CEP. Tente novamente."); setLoading(false); }
   };
 
@@ -91,7 +92,7 @@ const Index = () => {
                   <tr><td className="font-semibold text-foreground">Remuneração</td><td>R$ 2.429,26 + Benefícios (VA, VT, Plano de Saúde)</td></tr>
                   <tr><td className="font-semibold text-foreground">Carga Horária</td><td>40 horas semanais</td></tr>
                   <tr><td className="font-semibold text-foreground">Banca</td><td>IBFC — Instituto Brasileiro de Formação e Capacitação</td></tr>
-                  <tr><td className="font-semibold text-foreground">Taxa de Inscrição</td><td>R$ 39,80</td></tr>
+                  <tr><td className="font-semibold text-foreground">Banca</td><td>IBFC — Instituto Brasileiro de Formação e Capacitação</td></tr>
                 </tbody>
               </table>
 
