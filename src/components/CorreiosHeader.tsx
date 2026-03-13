@@ -8,7 +8,7 @@ const CorreiosHeader = ({ breadcrumb = "Concursos > Agente de Correios > Inscri√
   return (
     <>
       {/* Top Bar - Gov */}
-      <div className="bg-[hsl(209,100%,20%)] text-white/80 text-[10px] sm:text-xs py-1 px-4">
+      <div className="bg-[hsl(220,10%,15%)] text-white/80 text-[10px] sm:text-xs py-1 px-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <span>Empresa Brasileira de Correios e Tel√©grafos</span>
           <span className="hidden sm:inline">Governo Federal</span>
