@@ -22,7 +22,7 @@ const CorreiosHeader = ({ breadcrumb = "Concursos > Agente de Correios > Inscri�
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <div className="bg-[hsl(47,100%,50%)] rounded-sm p-1">
-                <span className="text-[hsl(209,100%,20%)] font-black text-lg sm:text-xl leading-none">✉</span>
+                <span className="text-[hsl(220,10%,15%)] font-black text-lg sm:text-xl leading-none">✉</span>
               </div>
               <div>
                 <span className="font-bold text-base sm:text-lg tracking-tight">CORREIOS</span>
