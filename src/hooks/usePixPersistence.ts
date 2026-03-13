@@ -13,7 +13,7 @@ export interface StoredPixData {
 /**
  * Get a unique key for storing PIX data based on page and step
  */
-export const getPixStorageKey = (pageType: "saque" | "upsell", step?: number): string => {
+export const getPixStorageKey = (pageType: "saque" | "upsell" | "pagamento", step?: number): string => {
   if (pageType === "upsell" && step !== undefined) {
     return `${PIX_STORAGE_PREFIX}upsell_${step}`;
   }
