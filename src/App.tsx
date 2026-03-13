@@ -10,6 +10,7 @@ import ConfirmaDados from "./pages/ConfirmaDados";
 import DetalhesInscricao from "./pages/DetalhesInscricao";
 import Pagamento from "./pages/Pagamento";
 import Upsell from "./pages/Upsell";
+import UpsellInfo from "./pages/UpsellInfo";
 import NotFound from "./pages/NotFound";
 import UtmCapture from "@/components/UtmCapture";
 import AdminLogin from "./pages/AdminLogin";
