@@ -34,12 +34,22 @@ const Resultado = () => {
 
   if (!cepData) return null;
 
-  const vagasRegiao = 64;
+  const vagasRegiao = Math.floor(Math.random() * 40) + 30;
   const provaDate = getProvaDate();
-  const agenciaNome = `AC ${cepData.localidade}`;
+
+  // Generate realistic agency name based on city/neighborhood
+  const agenciaNomes = [
+    `Agência ${cepData.localidade} Central`,
+    `Agência ${cepData.bairro || cepData.localidade}`,
+    `AC ${cepData.localidade} — ${cepData.bairro || 'Centro'}`,
+  ];
+  const agenciaNome = agenciaNomes[Math.floor(Math.random() * agenciaNomes.length)];
+
+  // Build realistic address from CEP data
+  const numPredial = Math.floor(Math.random() * 2000) + 100;
   const agenciaEndereco = cepData.logradouro
-    ? `${cepData.logradouro}, ${cepData.bairro} — ${cepData.localidade}/${cepData.uf}`
-    : `Centro — ${cepData.localidade}/${cepData.uf}`;
+    ? `${cepData.logradouro}, ${numPredial} — ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}`
+    : `Rua Principal, ${numPredial} — Centro, ${cepData.localidade}/${cepData.uf}`;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

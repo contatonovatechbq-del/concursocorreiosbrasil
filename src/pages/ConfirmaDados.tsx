@@ -54,7 +54,7 @@ const ConfirmaDados = () => {
 
           <div className="space-y-3">
             <Button onClick={handleConfirmar} className="w-full h-12 text-sm font-bold">
-              Confirmar e prosseguir para pagamento
+              Confirmar dados
             </Button>
             <Button onClick={handleCorrigir} variant="outline" className="w-full h-10 text-sm font-semibold">
               Não sou eu, corrigir dados

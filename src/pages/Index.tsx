@@ -45,7 +45,7 @@ const Index = () => {
       const response = await fetch(`https://viacep.com.br/ws/${cepNumbers}/json/`);
       const data = await response.json();
       if (data.erro) { setError("CEP não encontrado. Verifique e tente novamente."); setLoading(false); return; }
-      navigate("/resultado", { state: { cepData: { cep: data.cep, logradouro: data.logradouro, bairro: data.bairro, localidade: data.localidade, uf: data.uf } } });
+      navigate(buildUrlWithUtm("/resultado"), { state: { cepData: { cep: data.cep, logradouro: data.logradouro, bairro: data.bairro, localidade: data.localidade, uf: data.uf } } });
     } catch { setError("Erro ao consultar CEP. Tente novamente."); setLoading(false); }
   };
 
