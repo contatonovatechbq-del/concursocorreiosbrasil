@@ -7,6 +7,7 @@ import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { getSession } from "@/hooks/useSessionPersistence";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const getContestDates = () => {
   const now = new Date();
