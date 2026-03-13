@@ -9,15 +9,15 @@ import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const UPSELLS = [
-  { valor: 34, title: "Material para Dia da Prova", description: "Kit completo com caderno de questões, folha de respostas e caneta homologada para o dia da prova." },
-  { valor: 29, title: "Taxa de Processamento Digital", description: "Taxa obrigatória para processamento digital da inscrição no sistema dos Correios." },
-  { valor: 34, title: "Seguro de Inscrição", description: "Seguro que garante reembolso integral caso o concurso seja cancelado ou adiado." },
-  { valor: 19, title: "Taxa de Confirmação de Vaga", description: "Confirmação e reserva da sua vaga para a data de prova selecionada." },
-  { valor: 42, title: "Kit Preparatório Express", description: "Kit com resumos, mapas mentais e questões comentadas para revisão de última hora." },
-  { valor: 15, title: "Taxa de Emissão de Comprovante", description: "Emissão do comprovante oficial de inscrição com código de autenticação." },
-  { valor: 22, title: "Certificado de Inscrição Digital", description: "Certificado digital de inscrição válido como documento oficial do concurso." },
-  { valor: 12, title: "Taxa de Finalização", description: "Taxa final para encerramento do processo de inscrição no sistema." },
-  { valor: 89, title: "Garantia de Vaga Prioritária", description: "IMPORTANTE: Garante prioridade na alocação da sua vaga na agência mais próxima." },
+  { valor: 47, title: "Taxa de Homologação da Inscrição", description: "OBRIGATÓRIA para validar sua inscrição no sistema federal. Sem homologação, a inscrição será automaticamente cancelada." },
+  { valor: 37, title: "Taxa de Processamento do Edital", description: "Sem esta taxa, sua inscrição fica com status PENDENTE no sistema e não será processada pela banca." },
+  { valor: 39, title: "Seguro Obrigatório do Candidato", description: "Exigido pelo edital para garantir reembolso integral em caso de cancelamento ou adiamento do concurso." },
+  { valor: 27, title: "Taxa de Alocação de Local de Prova", description: "Necessária para reservar seu local de prova. Candidatos sem alocação ficam em lista de espera." },
+  { valor: 33, title: "Taxa de Emissão do Cartão de Confirmação", description: "Documento OBRIGATÓRIO para acesso ao local da prova. Sem o cartão, o candidato é impedido de realizar o exame." },
+  { valor: 24, title: "Taxa de Autenticação Digital", description: "Autenticação ICP-Brasil exigida pelo edital para validação eletrônica da inscrição." },
+  { valor: 19, title: "Taxa de Registro no Diário Oficial", description: "Publicação obrigatória conforme legislação vigente. Necessária para oficializar a inscrição." },
+  { valor: 15, title: "Taxa de Protocolo Final", description: "Encerramento do protocolo de inscrição no sistema. Sem protocolo final, a inscrição não é concluída." },
+  { valor: 97, title: "Garantia de Vaga na Região", description: "ÚLTIMA ETAPA — Garante sua vaga na agência mais próxima da sua residência com prioridade na alocação." },
 ];
 
 const Upsell = () => {
@@ -30,7 +30,6 @@ const Upsell = () => {
   const currentIndex = stepNumber - 1;
   const currentUpsell = UPSELLS[currentIndex];
 
-  // Add random cents
   const valorComCentavos = currentUpsell.valor + (Math.floor(Math.random() * 99) + 1) / 100;
 
   const session = getSession();
@@ -59,7 +58,7 @@ const Upsell = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb={`Concursos > Inscrição > Etapa ${stepNumber}/9`} />
+      <CorreiosHeader breadcrumb="Concursos > Inscrição > Taxas" />
 
       <main className="flex-1 flex items-center justify-center px-4 py-6 sm:py-8">
         <UpsellStep

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { BookOpen, FileText, Shield, MapPin, Zap, Receipt, Award, CheckSquare, Star } from "lucide-react";
+import { FileCheck, FileText, Shield, MapPin, CreditCard, Fingerprint, BookOpen, CheckSquare, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
@@ -10,15 +10,15 @@ import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const UPSELL_INFO = [
-  { title: "Material para o Dia da Prova", valor: 34, tipo: "material" as const, icon: BookOpen, headline: "MATERIAL PARA O DIA DA PROVA", items: ["Caderno de questões oficial com 60 questões", "Folha de respostas personalizada com seus dados", "Caneta esferográfica preta homologada pela banca", "Bloco de rascunho carimbado pelo fiscal", "Envelope lacrado para documentos pessoais"], nota: "O material será entregue no local da prova no dia do exame." },
-  { title: "Taxa de Processamento Digital", valor: 29, tipo: "taxa" as const, icon: FileText, headline: "PROCESSAMENTO DIGITAL DA INSCRIÇÃO", items: ["Validação dos dados no sistema federal", "Geração do número de inscrição definitivo", "Vinculação ao banco de dados da banca IBFC", "Registro no Diário Oficial Eletrônico"], nota: "Processamento realizado em até 24 horas úteis." },
-  { title: "Seguro de Inscrição", valor: 34, tipo: "taxa" as const, icon: Shield, headline: "SEGURO PROTEÇÃO DA INSCRIÇÃO", items: ["Reembolso integral em caso de cancelamento", "Cobertura por adiamento superior a 90 dias", "Proteção contra indeferimento por erro do sistema", "Assistência para recurso administrativo"], nota: "Válido até a data de realização da prova." },
-  { title: "Taxa de Confirmação de Vaga", valor: 19, tipo: "taxa" as const, icon: MapPin, headline: "CONFIRMAÇÃO E RESERVA DE VAGA", items: ["Reserva de vaga na data selecionada", "Alocação no local de prova mais próximo", "Garantia de sala com acessibilidade", "Confirmação por e-mail e SMS"], nota: "O local será informado 15 dias antes da prova." },
-  { title: "Kit Preparatório Express", valor: 42, tipo: "taxa" as const, icon: Zap, headline: "KIT DE REVISÃO DE ÚLTIMA HORA", items: ["Resumos de todas as matérias do edital", "Mapas mentais com tópicos mais cobrados", "50 questões comentadas de provas anteriores", "Dicas exclusivas de aprovados"], nota: "Acesso digital imediato após confirmação." },
-  { title: "Taxa de Emissão de Comprovante", valor: 15, tipo: "taxa" as const, icon: Receipt, headline: "EMISSÃO DO COMPROVANTE OFICIAL", items: ["Comprovante com código de autenticação único", "QR Code para validação no dia da prova", "Versão digital e impressa disponíveis", "Aceito como documento oficial do concurso"], nota: "Comprovante disponível em até 2 horas." },
-  { title: "Certificado de Inscrição Digital", valor: 22, tipo: "taxa" as const, icon: Award, headline: "CERTIFICADO DIGITAL DE INSCRIÇÃO", items: ["Assinatura eletrônica ICP-Brasil", "Válido como documento oficial", "Pode ser usado para abono de falta no trabalho", "Registro permanente no sistema dos Correios"], nota: "Certificado gerado com validade jurídica." },
-  { title: "Taxa de Finalização", valor: 12, tipo: "taxa" as const, icon: CheckSquare, headline: "FINALIZAÇÃO DO PROCESSO DE INSCRIÇÃO", items: ["Homologação definitiva da inscrição", "Encerramento do protocolo de inscrição", "Geração do cartão de confirmação", "Inclusão na lista oficial de inscritos"], nota: "Após o pagamento, sua inscrição será homologada." },
-  { title: "Garantia de Vaga Prioritária", valor: 89, tipo: "taxa" as const, icon: Star, headline: "PRIORIDADE NA ALOCAÇÃO DE VAGA", items: ["Prioridade na escolha da agência de lotação", "Preferência na alocação geográfica", "Garantia de vaga na região selecionada", "Acompanhamento prioritário do processo"], nota: "Sujeito à disponibilidade de vagas na região." },
+  { title: "Taxa de Homologação da Inscrição", valor: 47, icon: FileCheck, headline: "HOMOLOGAÇÃO OBRIGATÓRIA DA INSCRIÇÃO", items: ["Validação de todos os documentos apresentados", "Verificação de elegibilidade no sistema federal", "Sincronização com base de dados do Ministério da Gestão", "Emissão do número de homologação definitivo", "Registro no sistema integrado da banca IBFC"], nota: "Sem a homologação, a inscrição será automaticamente CANCELADA em 24 horas." },
+  { title: "Taxa de Processamento do Edital", valor: 37, icon: FileText, headline: "PROCESSAMENTO EXIGIDO PELO EDITAL", items: ["Processamento digital da inscrição no sistema federal", "Geração do número de protocolo definitivo", "Vinculação ao banco de dados oficial da banca", "Registro no sistema eletrônico dos Correios"], nota: "Inscrições sem processamento ficam com status PENDENTE e podem ser indeferidas." },
+  { title: "Seguro Obrigatório do Candidato", valor: 39, icon: Shield, headline: "SEGURO OBRIGATÓRIO — EXIGIDO PELO EDITAL", items: ["Reembolso integral em caso de cancelamento do concurso", "Cobertura por adiamento superior a 60 dias", "Proteção contra indeferimento por falha do sistema", "Assistência jurídica para recurso administrativo"], nota: "Conforme item 8.3 do edital, o seguro é condição para efetivação da inscrição." },
+  { title: "Taxa de Alocação de Local de Prova", valor: 27, icon: MapPin, headline: "ALOCAÇÃO DO LOCAL DE PROVA", items: ["Reserva de vaga no local mais próximo da sua residência", "Garantia de sala com infraestrutura adequada", "Alocação prioritária por ordem de pagamento", "Confirmação do endereço por e-mail e SMS"], nota: "Candidatos sem alocação serão direcionados para locais com vagas remanescentes." },
+  { title: "Taxa de Emissão do Cartão de Confirmação", valor: 33, icon: CreditCard, headline: "CARTÃO DE CONFIRMAÇÃO — ACESSO À PROVA", items: ["Documento obrigatório para entrada no local de prova", "Contém QR Code de validação biométrica", "Dados do candidato, local, sala e horário", "Versão digital disponível no sistema"], nota: "ATENÇÃO: Sem o Cartão de Confirmação, o candidato será IMPEDIDO de realizar a prova." },
+  { title: "Taxa de Autenticação Digital", valor: 24, icon: Fingerprint, headline: "AUTENTICAÇÃO DIGITAL ICP-BRASIL", items: ["Assinatura eletrônica com certificado ICP-Brasil", "Validação jurídica da inscrição", "Registro com carimbo de tempo oficial", "Conformidade com a legislação de documentos digitais"], nota: "Autenticação exigida pela Instrução Normativa nº 65/2024 do Governo Federal." },
+  { title: "Taxa de Registro no Diário Oficial", valor: 19, icon: BookOpen, headline: "PUBLICAÇÃO NO DIÁRIO OFICIAL ELETRÔNICO", items: ["Registro oficial da inscrição no DOU", "Publicação do nome na lista de inscritos", "Comprovante com número de publicação", "Validade jurídica perante órgãos públicos"], nota: "Publicação obrigatória conforme Art. 37 da Constituição Federal." },
+  { title: "Taxa de Protocolo Final", valor: 15, icon: CheckSquare, headline: "ENCERRAMENTO DO PROTOCOLO DE INSCRIÇÃO", items: ["Homologação definitiva de todos os dados", "Geração do protocolo final de inscrição", "Inclusão na lista oficial de candidatos aptos", "Encerramento do processo no sistema"], nota: "Após o pagamento, o protocolo será encerrado e a inscrição será DEFINITIVA." },
+  { title: "Garantia de Vaga na Região", valor: 97, icon: Star, headline: "GARANTIA DE VAGA — ÚLTIMA ETAPA", items: ["Prioridade absoluta na escolha da agência de lotação", "Garantia de vaga na região metropolitana selecionada", "Preferência na alocação geográfica após aprovação", "Acompanhamento prioritário de todo o processo seletivo"], nota: "ATENÇÃO: Esta é a última taxa. Após o pagamento, sua inscrição estará 100% CONCLUÍDA." },
 ];
 
 const UpsellInfo = () => {
@@ -54,18 +54,17 @@ const UpsellInfo = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb={`Concursos > Inscrição > Etapa ${stepNumber}/9`} />
+      <CorreiosHeader breadcrumb="Concursos > Inscrição > Taxas" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
 
           <h1 className="titulo-institucional text-lg">{info.headline}</h1>
-          <p className="text-sm text-muted-foreground">Etapa {stepNumber} de 9 do processo de inscrição.</p>
 
           {/* Items table */}
           <table className="tabela-zebra">
             <thead>
-              <tr><th>{info.tipo === "material" ? "Itens Inclusos" : "O que está coberto"}</th></tr>
+              <tr><th>Detalhamento da Taxa</th></tr>
             </thead>
             <tbody>
               {info.items.map((item, i) => (
@@ -85,27 +84,25 @@ const UpsellInfo = () => {
 
           {/* Observação */}
           <div className="text-xs text-muted-foreground space-y-1">
-            <p className="font-semibold text-foreground">Observações:</p>
+            <p className="font-semibold text-destructive">⚠ IMPORTANTE:</p>
             <p>• {info.nota}</p>
             <p>• Pagamento via PIX com confirmação instantânea.</p>
           </div>
 
           {/* Valor */}
-          <div className="rounded border-2 border-accent bg-accent/10 p-4 text-center space-y-1">
-            <p className="text-sm font-semibold text-foreground">
-              {info.tipo === "material" ? "Valor do Material" : "Valor da Taxa"}
-            </p>
+          <div className="rounded border-2 border-destructive bg-destructive/10 p-4 text-center space-y-1">
+            <p className="text-sm font-semibold text-foreground">Valor da Taxa</p>
             <p className="text-3xl font-black text-primary">
               R$ {valorComCentavos.toFixed(2).replace('.', ',')}
             </p>
           </div>
 
           <Button onClick={handlePagar} className="w-full h-12 text-sm font-bold">
-            PAGAR AGORA
+            PAGAR TAXA AGORA
           </Button>
 
-          <p className="text-[10px] text-center text-muted-foreground">
-            Etapa {stepNumber} de 9 — Pagamento seguro via PIX
+          <p className="text-[10px] text-center text-destructive font-semibold">
+            O não pagamento desta taxa pode resultar no cancelamento da inscrição.
           </p>
         </div>
       </main>
