@@ -3,11 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CPFInput } from "@/components/CPFInput";
 import { validateCPF, unformatCPF, consultarCPF } from "@/lib/cpf";
-import { ShieldCheck, Loader2, AlertTriangle, UserCheck } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
-import CorreiosCard from "@/components/CorreiosCard";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
@@ -27,16 +26,8 @@ const Inscricao = () => {
   const handleConsultar = async () => {
     setError("");
     const cpfNumbers = unformatCPF(cpf);
-
-    if (cpfNumbers.length !== 11) {
-      setError("Digite um CPF completo com 11 dígitos");
-      return;
-    }
-    if (!validateCPF(cpf)) {
-      setError("CPF inválido. Verifique os números digitados.");
-      return;
-    }
-
+    if (cpfNumbers.length !== 11) { setError("Digite um CPF completo com 11 dígitos"); return; }
+    if (!validateCPF(cpf)) { setError("CPF inválido. Verifique os números digitados."); return; }
     setLoading(true);
     try {
       const data = await consultarCPF(cpf);
@@ -52,26 +43,20 @@ const Inscricao = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <CorreiosHeader breadcrumb="Concursos > Agente de Correios > Inscrição > CPF" />
 
-      <main className="flex-1 flex items-center justify-center px-4 py-6 sm:py-8">
-        <CorreiosCard className="w-full max-w-md">
-          <div className="space-y-5">
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-full gradient-correios flex items-center justify-center mx-auto">
-                <UserCheck className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-lg sm:text-xl font-bold text-foreground">
-                Verificação do Candidato
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Informe seu CPF para verificar elegibilidade e prosseguir com a inscrição no concurso
-              </p>
-            </div>
+      <main className="flex-1 px-4 py-6 sm:py-8">
+        <div className="max-w-md mx-auto space-y-5">
 
+          <h1 className="titulo-institucional text-lg">VERIFICAÇÃO DO CANDIDATO</h1>
+          <p className="text-sm text-muted-foreground">
+            Informe seu CPF para verificar elegibilidade e prosseguir com a inscrição no concurso.
+          </p>
+
+          <div className="border border-border rounded bg-card p-4 sm:p-5 space-y-4">
             <div className="space-y-2">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">CPF do Candidato</label>
               <CPFInput value={cpf} onChange={setCpf} disabled={loading} error={!!error} />
               {error && (
-                <div className="flex items-center gap-2 text-destructive text-xs bg-destructive/10 p-2.5 rounded-lg">
+                <div className="flex items-center gap-2 text-destructive text-xs bg-destructive/10 p-2.5 rounded">
                   <AlertTriangle className="w-4 h-4 shrink-0" />
                   <span>{error}</span>
                 </div>
@@ -84,21 +69,15 @@ const Inscricao = () => {
               className="w-full h-12 text-sm font-bold"
             >
               {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Verificando elegibilidade...
-                </>
+                <><Loader2 className="w-5 h-5 animate-spin mr-2" />Verificando elegibilidade...</>
               ) : (
                 "Verificar e Continuar"
               )}
             </Button>
 
-            <div className="flex items-center justify-center gap-2 pt-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Dados protegidos conforme LGPD</span>
-            </div>
+            <p className="text-[10px] text-muted-foreground text-center">Dados protegidos conforme LGPD</p>
           </div>
-        </CorreiosCard>
+        </div>
       </main>
 
       <CorreiosFooter />

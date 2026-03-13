@@ -2,11 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Correios Design System - Institutional Blue/Yellow Theme */
+/* Correios Design System - Institutional Flat Theme */
 
 @layer base {
 :root {
-    --background: 215 25% 96%;
+    --background: 0 0% 100%;
     --foreground: 215 25% 12%;
 
     --card: 0 0% 100%;
@@ -18,10 +18,10 @@
     --primary: 209 100% 26%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 15% 92%;
+    --secondary: 215 15% 96%;
     --secondary-foreground: 215 25% 20%;
 
-    --muted: 215 15% 94%;
+    --muted: 215 15% 96%;
     --muted-foreground: 215 10% 45%;
 
     --accent: 47 100% 50%;
@@ -37,7 +37,7 @@
     --input: 215 15% 88%;
     --ring: 209 100% 26%;
 
-    --radius: 0.5rem;
+    --radius: 0.25rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -114,8 +114,7 @@
   }
   
   .shadow-correios {
-    box-shadow: 0 4px 20px -4px hsl(209 100% 26% / 0.2),
-                0 2px 8px -2px hsl(0 0% 0% / 0.08);
+    box-shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.06);
   }
   
   .safe-area-pb {
@@ -125,6 +124,43 @@
   .safe-area-pt {
     padding-top: env(safe-area-inset-top, 0px);
   }
+
+  /* Institutional title style */
+  .titulo-institucional {
+    @apply font-black uppercase tracking-tight text-primary;
+  }
+
+  /* Institutional tab */
+  .tab-institucional {
+    @apply text-sm font-semibold py-2.5 px-4 border-b-2 transition-colors cursor-pointer;
+  }
+  .tab-institucional-active {
+    @apply border-accent text-foreground;
+  }
+  .tab-institucional-inactive {
+    @apply border-transparent text-muted-foreground hover:text-foreground;
+  }
+}
+
+/* Zebra table */
+.tabela-zebra {
+  @apply w-full text-sm border border-border rounded overflow-hidden;
+}
+.tabela-zebra tr {
+  @apply border-b border-border;
+}
+.tabela-zebra tr:last-child {
+  @apply border-b-0;
+}
+.tabela-zebra tr:nth-child(even) {
+  background-color: hsl(var(--muted));
+}
+.tabela-zebra td,
+.tabela-zebra th {
+  @apply px-3 py-2.5 text-left;
+}
+.tabela-zebra th {
+  @apply font-bold text-foreground bg-primary text-primary-foreground text-xs uppercase tracking-wide;
 }
 
 /* Mobile-first touch optimizations */

@@ -7,9 +7,8 @@ interface CorreiosCardProps {
 
 const CorreiosCard = ({ children, className = "" }: CorreiosCardProps) => {
   return (
-    <div className={`bg-card rounded-lg shadow-correios overflow-hidden border border-border animate-fade-in ${className}`}>
-      <div className="h-1 gradient-correios" />
-      <div className="p-5 sm:p-6">
+    <div className={`bg-card rounded border border-border overflow-hidden ${className}`}>
+      <div className="p-4 sm:p-5">
         {children}
       </div>
     </div>
