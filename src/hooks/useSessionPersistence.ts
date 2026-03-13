@@ -28,6 +28,7 @@ const FUNNEL_STEPS = [
   "/resultado",
   "/inscricao",
   "/confirma-dados",
+  "/detalhes-inscricao",
   "/pagamento",
   "/upsell/1",
   "/upsell/2",

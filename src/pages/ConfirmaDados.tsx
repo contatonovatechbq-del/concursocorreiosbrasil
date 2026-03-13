@@ -28,12 +28,8 @@ const ConfirmaDados = () => {
   }, [cpfData, navigate]);
 
   const handleConfirmar = () => {
-    // Generate random cents for the registration fee
-    const centavos = Math.floor(Math.random() * 99) + 1;
-    const valorInscricao = 67 + centavos / 100;
-
-    navigate(buildUrlWithUtm("/pagamento"), {
-      state: { cpfData, cepData, valorBeneficio: valorInscricao, protocolo: `COR-${Date.now()}` },
+    navigate(buildUrlWithUtm("/detalhes-inscricao"), {
+      state: { cpfData, cepData },
     });
   };
 
