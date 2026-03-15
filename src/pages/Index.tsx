@@ -85,7 +85,7 @@ const Index = () => {
             <div className="space-y-4">
               <table className="tabela-zebra">
                 <tbody>
-                  <tr><td className="font-semibold text-foreground w-1/3">Órgão</td><td>Empresa Brasileira de Correios e Telégrafos</td></tr>
+                  <tr><td className="font-semibold text-foreground w-2/5">Órgão</td><td>Empresa Brasileira de Correios e Telégrafos</td></tr>
                   <tr><td className="font-semibold text-foreground">Cargo</td><td>Atendente Comercial</td></tr>
                   <tr><td className="font-semibold text-foreground">Escolaridade</td><td>Nível Médio Completo</td></tr>
                   <tr><td className="font-semibold text-foreground">Vagas</td><td>15.153 em todo o Brasil</td></tr>
@@ -115,22 +115,22 @@ const Index = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td className="font-medium">Início das Inscrições</td>
+                  <td className="font-medium">Inscrições (Início)</td>
                   <td className="whitespace-nowrap text-xs">{dates.inscStart}</td>
                   <td><span className="text-xs font-bold text-success">Em andamento</span></td>
                 </tr>
                 <tr>
-                  <td className="font-medium">Encerramento das Inscrições</td>
+                  <td className="font-medium">Inscrições (Fim)</td>
                   <td className="whitespace-nowrap text-xs">{dates.inscEnd}</td>
                   <td><span className="text-xs font-bold text-success">Em andamento</span></td>
                 </tr>
                 <tr>
-                  <td className="font-medium">Aplicação das Provas</td>
+                  <td className="font-medium">Provas</td>
                   <td className="whitespace-nowrap text-xs">{dates.prova}</td>
                   <td><span className="text-xs text-muted-foreground">Aguardando</span></td>
                 </tr>
                 <tr>
-                  <td className="font-medium">Divulgação do Gabarito</td>
+                  <td className="font-medium">Gabarito</td>
                   <td className="whitespace-nowrap text-xs">{dates.gabarito}</td>
                   <td><span className="text-xs text-muted-foreground">Aguardando</span></td>
                 </tr>
@@ -161,12 +161,7 @@ const Index = () => {
                 <tr>
                   <td className="font-medium">Carteiro</td>
                   <td>—</td>
-                  <td><span className="text-xs text-muted-foreground">Edital separado</span></td>
-                </tr>
-                <tr>
-                  <td className="font-medium">Operador de Triagem</td>
-                  <td>—</td>
-                  <td><span className="text-xs text-muted-foreground">Edital separado</span></td>
+                  <td><span className="text-xs font-bold text-accent-foreground">Em breve</span></td>
                 </tr>
               </tbody>
             </table>
