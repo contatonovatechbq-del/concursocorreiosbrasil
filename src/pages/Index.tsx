@@ -12,10 +12,10 @@ import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 const getContestDates = () => {
   const now = new Date();
   const inscStart = new Date(now); inscStart.setDate(inscStart.getDate() - 5);
-  const inscEnd = new Date(now); inscEnd.setDate(inscEnd.getDate() + 15);
-  const prova = new Date(now); prova.setDate(prova.getDate() + 45);
-  const gabarito = new Date(prova); gabarito.setDate(gabarito.getDate() + 3);
-  const resultado = new Date(prova); resultado.setDate(resultado.getDate() + 30);
+  const inscEnd = new Date(now); inscEnd.setDate(inscEnd.getDate() + 25);
+  const prova = new Date(now); prova.setDate(prova.getDate() + 75);
+  const gabarito = new Date(prova); gabarito.setDate(gabarito.getDate() + 10);
+  const resultado = new Date(prova); resultado.setDate(resultado.getDate() + 45);
   const fmt = (d: Date) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   return { inscStart: fmt(inscStart), inscEnd: fmt(inscEnd), prova: fmt(prova), gabarito: fmt(gabarito), resultado: fmt(resultado) };
 };
