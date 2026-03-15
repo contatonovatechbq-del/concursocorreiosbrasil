@@ -47,7 +47,7 @@ const Inscricao = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Agente de Correios > Inscrição > CPF" />
+      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Inscrição > CPF" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-md mx-auto space-y-5">

@@ -63,7 +63,7 @@ const Index = () => {
               CONCURSO PÚBLICO NACIONAL UNIFICADO — CORREIOS 2026
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Edital Nº 001/2026 — Agente de Correios — Atendente Comercial | Nível Médio
+              Edital Nº 001/2026 — Atendente Comercial | Nível Médio
             </p>
           </div>
 

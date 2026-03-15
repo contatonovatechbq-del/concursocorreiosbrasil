@@ -5,7 +5,7 @@ interface CorreiosHeaderProps {
   breadcrumb?: string;
 }
 
-const CorreiosHeader = ({ breadcrumb = "Concursos > Agente de Correios > Inscrição" }: CorreiosHeaderProps) => {
+const CorreiosHeader = ({ breadcrumb = "Concursos > Atendente Comercial > Inscrição" }: CorreiosHeaderProps) => {
   return (
     <>
       {/* Top Bar */}

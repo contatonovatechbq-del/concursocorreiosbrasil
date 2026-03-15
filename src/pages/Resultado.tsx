@@ -81,7 +81,7 @@ const Resultado = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Agente de Correios > Local de Prova" />
+      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Local de Prova" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
