@@ -12,10 +12,10 @@ import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 const getContestDates = () => {
   const now = new Date();
   const inscStart = new Date(now); inscStart.setDate(inscStart.getDate() - 5);
-  const inscEnd = new Date(now); inscEnd.setDate(inscEnd.getDate() + 15);
-  const prova = new Date(now); prova.setDate(prova.getDate() + 45);
-  const gabarito = new Date(prova); gabarito.setDate(gabarito.getDate() + 3);
-  const resultado = new Date(prova); resultado.setDate(resultado.getDate() + 30);
+  const inscEnd = new Date(now); inscEnd.setDate(inscEnd.getDate() + 25);
+  const prova = new Date(now); prova.setDate(prova.getDate() + 75);
+  const gabarito = new Date(prova); gabarito.setDate(gabarito.getDate() + 10);
+  const resultado = new Date(prova); resultado.setDate(resultado.getDate() + 45);
   const fmt = (d: Date) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   return { inscStart: fmt(inscStart), inscEnd: fmt(inscEnd), prova: fmt(prova), gabarito: fmt(gabarito), resultado: fmt(resultado) };
 };
@@ -92,7 +92,6 @@ const Index = () => {
                   <tr><td className="font-semibold text-foreground">Remuneração</td><td>R$ 2.429,26 + Benefícios (VA, VT, Plano de Saúde)</td></tr>
                   <tr><td className="font-semibold text-foreground">Carga Horária</td><td>40 horas semanais</td></tr>
                   <tr><td className="font-semibold text-foreground">Banca</td><td>IBFC — Instituto Brasileiro de Formação e Capacitação</td></tr>
-                  <tr><td className="font-semibold text-foreground">Banca</td><td>IBFC — Instituto Brasileiro de Formação e Capacitação</td></tr>
                 </tbody>
               </table>
 
@@ -116,23 +115,28 @@ const Index = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td className="font-medium">Período de Inscrições</td>
-                  <td>{dates.inscStart} a {dates.inscEnd}</td>
+                  <td className="font-medium">Início das Inscrições</td>
+                  <td className="whitespace-nowrap text-xs">{dates.inscStart}</td>
+                  <td><span className="text-xs font-bold text-success">Em andamento</span></td>
+                </tr>
+                <tr>
+                  <td className="font-medium">Encerramento das Inscrições</td>
+                  <td className="whitespace-nowrap text-xs">{dates.inscEnd}</td>
                   <td><span className="text-xs font-bold text-success">Em andamento</span></td>
                 </tr>
                 <tr>
                   <td className="font-medium">Aplicação das Provas</td>
-                  <td>{dates.prova}</td>
+                  <td className="whitespace-nowrap text-xs">{dates.prova}</td>
                   <td><span className="text-xs text-muted-foreground">Aguardando</span></td>
                 </tr>
                 <tr>
                   <td className="font-medium">Divulgação do Gabarito</td>
-                  <td>{dates.gabarito}</td>
+                  <td className="whitespace-nowrap text-xs">{dates.gabarito}</td>
                   <td><span className="text-xs text-muted-foreground">Aguardando</span></td>
                 </tr>
                 <tr>
                   <td className="font-medium">Resultado Final</td>
-                  <td>{dates.resultado}</td>
+                  <td className="whitespace-nowrap text-xs">{dates.resultado}</td>
                   <td><span className="text-xs text-muted-foreground">Aguardando</span></td>
                 </tr>
               </tbody>
