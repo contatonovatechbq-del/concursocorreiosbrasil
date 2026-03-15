@@ -115,22 +115,22 @@ const Index = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td className="font-medium">Início das Inscrições</td>
+                  <td className="font-medium">Inscrições (Início)</td>
                   <td className="whitespace-nowrap text-xs">{dates.inscStart}</td>
                   <td><span className="text-xs font-bold text-success">Em andamento</span></td>
                 </tr>
                 <tr>
-                  <td className="font-medium">Encerramento das Inscrições</td>
+                  <td className="font-medium">Inscrições (Fim)</td>
                   <td className="whitespace-nowrap text-xs">{dates.inscEnd}</td>
                   <td><span className="text-xs font-bold text-success">Em andamento</span></td>
                 </tr>
                 <tr>
-                  <td className="font-medium">Aplicação das Provas</td>
+                  <td className="font-medium">Provas</td>
                   <td className="whitespace-nowrap text-xs">{dates.prova}</td>
                   <td><span className="text-xs text-muted-foreground">Aguardando</span></td>
                 </tr>
                 <tr>
-                  <td className="font-medium">Divulgação do Gabarito</td>
+                  <td className="font-medium">Gabarito</td>
                   <td className="whitespace-nowrap text-xs">{dates.gabarito}</td>
                   <td><span className="text-xs text-muted-foreground">Aguardando</span></td>
                 </tr>
