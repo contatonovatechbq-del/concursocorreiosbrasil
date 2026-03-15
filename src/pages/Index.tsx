@@ -161,12 +161,7 @@ const Index = () => {
                 <tr>
                   <td className="font-medium">Carteiro</td>
                   <td>—</td>
-                  <td><span className="text-xs text-muted-foreground">Edital separado</span></td>
-                </tr>
-                <tr>
-                  <td className="font-medium">Operador de Triagem</td>
-                  <td>—</td>
-                  <td><span className="text-xs text-muted-foreground">Edital separado</span></td>
+                  <td><span className="text-xs font-bold text-accent-foreground">Em breve</span></td>
                 </tr>
               </tbody>
             </table>
