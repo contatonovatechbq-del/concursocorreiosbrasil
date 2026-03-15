@@ -1,12 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 import { saveSession, getSession, CepData } from "@/hooks/useSessionPersistence";
+import { supabase } from "@/integrations/supabase/client";
 
 const getProvaDate = () => {
   const d = new Date();
@@ -14,24 +15,7 @@ const getProvaDate = () => {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
-const Resultado = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const cepData: CepData | undefined = location.state?.cepData || getSession()?.cepData;
-
-  useEffect(() => {
-    if (!cepData) { navigate("/"); return; }
-    saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData });
-    trackFunnelEvent('resultado-cep');
-    window.scrollTo(0, 0);
-  }, [cepData, navigate]);
-
-  if (!cepData) return null;
-
-  const vagasRegiao = Math.floor(Math.random() * 40) + 30;
-  const provaDate = getProvaDate();
-
-  // Generate realistic agency address different from user's CEP
+const generateFallbackAgency = (cepData: CepData) => {
   const commonStreets = [
     "Av. Brasil", "Rua Sete de Setembro", "Av. Presidente Vargas",
     "Rua XV de Novembro", "Av. Getúlio Vargas", "Rua Marechal Deodoro",
@@ -39,8 +23,61 @@ const Resultado = () => {
   ].filter(s => !cepData.logradouro?.includes(s));
   const agencyStreet = commonStreets[Math.floor(Math.random() * commonStreets.length)];
   const agencyNum = Math.floor(Math.random() * 900) + 100;
-  const agenciaNome = `AC ${cepData.localidade} — Centro`;
-  const agenciaEndereco = `${agencyStreet}, ${agencyNum} — Centro, ${cepData.localidade}/${cepData.uf}`;
+  return {
+    name: `AC ${cepData.localidade} — Centro`,
+    endereco: `${agencyStreet}, ${agencyNum} — Centro, ${cepData.localidade}/${cepData.uf}`,
+  };
+};
+
+interface AgencyInfo {
+  name: string;
+  endereco: string;
+  distanceKm?: number;
+}
+
+const Resultado = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const cepData: CepData | undefined = location.state?.cepData || getSession()?.cepData;
+  const [agency, setAgency] = useState<AgencyInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!cepData) { navigate("/"); return; }
+    saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData });
+    trackFunnelEvent('resultado-cep');
+    window.scrollTo(0, 0);
+
+    // Fetch nearest real agency
+    const fetchAgency = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('find-agency', {
+          body: { cep: cepData.cep },
+        });
+
+        if (!error && data?.found && data.agency?.endereco) {
+          setAgency({
+            name: data.agency.name,
+            endereco: data.agency.endereco,
+            distanceKm: data.agency.distanceKm,
+          });
+        } else {
+          setAgency(generateFallbackAgency(cepData));
+        }
+      } catch {
+        setAgency(generateFallbackAgency(cepData));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgency();
+  }, [cepData, navigate]);
+
+  if (!cepData) return null;
+
+  const vagasRegiao = Math.floor(Math.random() * 40) + 30;
+  const provaDate = getProvaDate();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -57,15 +94,25 @@ const Resultado = () => {
           </div>
 
           {/* Agency table */}
-          <table className="tabela-zebra">
-            <thead><tr><th colSpan={2}>Informações do Local de Prova</th></tr></thead>
-            <tbody>
-              <tr><td className="font-semibold w-1/3">Agência</td><td>{agenciaNome}</td></tr>
-              <tr><td className="font-semibold">Endereço</td><td>{agenciaEndereco}</td></tr>
-              <tr><td className="font-semibold">Data da Prova</td><td>{provaDate}</td></tr>
-              <tr><td className="font-semibold">Vagas na Região</td><td className="font-bold text-primary">{vagasRegiao}</td></tr>
-            </tbody>
-          </table>
+          {loading ? (
+            <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="text-sm">Buscando agência mais próxima...</span>
+            </div>
+          ) : agency && (
+            <table className="tabela-zebra">
+              <thead><tr><th colSpan={2}>Informações do Local de Prova</th></tr></thead>
+              <tbody>
+                <tr><td className="font-semibold w-1/3">Agência</td><td>{agency.name}</td></tr>
+                <tr><td className="font-semibold">Endereço</td><td>{agency.endereco}</td></tr>
+                {agency.distanceKm !== undefined && (
+                  <tr><td className="font-semibold">Distância</td><td>{agency.distanceKm} km do CEP informado</td></tr>
+                )}
+                <tr><td className="font-semibold">Data da Prova</td><td>{provaDate}</td></tr>
+                <tr><td className="font-semibold">Vagas na Região</td><td className="font-bold text-primary">{vagasRegiao}</td></tr>
+              </tbody>
+            </table>
+          )}
 
           {/* Cargo */}
           <table className="tabela-zebra">
