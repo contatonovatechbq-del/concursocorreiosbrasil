@@ -85,7 +85,7 @@ const Index = () => {
             <div className="space-y-4">
               <table className="tabela-zebra">
                 <tbody>
-                  <tr><td className="font-semibold text-foreground w-1/3">Órgão</td><td>Empresa Brasileira de Correios e Telégrafos</td></tr>
+                  <tr><td className="font-semibold text-foreground w-2/5">Órgão</td><td>Empresa Brasileira de Correios e Telégrafos</td></tr>
                   <tr><td className="font-semibold text-foreground">Cargo</td><td>Atendente Comercial</td></tr>
                   <tr><td className="font-semibold text-foreground">Escolaridade</td><td>Nível Médio Completo</td></tr>
                   <tr><td className="font-semibold text-foreground">Vagas</td><td>15.153 em todo o Brasil</td></tr>
