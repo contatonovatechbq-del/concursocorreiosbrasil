@@ -1,1 +1,4 @@
 project_id = "sfqpikcyctockahshaej"
+
+[functions.find-agency]
+verify_jwt = false
