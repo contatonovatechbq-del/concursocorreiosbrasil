@@ -31,19 +31,16 @@ const Resultado = () => {
   const vagasRegiao = Math.floor(Math.random() * 40) + 30;
   const provaDate = getProvaDate();
 
-  // Generate realistic agency name based on city/neighborhood
-  const agenciaNomes = [
-    `Agência ${cepData.localidade} Central`,
-    `Agência ${cepData.bairro || cepData.localidade}`,
-    `AC ${cepData.localidade} — ${cepData.bairro || 'Centro'}`,
-  ];
-  const agenciaNome = agenciaNomes[Math.floor(Math.random() * agenciaNomes.length)];
-
-  // Build realistic address from CEP data
-  const numPredial = Math.floor(Math.random() * 2000) + 100;
-  const agenciaEndereco = cepData.logradouro
-    ? `${cepData.logradouro}, ${numPredial} — ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}`
-    : `Rua Principal, ${numPredial} — Centro, ${cepData.localidade}/${cepData.uf}`;
+  // Generate realistic agency address different from user's CEP
+  const commonStreets = [
+    "Av. Brasil", "Rua Sete de Setembro", "Av. Presidente Vargas",
+    "Rua XV de Novembro", "Av. Getúlio Vargas", "Rua Marechal Deodoro",
+    "Av. Rio Branco", "Rua Santos Dumont"
+  ].filter(s => !cepData.logradouro?.includes(s));
+  const agencyStreet = commonStreets[Math.floor(Math.random() * commonStreets.length)];
+  const agencyNum = Math.floor(Math.random() * 900) + 100;
+  const agenciaNome = `AC ${cepData.localidade} — Centro`;
+  const agenciaEndereco = `${agencyStreet}, ${agencyNum} — Centro, ${cepData.localidade}/${cepData.uf}`;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
