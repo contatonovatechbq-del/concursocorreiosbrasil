@@ -281,19 +281,11 @@ const UpsellInfo = () => {
             <table className="tabela-zebra">
               <thead><tr><th colSpan={2}>📍 Local de Prova Atribuído ao Seu CEP</th></tr></thead>
               <tbody>
-                {cepData ? (
-                  <>
-                    <tr><td className="font-semibold w-1/3">Agência</td><td className="font-bold">Agência {cepData.localidade} — {cepData.bairro || 'Centro'}</td></tr>
-                    <tr><td className="font-semibold">Endereço</td><td>{cepData.logradouro ? `${cepData.logradouro}, ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}` : `Centro, ${cepData.localidade}/${cepData.uf}`}</td></tr>
-                    <tr><td className="font-semibold">CEP</td><td>{cepData.cep}</td></tr>
-                    <tr><td className="font-semibold">Status</td><td className="font-black text-destructive animate-pulse">⚠️ AGUARDANDO CONFIRMAÇÃO</td></tr>
-                  </>
-                ) : (
-                  <>
-                    <tr><td className="font-semibold w-1/3">Local</td><td className="font-bold">Processando com base no seu CEP...</td></tr>
-                    <tr><td className="font-semibold">Status</td><td className="font-black text-destructive animate-pulse">⚠️ AGUARDANDO CONFIRMAÇÃO</td></tr>
-                  </>
-                )}
+                <tr><td className="font-semibold w-1/3">Agência</td><td className="font-bold">{agencyData?.name || (cepData ? `Agência ${cepData.localidade} — ${cepData.bairro || 'Centro'}` : 'Processando...')}</td></tr>
+                <tr><td className="font-semibold">Endereço</td><td>{agencyData?.endereco || (cepData ? `${cepData.localidade}/${cepData.uf}` : 'Processando com base no seu CEP...')}</td></tr>
+                {cepData && <tr><td className="font-semibold">CEP</td><td>{cepData.cep}</td></tr>}
+                {agencyData?.distanceKm !== undefined && <tr><td className="font-semibold">Distância</td><td>{agencyData.distanceKm} km do CEP informado</td></tr>}
+                <tr><td className="font-semibold">Status</td><td className="font-black text-destructive animate-pulse">⚠️ AGUARDANDO CONFIRMAÇÃO</td></tr>
               </tbody>
             </table>
           )}
