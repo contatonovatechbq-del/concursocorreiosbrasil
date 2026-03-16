@@ -66,11 +66,18 @@ const Resultado = () => {
         });
 
         if (!error && data?.found && data.agency?.endereco) {
-          setAgency({
-            name: data.agency.name,
-            endereco: data.agency.endereco,
-            distanceKm: data.agency.distanceKm,
-          });
+          const fetchedAddress = String(data.agency.endereco);
+          const isSameCity = isAgencyInRequestedCity(fetchedAddress, cd.localidade);
+
+          if (isSameCity) {
+            setAgency({
+              name: data.agency.name,
+              endereco: fetchedAddress,
+              distanceKm: data.agency.distanceKm,
+            });
+          } else {
+            setAgency(generateFallbackAgency(cd));
+          }
         } else {
           setAgency(generateFallbackAgency(cd));
         }
