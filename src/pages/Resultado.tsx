@@ -140,6 +140,10 @@ const Resultado = () => {
             <p>• Levar documento com foto e caneta esferográfica preta.</p>
           </div>
 
+          <div className="bg-destructive/10 border border-destructive/30 rounded p-3 text-sm text-destructive font-medium">
+            ⚠️ 1 pessoa já se inscreveu para o CEP {cepData.cep}. Vagas limitadas!
+          </div>
+
           <Button
             onClick={() => navigate(buildUrlWithUtm("/inscricao"), { state: { cepData } })}
             className="w-full h-12 text-sm font-bold"
