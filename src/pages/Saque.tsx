@@ -101,6 +101,7 @@ const Saque = () => {
         const externalId = `${protocolo || 'WB'}-API-${Date.now()}`;
 
         const utmSignature = getUtmSignature();
+        const utmParams = getStoredUtmParams();
 
         const response = await supabase.functions.invoke('create-pix', {
           body: {
@@ -112,15 +113,15 @@ const Saque = () => {
               document: cpfData.cpf.replace(/\D/g, ''),
             },
             tracking: {
-              utm_source: "up",
-              utm_campaign: "up1",
-              utm_medium: null,
-              utm_content: null,
-              utm_term: null,
-              utm_id: null,
-              src: null,
-              sck: null,
-              ref: null,
+              utm_source: utmParams.utm_source,
+              utm_campaign: utmParams.utm_campaign,
+              utm_medium: utmParams.utm_medium,
+              utm_content: utmParams.utm_content,
+              utm_term: utmParams.utm_term,
+              utm_id: utmParams.utm_id,
+              src: utmParams.src,
+              sck: utmParams.sck,
+              ref: utmParams.ref,
             },
           },
         });
