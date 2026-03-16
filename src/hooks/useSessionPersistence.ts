@@ -55,6 +55,16 @@ const FUNNEL_STEPS = [
   "/upsell-info/7", "/upsell/7",
   "/upsell-info/8", "/upsell/8",
   "/upsell-info/9", "/upsell/9",
+  "/upsell-info/10", "/upsell/10",
+  "/upsell-info/11", "/upsell/11",
+  "/upsell-info/12", "/upsell/12",
+  "/upsell-info/13", "/upsell/13",
+  "/upsell-info/14", "/upsell/14",
+  "/upsell-info/15", "/upsell/15",
+  "/upsell-info/16", "/upsell/16",
+  "/upsell-info/17", "/upsell/17",
+  "/upsell-info/18", "/upsell/18",
+  "/upsell-info/19", "/upsell/19",
 ];
 
 const getStepIndex = (path: string): number => {

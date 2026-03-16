@@ -61,9 +61,13 @@ const Resultado = () => {
 
     const fetchAgency = async () => {
       try {
-        const { data, error } = await supabase.functions.invoke('find-agency', {
+        const fetchPromise = supabase.functions.invoke('find-agency', {
           body: { cep: cd.cep, localidade: cd.localidade, uf: cd.uf },
         });
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 8000)
+        );
+        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
         let agencyResult: AgencyInfo;
         if (!error && data?.found && data.agency?.endereco) {

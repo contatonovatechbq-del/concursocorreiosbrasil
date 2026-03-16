@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { getStoredUtmParams } from "@/hooks/useUtmTracking";
+import { captureUtmParams, getStoredUtmParams } from "@/hooks/useUtmTracking";
 
 // Get or create session ID
 const getSessionId = (): string => {
@@ -32,6 +32,8 @@ export const trackFunnelEvent = async (
 ): Promise<void> => {
   try {
     const sessionId = getSessionId();
+    // Safety net: capture UTMs before reading to avoid null values
+    captureUtmParams();
     const utmParams = getStoredUtmParams();
     
     // Hash CPF if provided
