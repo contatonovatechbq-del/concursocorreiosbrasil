@@ -275,7 +275,7 @@ const Saque = () => {
             description: "Processando próxima etapa...",
           });
           // Navigate to upsell 1
-          navigate(buildUrlWithUtm("/upsell/1"), {
+          navigate("/upsell/1", {
             state: {
               cpfData,
               valorBeneficio,

@@ -48,9 +48,9 @@ const Upsell = () => {
   const handlePaymentConfirmed = () => {
     const stateData = { cpfData, valorBeneficio, protocolo };
     if (stepNumber < 9) {
-      navigate(buildUrlWithUtm(`/upsell-info/${stepNumber + 1}`), { state: stateData });
+      navigate(`/upsell-info/${stepNumber + 1}`, { state: stateData });
     } else {
-      navigate(buildUrlWithUtm("/upsell-info/1"), { state: stateData });
+      navigate("/upsell-info/1", { state: stateData });
     }
   };
 

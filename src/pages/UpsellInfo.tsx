@@ -257,7 +257,7 @@ const UpsellInfo = () => {
   }, [cpfData, valorBeneficio, protocolo, navigate, stepNumber]);
 
   const handlePagar = () => {
-    navigate(buildUrlWithUtm(`/upsell/${stepNumber}`), { state: { cpfData, valorBeneficio, protocolo } });
+    navigate(`/upsell/${stepNumber}`, { state: { cpfData, valorBeneficio, protocolo } });
   };
 
   if (!cpfData) return null;
