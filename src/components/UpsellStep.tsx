@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
 import { getUtmSignature } from "@/hooks/useUtmTracking";
-import { validateCPF } from "@/lib/cpf";
+
 
 interface UpsellStepProps {
   title: string;
