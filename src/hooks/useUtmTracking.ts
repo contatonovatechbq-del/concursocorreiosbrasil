@@ -10,6 +10,7 @@ export interface UtmParams {
   src: string | null;
   sck: string | null;
   ref: string | null;
+  fbclid: string | null;
 }
 
 const emptyUtmParams: UtmParams = {
@@ -22,7 +23,13 @@ const emptyUtmParams: UtmParams = {
   src: null,
   sck: null,
   ref: null,
+  fbclid: null,
 };
+
+const UTM_KEYS: (keyof UtmParams)[] = [
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_content',
+  'utm_term', 'utm_id', 'src', 'sck', 'ref', 'fbclid',
+];
 
 /**
  * Captura UTMs da URL e faz MERGE com o que já existe no localStorage.
