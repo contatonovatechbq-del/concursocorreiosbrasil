@@ -20,6 +20,18 @@ const generateFallbackAgency = (cepData: CepData) => ({
   endereco: `${cepData.localidade}/${cepData.uf}`,
 });
 
+const normalizeText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const isAgencyInRequestedCity = (address: string, city: string) => {
+  if (!city) return true;
+  return normalizeText(address).includes(normalizeText(city));
+};
+
 interface AgencyInfo {
   name: string;
   endereco: string;
