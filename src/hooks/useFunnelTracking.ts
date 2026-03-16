@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { getStoredUtmParams } from "@/hooks/useUtmTracking";
+import { captureUtmParams, getStoredUtmParams } from "@/hooks/useUtmTracking";
 
 // Get or create session ID
 const getSessionId = (): string => {
