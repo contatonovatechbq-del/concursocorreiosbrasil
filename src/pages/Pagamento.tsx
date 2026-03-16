@@ -5,6 +5,7 @@ import { CheckCircle, Copy, Clock, Loader2 } from "lucide-react";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { CPFData } from "@/lib/cpf";
+import { normalizeBuyer } from "@/lib/pixBuyer";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
