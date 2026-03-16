@@ -18,6 +18,7 @@ const OVERPASS_ENDPOINTS = [
 let lastExternalCallAt = 0;
 const geocodeCache = new Map<string, { lat: number; lon: number }>();
 const overpassCache = new Map<string, any[]>();
+const reverseAddressCache = new Map<string, string>();
 
 function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
@@ -43,11 +44,33 @@ async function waitRateLimit() {
   lastExternalCallAt = Date.now();
 }
 
+function parseRetryAfterMs(retryAfter: string | null): number | null {
+  if (!retryAfter) return null;
+
+  const seconds = Number.parseInt(retryAfter, 10);
+  if (Number.isFinite(seconds)) {
+    return Math.max(250, seconds * 1000);
+  }
+
+  const dateMs = Date.parse(retryAfter);
+  if (Number.isFinite(dateMs)) {
+    return Math.max(250, dateMs - Date.now());
+  }
+
+  return null;
+}
+
+function computeBackoffMs(attempt: number): number {
+  const exponential = 1000 * Math.pow(2, attempt - 1);
+  const jitter = Math.floor(Math.random() * 800);
+  return Math.min(exponential + jitter, 12000);
+}
+
 async function safeFetchJson(
   url: string,
   label: string,
   init: RequestInit = {},
-  attempts = 2,
+  attempts = 3,
 ): Promise<any | null> {
   for (let attempt = 1; attempt <= attempts; attempt++) {
     let timeoutId: number | undefined;
@@ -56,7 +79,7 @@ async function safeFetchJson(
       await waitRateLimit();
 
       const controller = new AbortController();
-      timeoutId = setTimeout(() => controller.abort(), 12000);
+      timeoutId = setTimeout(() => controller.abort(), 14000);
 
       const mergedHeaders = {
         "User-Agent": USER_AGENT,
@@ -72,12 +95,26 @@ async function safeFetchJson(
 
       const text = await res.text();
 
-      if (res.status === 429 || res.status >= 500) {
-        console.error(`${label} returned status ${res.status}: ${text.substring(0, 150)}`);
+      if (res.status === 429) {
+        console.error(`${label} returned status 429: ${text.substring(0, 150)}`);
+
         if (attempt < attempts) {
-          await sleep(600 * attempt);
+          const retryAfterMs = parseRetryAfterMs(res.headers.get("Retry-After"));
+          await sleep(retryAfterMs ?? computeBackoffMs(attempt));
           continue;
         }
+
+        return null;
+      }
+
+      if (res.status >= 500) {
+        console.error(`${label} returned status ${res.status}: ${text.substring(0, 150)}`);
+
+        if (attempt < attempts) {
+          await sleep(computeBackoffMs(attempt));
+          continue;
+        }
+
         return null;
       }
 
@@ -94,10 +131,12 @@ async function safeFetchJson(
       }
     } catch (e) {
       console.error(`${label} fetch failed: ${e instanceof Error ? e.message : String(e)}`);
+
       if (attempt < attempts) {
-        await sleep(600 * attempt);
+        await sleep(computeBackoffMs(attempt));
         continue;
       }
+
       return null;
     } finally {
       if (timeoutId !== undefined) clearTimeout(timeoutId);
@@ -166,6 +205,10 @@ async function geocodePhoton(query: string, label: string): Promise<{ lat: numbe
   return null;
 }
 
+function escapeOverpassValue(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 async function queryOverpass(query: string, label: string): Promise<any[]> {
   const cacheKey = `overpass:${query}`;
   const cached = overpassCache.get(cacheKey);
@@ -182,7 +225,7 @@ async function queryOverpass(query: string, label: string): Promise<any[]> {
         },
         body: `data=${encodeURIComponent(query)}`,
       },
-      2,
+      3,
     );
 
     if (data && Array.isArray(data.elements)) {
@@ -192,6 +235,84 @@ async function queryOverpass(query: string, label: string): Promise<any[]> {
   }
 
   return [];
+}
+
+function extractElementCoords(element: any): { lat: number; lon: number } | null {
+  const lat = Number(element?.lat ?? element?.center?.lat);
+  const lon = Number(element?.lon ?? element?.center?.lon);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  return { lat, lon };
+}
+
+function isGenericAddress(address: string, fallbackCity?: string, fallbackState?: string): boolean {
+  const cleaned = (address || "").trim();
+  if (!cleaned) return true;
+
+  if (fallbackCity && fallbackState) {
+    if (cleaned === `${fallbackCity}/${fallbackState}` || cleaned === `${fallbackCity} — ${fallbackState}`) {
+      return true;
+    }
+  }
+
+  if (fallbackCity && cleaned === fallbackCity) return true;
+
+  return !cleaned.includes(",") && !/\d/.test(cleaned);
+}
+
+async function reverseGeocodeAddress(
+  lat: number,
+  lon: number,
+  fallbackCity?: string,
+  fallbackState?: string,
+): Promise<string | null> {
+  const key = `${lat.toFixed(5)},${lon.toFixed(5)}`;
+  const cached = reverseAddressCache.get(key);
+  if (cached) return cached;
+
+  const params = new URLSearchParams({
+    lat: String(lat),
+    lon: String(lon),
+    format: "jsonv2",
+    addressdetails: "1",
+    zoom: "18",
+  });
+
+  const data = await safeFetchJson(
+    `https://nominatim.openstreetmap.org/reverse?${params.toString()}`,
+    "Nominatim-reverse",
+    {},
+    2,
+  );
+
+  const addr = data?.address || {};
+  const street = addr.road || addr.pedestrian || addr.residential || addr.cycleway || "";
+  const number = addr.house_number || "";
+  const city =
+    addr.city ||
+    addr.town ||
+    addr.village ||
+    addr.municipality ||
+    addr.city_district ||
+    fallbackCity ||
+    "";
+  const state = fallbackState || addr.state_code || addr.state || "";
+
+  let formatted = "";
+
+  if (street) {
+    formatted = street;
+    if (number) formatted += `, ${number}`;
+    if (city) formatted += ` — ${city}`;
+    if (state) formatted += `/${state}`;
+  } else if (data?.display_name) {
+    formatted = String(data.display_name).split(",").slice(0, 3).join(",").trim();
+  }
+
+  if (!formatted) return null;
+
+  reverseAddressCache.set(key, formatted);
+  return formatted;
 }
 
 serve(async (req) => {
@@ -209,38 +330,44 @@ serve(async (req) => {
     }
 
     const cleanCep = String(cep).replace(/\D/g, "");
+    const safeLocalidade = localidade ? escapeOverpassValue(String(localidade)) : "";
 
     let coords: { lat: number; lon: number } | null = null;
 
-    if (localidade && uf) {
+    if (cleanCep.length >= 8) {
+      coords = await geocodeNominatim(`${cleanCep}, Brasil`, "Nominatim-cep");
+    }
+
+    if (!coords && localidade && uf) {
       coords = await geocodeNominatim(`${localidade}, ${uf}, Brasil`, "Nominatim-city");
-      if (!coords) {
-        coords = await geocodePhoton(`${localidade}, ${uf}, Brasil`, "Photon-city");
-      }
     }
 
     if (!coords) {
-      coords = await geocodeNominatim(`${cleanCep}, Brasil`, "Nominatim-cep");
-      if (!coords) {
-        const composed = [cleanCep, localidade, uf, "Brasil"].filter(Boolean).join(", ");
-        coords = await geocodePhoton(composed, "Photon-cep");
-      }
+      const composed = [cleanCep, localidade, uf, "Brasil"].filter(Boolean).join(", ");
+      coords = await geocodePhoton(composed, "Photon-cep-city");
     }
 
     if (!coords && localidade) {
-      const areaQuery = `[out:json][timeout:15];area["name"="${localidade}"]["admin_level"]->.a;node["amenity"="post_office"](area.a);out body 1;`;
+      const areaQuery = `[out:json][timeout:20];area["name"="${safeLocalidade}"]["boundary"="administrative"]->.a;(node["amenity"="post_office"](area.a);way["amenity"="post_office"](area.a);relation["amenity"="post_office"](area.a););out body center 1;`;
       const elements = await queryOverpass(areaQuery, "Overpass-area");
 
       if (elements.length > 0) {
         const el = elements[0];
         const tags = el.tags || {};
+        const elCoords = extractElementCoords(el);
+        let endereco = buildEndereco(tags, localidade, uf);
+
+        if (elCoords && isGenericAddress(endereco, localidade, uf)) {
+          const reverseAddr = await reverseGeocodeAddress(elCoords.lat, elCoords.lon, localidade, uf);
+          if (reverseAddr) endereco = reverseAddr;
+        }
 
         return new Response(
           JSON.stringify({
             found: true,
             agency: {
               name: tags.name || tags["official_name"] || "Agência dos Correios",
-              endereco: buildEndereco(tags, localidade, uf),
+              endereco,
             },
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -260,8 +387,8 @@ serve(async (req) => {
 
     let agencies: any[] = [];
 
-    for (const radius of [5000, 15000, 30000]) {
-      const overpassQuery = `[out:json][timeout:15];(node["amenity"="post_office"](around:${radius},${coords.lat},${coords.lon});way["amenity"="post_office"](around:${radius},${coords.lat},${coords.lon}););out body center;`;
+    for (const radius of [5000, 15000, 30000, 60000]) {
+      const overpassQuery = `[out:json][timeout:20];(node["amenity"="post_office"](around:${radius},${coords.lat},${coords.lon});way["amenity"="post_office"](around:${radius},${coords.lat},${coords.lon});relation["amenity"="post_office"](around:${radius},${coords.lat},${coords.lon}););out body center;`;
       const elements = await queryOverpass(overpassQuery, `Overpass-${radius}`);
       if (elements.length > 0) {
         agencies = elements;
@@ -270,7 +397,7 @@ serve(async (req) => {
     }
 
     if (agencies.length === 0 && localidade) {
-      const areaQuery = `[out:json][timeout:15];area["name"="${localidade}"]["admin_level"]->.a;node["amenity"="post_office"](area.a);out body 25;`;
+      const areaQuery = `[out:json][timeout:20];area["name"="${safeLocalidade}"]["boundary"="administrative"]->.a;(node["amenity"="post_office"](area.a);way["amenity"="post_office"](area.a);relation["amenity"="post_office"](area.a););out body center 40;`;
       agencies = await queryOverpass(areaQuery, "Overpass-area-fallback");
     }
 
@@ -284,10 +411,9 @@ serve(async (req) => {
     let minDist = Infinity;
 
     for (const ag of agencies) {
-      const agLat = Number(ag.lat ?? ag.center?.lat);
-      const agLon = Number(ag.lon ?? ag.center?.lon);
-      if (Number.isFinite(agLat) && Number.isFinite(agLon)) {
-        const dist = haversineDistance(coords.lat, coords.lon, agLat, agLon);
+      const agCoords = extractElementCoords(ag);
+      if (agCoords) {
+        const dist = haversineDistance(coords.lat, coords.lon, agCoords.lat, agCoords.lon);
         if (dist < minDist) {
           minDist = dist;
           closest = ag;
@@ -296,9 +422,19 @@ serve(async (req) => {
     }
 
     const tags = closest?.tags || {};
+    const closestCoords = extractElementCoords(closest);
+    let endereco = buildEndereco(tags, localidade, uf);
+
+    if (closestCoords && isGenericAddress(endereco, localidade, uf)) {
+      const reverseAddr = await reverseGeocodeAddress(closestCoords.lat, closestCoords.lon, localidade, uf);
+      if (reverseAddr) {
+        endereco = reverseAddr;
+      }
+    }
+
     const agency: Record<string, string | number> = {
       name: tags.name || tags["official_name"] || "Agência dos Correios",
-      endereco: buildEndereco(tags, localidade, uf),
+      endereco,
     };
 
     if (Number.isFinite(minDist)) {
@@ -325,10 +461,30 @@ serve(async (req) => {
 });
 
 function buildEndereco(tags: Record<string, string>, fallbackCity?: string, fallbackState?: string): string {
-  const street = tags["addr:street"] || "";
-  const number = tags["addr:housenumber"] || "";
-  const city = tags["addr:city"] || fallbackCity || "";
-  const state = tags["addr:state"] || fallbackState || "";
+  const full = tags["addr:full"] || "";
+  if (full) return full;
+
+  const street =
+    tags["addr:street"] ||
+    tags["contact:street"] ||
+    tags["street"] ||
+    tags["addr:place"] ||
+    "";
+
+  const number =
+    tags["addr:housenumber"] ||
+    tags["contact:housenumber"] ||
+    tags["addr:unit"] ||
+    "";
+
+  const city =
+    tags["addr:city"] ||
+    tags["contact:city"] ||
+    tags["addr:municipality"] ||
+    fallbackCity ||
+    "";
+
+  const state = tags["addr:state"] || tags["contact:state"] || fallbackState || "";
 
   if (!street) return city && state ? `${city}/${state}` : city || "";
 
