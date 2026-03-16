@@ -96,7 +96,8 @@ const Resultado = () => {
       } catch {
         const fallback = generateFallbackAgency(cd);
         setAgency(fallback);
-        saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd, agencyData: fallback });
+        const s2 = getSession();
+        saveSession({ cpfData: s2?.cpfData || { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd, agencyData: fallback });
       } finally {
         setLoading(false);
       }
