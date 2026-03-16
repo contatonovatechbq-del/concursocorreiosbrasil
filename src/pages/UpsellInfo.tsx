@@ -21,14 +21,11 @@ interface UpsellInfoItem {
   botaoTexto: string;
 }
 
-const buildUpsellInfo = (cepData?: CepData): UpsellInfoItem[] => {
-  const agenciaNome = cepData
-    ? `Agência ${cepData.localidade} — ${cepData.bairro || 'Centro'}`
-    : "Agência mais próxima do seu CEP";
-  const numPredial = Math.floor(Math.random() * 2000) + 100;
-  const agenciaEndereco = cepData?.logradouro
-    ? `${cepData.logradouro}, ${numPredial} — ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}`
-    : "Endereço será definido com base no seu CEP";
+const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfoItem[] => {
+  const agenciaNome = agencyData?.name
+    || (cepData ? `Agência ${cepData.localidade} — ${cepData.bairro || 'Centro'}` : "Agência mais próxima do seu CEP");
+  const agenciaEndereco = agencyData?.endereco
+    || (cepData?.logradouro ? `${cepData.logradouro}, ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}` : "Endereço será definido com base no seu CEP");
 
   return [
     {
