@@ -43,7 +43,7 @@ const Resultado = () => {
   const hasFetched = useRef(false);
   const [agency, setAgency] = useState<AgencyInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const [vagasRegiao] = useState(() => Math.floor(Math.random() * 40) + 30);
+  const [vagasRegiao] = useState(() => Math.floor(Math.random() * 6) + 2);
   const [provaDate] = useState(getProvaDate);
 
   useEffect(() => {
