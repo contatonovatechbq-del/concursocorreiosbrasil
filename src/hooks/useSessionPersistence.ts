@@ -22,6 +22,12 @@ export interface CepData {
   uf: string;
 }
 
+export interface AgencyData {
+  name: string;
+  endereco: string;
+  distanceKm?: number;
+}
+
 interface SessionData {
   cpfData: CPFData;
   currentStep: string;
@@ -30,6 +36,7 @@ interface SessionData {
   timestamp: number;
   chatState?: ChatState;
   cepData?: CepData;
+  agencyData?: AgencyData;
 }
 
 const FUNNEL_STEPS = [

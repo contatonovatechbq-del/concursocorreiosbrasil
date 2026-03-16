@@ -65,24 +65,31 @@ const Resultado = () => {
           body: { cep: cd.cep, localidade: cd.localidade, uf: cd.uf },
         });
 
+        let agencyResult: AgencyInfo;
         if (!error && data?.found && data.agency?.endereco) {
           const fetchedAddress = String(data.agency.endereco);
           const isSameCity = isAgencyInRequestedCity(fetchedAddress, cd.localidade);
 
           if (isSameCity) {
-            setAgency({
+            agencyResult = {
               name: data.agency.name,
               endereco: fetchedAddress,
               distanceKm: data.agency.distanceKm,
-            });
+            };
           } else {
-            setAgency(generateFallbackAgency(cd));
+            agencyResult = generateFallbackAgency(cd);
           }
         } else {
-          setAgency(generateFallbackAgency(cd));
+          agencyResult = generateFallbackAgency(cd);
         }
+
+        setAgency(agencyResult);
+        // Save agency data to session for use in upsell pages
+        saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd, agencyData: agencyResult });
       } catch {
-        setAgency(generateFallbackAgency(cd));
+        const fallback = generateFallbackAgency(cd);
+        setAgency(fallback);
+        saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd, agencyData: fallback });
       } finally {
         setLoading(false);
       }
