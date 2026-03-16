@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
-import { getUtmSignature, getStoredUtmParams } from "@/hooks/useUtmTracking";
+import { getUtmSignature, getStoredUtmParams, captureUtmParams } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 interface PixData {
@@ -100,8 +100,11 @@ const Saque = () => {
         const amountInCents = Math.round(taxaFinal * 100);
         const externalId = `${protocolo || 'WB'}-API-${Date.now()}`;
 
+        // Safety net: captura UTMs antes de ler, caso UtmCapture não tenha rodado ainda
+        captureUtmParams();
         const utmSignature = getUtmSignature();
         const utmParams = getStoredUtmParams();
+        console.log('[Saque] UTM params for PIX:', utmParams);
 
         const response = await supabase.functions.invoke('create-pix', {
           body: {

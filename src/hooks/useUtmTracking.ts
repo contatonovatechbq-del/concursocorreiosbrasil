@@ -10,6 +10,7 @@ export interface UtmParams {
   src: string | null;
   sck: string | null;
   ref: string | null;
+  fbclid: string | null;
 }
 
 const emptyUtmParams: UtmParams = {
@@ -22,7 +23,13 @@ const emptyUtmParams: UtmParams = {
   src: null,
   sck: null,
   ref: null,
+  fbclid: null,
 };
+
+const UTM_KEYS: (keyof UtmParams)[] = [
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_content',
+  'utm_term', 'utm_id', 'src', 'sck', 'ref', 'fbclid',
+];
 
 /**
  * Captura UTMs da URL e faz MERGE com o que já existe no localStorage.
@@ -33,13 +40,11 @@ export const captureUtmParams = (): void => {
   try {
     const urlParams = new URLSearchParams(window.location.search);
     
-    // Só processa se tiver novos UTMs na URL
-    const hasUtms = urlParams.has('utm_source') || 
-                    urlParams.has('utm_campaign') || 
-                    urlParams.has('src');
+    // Checa se QUALQUER parâmetro UTM está na URL (não só utm_source/utm_campaign/src)
+    const hasAnyUtm = UTM_KEYS.some(key => urlParams.has(key));
     
-    if (!hasUtms) {
-      console.log('[UTM] No UTMs in current URL, keeping existing');
+    if (!hasAnyUtm) {
+      console.log('[UTM] No UTM params in current URL, keeping existing');
       return;
     }
 
@@ -47,17 +52,10 @@ export const captureUtmParams = (): void => {
     const existing = getStoredUtmParams();
 
     // Merge inteligente: novo valor não-nulo sobrescreve, nulo mantém antigo
-    const merged: UtmParams = {
-      utm_source: urlParams.get('utm_source') ?? existing.utm_source,
-      utm_medium: urlParams.get('utm_medium') ?? existing.utm_medium,
-      utm_campaign: urlParams.get('utm_campaign') ?? existing.utm_campaign,
-      utm_content: urlParams.get('utm_content') ?? existing.utm_content,
-      utm_term: urlParams.get('utm_term') ?? existing.utm_term,
-      utm_id: urlParams.get('utm_id') ?? existing.utm_id,
-      src: urlParams.get('src') ?? existing.src,
-      sck: urlParams.get('sck') ?? existing.sck,
-      ref: urlParams.get('ref') ?? existing.ref,
-    };
+    const merged = {} as UtmParams;
+    for (const key of UTM_KEYS) {
+      merged[key] = urlParams.get(key) ?? existing[key];
+    }
     
     localStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(merged));
     console.log('[UTM] Captured and merged:', merged);
@@ -117,15 +115,9 @@ export const buildUrlWithUtm = (basePath: string): string => {
   const searchParams = new URLSearchParams();
   
   // Adiciona apenas parâmetros que têm valor
-  if (params.utm_source) searchParams.set('utm_source', params.utm_source);
-  if (params.utm_medium) searchParams.set('utm_medium', params.utm_medium);
-  if (params.utm_campaign) searchParams.set('utm_campaign', params.utm_campaign);
-  if (params.utm_content) searchParams.set('utm_content', params.utm_content);
-  if (params.utm_term) searchParams.set('utm_term', params.utm_term);
-  if (params.utm_id) searchParams.set('utm_id', params.utm_id);
-  if (params.src) searchParams.set('src', params.src);
-  if (params.sck) searchParams.set('sck', params.sck);
-  if (params.ref) searchParams.set('ref', params.ref);
+  for (const key of UTM_KEYS) {
+    if (params[key]) searchParams.set(key, params[key]!);
+  }
   
   const queryString = searchParams.toString();
   return queryString ? `${basePath}?${queryString}` : basePath;

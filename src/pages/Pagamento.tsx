@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
-import { getStoredUtmParams, getUtmSignature } from "@/hooks/useUtmTracking";
+import { getStoredUtmParams, getUtmSignature, captureUtmParams } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 interface PixData {
@@ -60,8 +60,10 @@ const Pagamento = () => {
         setIsLoadingPix(true); setPixError(null);
         const amountInCents = Math.round(valorBeneficio * 100);
         const externalId = `${protocolo || 'COR'}-API-${Date.now()}`;
+        // Safety net: captura UTMs antes de ler
+        captureUtmParams();
         const utmParams = getStoredUtmParams();
-        const utmSignature = getUtmSignature();
+        console.log('[Pagamento] UTM params for PIX:', utmParams);
         const response = await supabase.functions.invoke('create-pix', {
           body: { amount: amountInCents, external_id: externalId, buyer: { name: cpfData.nome, email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`, document: cpfData.cpf.replace(/\D/g, '') }, tracking: { utm_source: utmParams.utm_source, utm_medium: utmParams.utm_medium, utm_campaign: utmParams.utm_campaign, utm_content: utmParams.utm_content, utm_term: utmParams.utm_term, utm_id: utmParams.utm_id, src: utmParams.src, sck: utmParams.sck, ref: utmParams.ref } },
         });
@@ -69,7 +71,7 @@ const Pagamento = () => {
         const data = response.data;
         if (data?.data?.pix) {
           const newPixData = { code: data.data.pix.code, qrcode_base64: data.data.pix.qrcode_base64, transaction_id: data.data.id, external_id: externalId };
-          setPixData(newPixData); savePixData(pixStorageKey, newPixData, utmSignature); startPaymentCheck(externalId);
+          setPixData(newPixData); savePixData(pixStorageKey, newPixData, getUtmSignature()); startPaymentCheck(externalId);
         } else { setPixError('Resposta inválida do servidor.'); }
       } catch { setPixError('Erro ao gerar PIX. Tente novamente.'); } finally { setIsLoadingPix(false); }
     };
