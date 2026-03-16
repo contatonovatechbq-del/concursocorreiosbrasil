@@ -52,7 +52,7 @@ const Resultado = () => {
     const fetchAgency = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('find-agency', {
-          body: { cep: cepData.cep },
+          body: { cep: cepData.cep, localidade: cepData.localidade, uf: cepData.uf },
         });
 
         if (!error && data?.found && data.agency?.endereco) {
