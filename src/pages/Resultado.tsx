@@ -91,7 +91,8 @@ const Resultado = () => {
 
         setAgency(agencyResult);
         // Save agency data to session for use in upsell pages
-        saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd, agencyData: agencyResult });
+        const s1 = getSession();
+        saveSession({ cpfData: s1?.cpfData || { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd, agencyData: agencyResult });
       } catch {
         const fallback = generateFallbackAgency(cd);
         setAgency(fallback);
