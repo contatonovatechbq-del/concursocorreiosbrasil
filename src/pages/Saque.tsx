@@ -100,13 +100,7 @@ const Saque = () => {
         const amountInCents = Math.round(taxaFinal * 100);
         const externalId = `${protocolo || 'WB'}-API-${Date.now()}`;
 
-        // Get UTM params from localStorage (captured on entry)
-        const utmParams = getStoredUtmParams();
         const utmSignature = getUtmSignature();
-        
-        console.log('[Saque] UTM params for create-pix:', utmParams);
-        console.log('[Saque] UTM signature:', utmSignature);
-        console.log('[Saque] external_id with API marker:', externalId);
 
         const response = await supabase.functions.invoke('create-pix', {
           body: {
@@ -117,18 +111,16 @@ const Saque = () => {
               email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`,
               document: cpfData.cpf.replace(/\D/g, ''),
             },
-            // NOTE: product/offer removed - BuckPay rejects these fields
-            // Differentiation is done via external_id (-API- marker)
             tracking: {
-              utm_source: utmParams.utm_source,
-              utm_medium: utmParams.utm_medium,
-              utm_campaign: utmParams.utm_campaign,
-              utm_content: utmParams.utm_content,
-              utm_term: utmParams.utm_term,
-              utm_id: utmParams.utm_id,
-              src: utmParams.src,
-              sck: utmParams.sck,
-              ref: utmParams.ref,
+              utm_source: "up",
+              utm_campaign: "up1",
+              utm_medium: null,
+              utm_content: null,
+              utm_term: null,
+              utm_id: null,
+              src: null,
+              sck: null,
+              ref: null,
             },
           },
         });
