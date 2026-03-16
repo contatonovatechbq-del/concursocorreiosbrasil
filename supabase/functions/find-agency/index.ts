@@ -13,6 +13,19 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+async function fetchJson(url: string, label: string) {
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'CorreiosConsulta/1.0' },
+  });
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    console.error(`${label} returned non-JSON (status ${res.status}): ${text.substring(0, 200)}`);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -27,13 +40,12 @@ serve(async (req) => {
     const cleanCep = cep.replace(/\D/g, '');
 
     // Step 1: Geocode CEP using Nominatim
-    const geoUrl = `https://nominatim.openstreetmap.org/search?q=${cleanCep}+Brasil&format=json&limit=1`;
-    const geoRes = await fetch(geoUrl, {
-      headers: { 'User-Agent': 'CorreiosConsulta/1.0' },
-    });
-    const geoData = await geoRes.json();
+    const geoData = await fetchJson(
+      `https://nominatim.openstreetmap.org/search?q=${cleanCep}+Brasil&format=json&limit=1`,
+      'Nominatim'
+    );
 
-    if (!geoData || geoData.length === 0) {
+    if (!geoData || !Array.isArray(geoData) || geoData.length === 0) {
       return new Response(JSON.stringify({ found: false, reason: 'geocoding_failed' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -49,12 +61,9 @@ serve(async (req) => {
       const overpassQuery = `[out:json][timeout:10];(node["amenity"="post_office"](around:${radius},${lat},${lon});way["amenity"="post_office"](around:${radius},${lat},${lon}););out body center;`;
       const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
 
-      const overpassRes = await fetch(overpassUrl, {
-        headers: { 'User-Agent': 'CorreiosConsulta/1.0' },
-      });
-      const overpassData = await overpassRes.json();
+      const overpassData = await fetchJson(overpassUrl, 'Overpass');
 
-      if (overpassData.elements && overpassData.elements.length > 0) {
+      if (overpassData?.elements && overpassData.elements.length > 0) {
         agencies = overpassData.elements;
         break;
       }
@@ -88,7 +97,6 @@ serve(async (req) => {
     const number = tags['addr:housenumber'] || '';
     const city = tags['addr:city'] || '';
     const state = tags['addr:state'] || '';
-    const postcode = tags['addr:postcode'] || '';
 
     let endereco = '';
     if (street) {
