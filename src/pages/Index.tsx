@@ -89,7 +89,7 @@ const Index = () => {
                   <tr><td className="font-semibold text-foreground">Cargo</td><td>Atendente Comercial</td></tr>
                   <tr><td className="font-semibold text-foreground">Escolaridade</td><td>Nível Médio Completo</td></tr>
                   <tr><td className="font-semibold text-foreground">Vagas</td><td>15.153 em todo o Brasil</td></tr>
-                  <tr><td className="font-semibold text-foreground">Remuneração</td><td>R$ 2.429,26 + Benefícios (VA, VT, Plano de Saúde)</td></tr>
+                  <tr><td className="font-semibold text-foreground">Remuneração</td><td>R$ 5.724,23 + Benefícios (VA, VT, Plano de Saúde)</td></tr>
                   <tr><td className="font-semibold text-foreground">Carga Horária</td><td>40 horas semanais</td></tr>
                   <tr><td className="font-semibold text-foreground">Banca</td><td>IBFC — Instituto Brasileiro de Formação e Capacitação</td></tr>
                 </tbody>

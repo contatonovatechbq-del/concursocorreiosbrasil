@@ -54,7 +54,7 @@ const DetalhesInscricao = () => {
             <thead><tr><th colSpan={2}>Informações do Concurso</th></tr></thead>
             <tbody>
               <tr><td className="font-semibold w-1/3">Cargo</td><td>Atendente Comercial — Nível Médio</td></tr>
-              <tr><td className="font-semibold">Remuneração</td><td>R$ 2.400 a R$ 3.000</td></tr>
+              <tr><td className="font-semibold">Remuneração</td><td>R$ 5.700 a R$ 9.000*</td></tr>
               <tr><td className="font-semibold">Vagas</td><td>15.153 em todo o Brasil</td></tr>
               <tr><td className="font-semibold">Banca</td><td>IBFC — Instituto Brasileiro de Formação e Capacitação</td></tr>
             </tbody>

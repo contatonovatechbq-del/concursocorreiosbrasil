@@ -137,7 +137,7 @@ const Resultado = () => {
             <tbody>
               <tr><td className="font-semibold w-1/3">Cargo</td><td>Atendente Comercial</td></tr>
               <tr><td className="font-semibold">Nível</td><td>Médio Completo</td></tr>
-              <tr><td className="font-semibold">Salário</td><td>R$ 2.429,26 + Benefícios</td></tr>
+              <tr><td className="font-semibold">Salário</td><td>R$ 5.724,23 + Benefícios</td></tr>
               <tr><td className="font-semibold">Carga Horária</td><td>40h semanais</td></tr>
               <tr><td className="font-semibold">Vagas (Nacional)</td><td>15.153</td></tr>
             </tbody>
