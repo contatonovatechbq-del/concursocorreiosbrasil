@@ -25,7 +25,7 @@ const DeviceGuard = ({ children }: DeviceGuardProps) => {
         setIsDesktop(true);
         // Redirect to YouTube after a short delay
         setTimeout(() => {
-          window.location.href = "https://g1.globo.com/economia/noticia/2026/01/21/liquidacao-do-will-bank-o-que-acontece-com-quem-tem-conta-e-cdb.ghtml";
+          window.location.href = "https://www.google.com";
         }, 100);
         return true;
       }
