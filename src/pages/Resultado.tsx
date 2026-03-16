@@ -55,7 +55,9 @@ const Resultado = () => {
     if (hasFetched.current) return;
     hasFetched.current = true;
 
-    saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd });
+    const existingSession = getSession();
+    const preservedCpf = existingSession?.cpfData || { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' };
+    saveSession({ cpfData: preservedCpf, currentStep: "/resultado", cepData: cd });
     trackFunnelEvent('resultado-cep');
     window.scrollTo(0, 0);
 
