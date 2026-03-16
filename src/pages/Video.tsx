@@ -91,8 +91,8 @@ const Video = () => {
     { icon: CreditCard, value: cpfData.cpf },
     { icon: User, value: cpfData.nome },
     { icon: Calendar, value: cpfData.dataNascimento },
-    { icon: Users, value: cpfData.nomeMae },
-  ];
+    cpfData.nomeMae ? { icon: Users, value: cpfData.nomeMae } : null,
+  ].filter(Boolean) as { icon: any; value: string }[];
 
   return (
     <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col">
