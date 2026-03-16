@@ -58,7 +58,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
           body: {
             amount: amountInCents, external_id: externalId,
             buyer: { name: cpfData.nome, email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`, document: cpfData.cpf.replace(/\D/g, '') },
-            tracking: { utm_source: "up", utm_campaign: `up${stepNumber + 1}`, utm_medium: null, utm_content: null, utm_term: null, utm_id: null, src: null, sck: null, ref: null },
+            tracking: { utm_source: "up", utm_campaign: `up${stepNumber}`, utm_medium: null, utm_content: null, utm_term: null, utm_id: null, src: null, sck: null, ref: null },
           },
         });
 
