@@ -5,7 +5,7 @@ import CorreiosFooter from "@/components/CorreiosFooter";
 import UpsellStep from "@/components/UpsellStep";
 import { CPFData } from "@/lib/cpf";
 import { getSession, saveSession } from "@/hooks/useSessionPersistence";
-import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const UPSELLS = [
@@ -48,9 +48,9 @@ const Upsell = () => {
   const handlePaymentConfirmed = () => {
     const stateData = { cpfData, valorBeneficio, protocolo };
     if (stepNumber < 9) {
-      navigate(buildUrlWithUtm(`/upsell-info/${stepNumber + 1}`), { state: stateData });
+      navigate(`/upsell-info/${stepNumber + 1}`, { state: stateData });
     } else {
-      navigate(buildUrlWithUtm("/upsell-info/1"), { state: stateData });
+      navigate("/upsell-info/1", { state: stateData });
     }
   };
 
