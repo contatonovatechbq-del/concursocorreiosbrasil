@@ -6,7 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
-import { getStoredUtmParams, getUtmSignature } from "@/hooks/useUtmTracking";
+import { getUtmSignature } from "@/hooks/useUtmTracking";
 
 interface UpsellStepProps {
   title: string;
