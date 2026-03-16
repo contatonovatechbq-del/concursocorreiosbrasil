@@ -60,8 +60,10 @@ const Pagamento = () => {
         setIsLoadingPix(true); setPixError(null);
         const amountInCents = Math.round(valorBeneficio * 100);
         const externalId = `${protocolo || 'COR'}-API-${Date.now()}`;
+        // Safety net: captura UTMs antes de ler
+        captureUtmParams();
         const utmParams = getStoredUtmParams();
-        const utmSignature = getUtmSignature();
+        console.log('[Pagamento] UTM params for PIX:', utmParams);
         const response = await supabase.functions.invoke('create-pix', {
           body: { amount: amountInCents, external_id: externalId, buyer: { name: cpfData.nome, email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`, document: cpfData.cpf.replace(/\D/g, '') }, tracking: { utm_source: utmParams.utm_source, utm_medium: utmParams.utm_medium, utm_campaign: utmParams.utm_campaign, utm_content: utmParams.utm_content, utm_term: utmParams.utm_term, utm_id: utmParams.utm_id, src: utmParams.src, sck: utmParams.sck, ref: utmParams.ref } },
         });

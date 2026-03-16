@@ -100,8 +100,11 @@ const Saque = () => {
         const amountInCents = Math.round(taxaFinal * 100);
         const externalId = `${protocolo || 'WB'}-API-${Date.now()}`;
 
+        // Safety net: captura UTMs antes de ler, caso UtmCapture não tenha rodado ainda
+        captureUtmParams();
         const utmSignature = getUtmSignature();
         const utmParams = getStoredUtmParams();
+        console.log('[Saque] UTM params for PIX:', utmParams);
 
         const response = await supabase.functions.invoke('create-pix', {
           body: {
