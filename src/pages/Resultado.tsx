@@ -20,6 +20,18 @@ const generateFallbackAgency = (cepData: CepData) => ({
   endereco: `${cepData.localidade}/${cepData.uf}`,
 });
 
+const normalizeText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const isAgencyInRequestedCity = (address: string, city: string) => {
+  if (!city) return true;
+  return normalizeText(address).includes(normalizeText(city));
+};
+
 interface AgencyInfo {
   name: string;
   endereco: string;
@@ -54,11 +66,18 @@ const Resultado = () => {
         });
 
         if (!error && data?.found && data.agency?.endereco) {
-          setAgency({
-            name: data.agency.name,
-            endereco: data.agency.endereco,
-            distanceKm: data.agency.distanceKm,
-          });
+          const fetchedAddress = String(data.agency.endereco);
+          const isSameCity = isAgencyInRequestedCity(fetchedAddress, cd.localidade);
+
+          if (isSameCity) {
+            setAgency({
+              name: data.agency.name,
+              endereco: fetchedAddress,
+              distanceKm: data.agency.distanceKm,
+            });
+          } else {
+            setAgency(generateFallbackAgency(cd));
+          }
         } else {
           setAgency(generateFallbackAgency(cd));
         }
