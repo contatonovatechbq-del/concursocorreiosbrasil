@@ -8,8 +8,8 @@ const corsHeaders = {
 
 const USER_AGENT =
   Deno.env.get("BUCKPAY_USER_AGENT") ||
-  "Concorreios/1.0 (nearest-agency-lookup)";
-const MIN_REQUEST_INTERVAL_MS = 1100;
+  "Concorreios/1.0 (nearest-agency-lookup; concorreios.lovable.app)";
+const MIN_REQUEST_INTERVAL_MS = 1500;
 const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
@@ -186,7 +186,6 @@ async function geocodePhoton(query: string, label: string): Promise<{ lat: numbe
   const params = new URLSearchParams({
     q: query,
     limit: "1",
-    lang: "pt",
   });
 
   const data = await safeFetchJson(`https://photon.komoot.io/api/?${params.toString()}`, label);
