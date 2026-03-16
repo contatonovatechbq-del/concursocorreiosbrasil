@@ -32,6 +32,8 @@ export const trackFunnelEvent = async (
 ): Promise<void> => {
   try {
     const sessionId = getSessionId();
+    // Safety net: capture UTMs before reading to avoid null values
+    captureUtmParams();
     const utmParams = getStoredUtmParams();
     
     // Hash CPF if provided
