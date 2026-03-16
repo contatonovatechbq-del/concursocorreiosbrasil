@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
 import { getUtmSignature } from "@/hooks/useUtmTracking";
+import { validateCPF } from "@/lib/cpf";
 
 interface UpsellStepProps {
   title: string;
@@ -54,24 +55,41 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         const externalId = `${protocolo}-UP${stepNumber}-${Date.now()}`;
         const utmSignature = getUtmSignature();
 
-        // Validate buyer data - fallback to session if props are empty
-        const buyerName = cpfData.nome?.trim() || (() => {
-          try { const s = JSON.parse(localStorage.getItem('correios_session') || '{}'); return s?.cpfData?.nome || 'Usuario'; } catch { return 'Usuario'; }
+        // Validate buyer data - fallback to saved session data if props are empty
+        const sessionCpfData = (() => {
+          try {
+            const session = JSON.parse(localStorage.getItem("correios_session") || "{}");
+            return session?.cpfData ?? null;
+          } catch {
+            return null;
+          }
         })();
-        const buyerCpf = (cpfData.cpf || '').replace(/\D/g, '') || (() => {
-          try { const s = JSON.parse(localStorage.getItem('correios_session') || '{}'); return (s?.cpfData?.cpf || '').replace(/\D/g, '') || '00000000000'; } catch { return '00000000000'; }
-        })();
-        const buyerEmail = buyerName.toLowerCase().replace(/\s+/g, '.') + '@api.com';
 
-        if (buyerName.length < 3 || buyerCpf.length < 11) {
-          console.error('Invalid buyer data:', { buyerName, buyerCpf });
-          setPixError('Dados do candidato incompletos. Volte ao início.');
+        const buyerName = (cpfData.nome?.trim() || sessionCpfData?.nome?.trim() || "")
+          .replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'-]/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        const buyerCpf = (cpfData.cpf || sessionCpfData?.cpf || "").replace(/\D/g, "");
+        const emailBase = buyerName
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/[^a-z\s'-]/g, "")
+          .trim()
+          .replace(/\s+/g, ".");
+        const buyerEmail = emailBase ? `${emailBase}@api.com` : "";
+
+        if (buyerName.length < 3 || !validateCPF(buyerCpf) || !buyerEmail) {
+          console.error("Invalid buyer data:", { buyerName, buyerCpf, buyerEmail });
+          setPixError("CPF inválido ou dados incompletos. Volte e refaça a consulta.");
           return;
         }
 
-        const response = await supabase.functions.invoke('create-pix', {
+        const response = await supabase.functions.invoke("create-pix", {
           body: {
-            amount: amountInCents, external_id: externalId,
+            amount: amountInCents,
+            external_id: externalId,
             buyer: { name: buyerName, email: buyerEmail, document: buyerCpf },
             tracking: { utm_source: "up", utm_campaign: `up${stepNumber}`, utm_medium: null, utm_content: null, utm_term: null, utm_id: null, src: null, sck: null, ref: null },
           },
