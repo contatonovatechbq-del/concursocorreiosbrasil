@@ -36,7 +36,7 @@ const Upsell = () => {
   const { step } = useParams<{ step: string }>();
 
   const parsedStep = parseInt(step || "1", 10);
-  const stepNumber = isNaN(parsedStep) ? 1 : Math.min(Math.max(parsedStep, 1), 9);
+  const stepNumber = isNaN(parsedStep) ? 1 : Math.min(Math.max(parsedStep, 1), 19);
   const currentIndex = stepNumber - 1;
   const currentUpsell = UPSELLS[currentIndex];
 
