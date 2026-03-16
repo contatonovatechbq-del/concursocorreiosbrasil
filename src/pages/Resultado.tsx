@@ -39,20 +39,27 @@ const Resultado = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const cepData: CepData | undefined = location.state?.cepData || getSession()?.cepData;
+  const cepDataRef = useRef(cepData);
+  const hasFetched = useRef(false);
   const [agency, setAgency] = useState<AgencyInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [vagasRegiao] = useState(() => Math.floor(Math.random() * 40) + 30);
+  const [provaDate] = useState(getProvaDate);
 
   useEffect(() => {
-    if (!cepData) { navigate("/"); return; }
-    saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData });
+    const cd = cepDataRef.current;
+    if (!cd) { navigate("/"); return; }
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
+    saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd });
     trackFunnelEvent('resultado-cep');
     window.scrollTo(0, 0);
 
-    // Fetch nearest real agency
     const fetchAgency = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('find-agency', {
-          body: { cep: cepData.cep, localidade: cepData.localidade, uf: cepData.uf },
+          body: { cep: cd.cep, localidade: cd.localidade, uf: cd.uf },
         });
 
         if (!error && data?.found && data.agency?.endereco) {
@@ -62,17 +69,17 @@ const Resultado = () => {
             distanceKm: data.agency.distanceKm,
           });
         } else {
-          setAgency(generateFallbackAgency(cepData));
+          setAgency(generateFallbackAgency(cd));
         }
       } catch {
-        setAgency(generateFallbackAgency(cepData));
+        setAgency(generateFallbackAgency(cd));
       } finally {
         setLoading(false);
       }
     };
 
     fetchAgency();
-  }, [cepData, navigate]);
+  }, [cepData?.cep]);
 
   if (!cepData) return null;
 
