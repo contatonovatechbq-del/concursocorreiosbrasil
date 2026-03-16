@@ -186,7 +186,6 @@ async function geocodePhoton(query: string, label: string): Promise<{ lat: numbe
   const params = new URLSearchParams({
     q: query,
     limit: "1",
-    lang: "pt",
   });
 
   const data = await safeFetchJson(`https://photon.komoot.io/api/?${params.toString()}`, label);
