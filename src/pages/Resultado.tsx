@@ -15,19 +15,10 @@ const getProvaDate = () => {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
-const generateFallbackAgency = (cepData: CepData) => {
-  const commonStreets = [
-    "Av. Brasil", "Rua Sete de Setembro", "Av. Presidente Vargas",
-    "Rua XV de Novembro", "Av. Getúlio Vargas", "Rua Marechal Deodoro",
-    "Av. Rio Branco", "Rua Santos Dumont"
-  ].filter(s => !cepData.logradouro?.includes(s));
-  const agencyStreet = commonStreets[Math.floor(Math.random() * commonStreets.length)];
-  const agencyNum = Math.floor(Math.random() * 900) + 100;
-  return {
-    name: `AC ${cepData.localidade} — Centro`,
-    endereco: `${agencyStreet}, ${agencyNum} — Centro, ${cepData.localidade}/${cepData.uf}`,
-  };
-};
+const generateFallbackAgency = (cepData: CepData) => ({
+  name: `Agência dos Correios — ${cepData.localidade}/${cepData.uf}`,
+  endereco: `${cepData.localidade}/${cepData.uf}`,
+});
 
 interface AgencyInfo {
   name: string;
