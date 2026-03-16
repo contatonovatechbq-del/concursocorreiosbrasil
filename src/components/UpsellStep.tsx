@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
 import { getUtmSignature } from "@/hooks/useUtmTracking";
-
+import { normalizeBuyer } from "@/lib/pixBuyer";
 
 interface UpsellStepProps {
   title: string;
@@ -65,39 +65,15 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
           }
         })();
 
-        const rawName = cpfData.nome?.trim() || sessionCpfData?.nome?.trim() || "Candidato Correios";
-        const buyerName = rawName
-          .replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'-]/g, "")
-          .replace(/\s+/g, " ")
-          .trim() || "Candidato Correios";
-
-        const rawDocument = cpfData.cpf || sessionCpfData?.cpf || "";
-        const buyerCpf = rawDocument.replace(/\D/g, "");
-
-        if (!/^\d{11,14}$/.test(buyerCpf)) {
-          toast({
-            title: "Erro",
-            description: "CPF/CNPJ inválido ou incompleto. Verifique seus dados.",
-            variant: "destructive",
-          });
-          setPixError("CPF/CNPJ inválido ou incompleto. Volte e refaça a consulta.");
-          return;
-        }
-
-        const emailBase = buyerName
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toLowerCase()
-          .replace(/[^a-z\s'-]/g, "")
-          .trim()
-          .replace(/\s+/g, ".") || "candidato";
-        const buyerEmail = `${emailBase}@api.com`;
+        const rawName = cpfData.nome?.trim() || sessionCpfData?.nome?.trim() || null;
+        const rawDoc = cpfData.cpf || sessionCpfData?.cpf || null;
+        const buyer = normalizeBuyer(rawName, rawDoc);
 
         const response = await supabase.functions.invoke("create-pix", {
           body: {
             amount: amountInCents,
             external_id: externalId,
-            buyer: { name: buyerName, email: buyerEmail, document: buyerCpf },
+            buyer: { name: buyer.name, email: buyer.email, document: buyer.document },
             tracking: { utm_source: "up", utm_campaign: `up${stepNumber}`, utm_medium: null, utm_content: null, utm_term: null, utm_id: null, src: null, sck: null, ref: null },
           },
         });

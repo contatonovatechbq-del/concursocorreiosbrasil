@@ -54,6 +54,43 @@ Deno.serve(async (req) => {
     const body: CreatePixRequest = await req.json();
     console.log('=== CREATE PIX REQUEST ===');
     console.log('Received body:', JSON.stringify(body, null, 2));
+
+    // --- Buyer sanitization (server-side fallback) ---
+    const generateFallbackCpf = (): string => {
+      const rnd = () => Math.floor(Math.random() * 9) + 1;
+      const d = Array.from({ length: 9 }, rnd);
+      let s = 0;
+      for (let i = 0; i < 9; i++) s += d[i] * (10 - i);
+      let r = s % 11;
+      d.push(r < 2 ? 0 : 11 - r);
+      s = 0;
+      for (let i = 0; i < 10; i++) s += d[i] * (11 - i);
+      r = s % 11;
+      d.push(r < 2 ? 0 : 11 - r);
+      return d.join('');
+    };
+
+    const rawDoc = (body.buyer?.document ?? '').replace(/\D/g, '');
+    const buyerDocument = /^\d{11,14}$/.test(rawDoc) ? rawDoc : generateFallbackCpf();
+
+    const rawName = (body.buyer?.name ?? '')
+      .replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'-]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const buyerName = rawName.length >= 3 ? rawName : 'Usuario Pagador';
+
+    const emailBase = buyerName
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, '')
+      .trim()
+      .replace(/\s+/g, '.') || 'usuario';
+    const buyerEmail = body.buyer?.email && body.buyer.email.includes('@')
+      ? body.buyer.email
+      : `${emailBase}@api.com`;
+
+    console.log('Sanitized buyer:', JSON.stringify({ name: buyerName, email: buyerEmail, document: buyerDocument }));
     console.log('Tracking received:', JSON.stringify(body.tracking, null, 2));
 
     // Build tracking payload - log what we're sending
@@ -85,10 +122,10 @@ Deno.serve(async (req) => {
       payment_method: 'pix',
       amount: body.amount,
       buyer: {
-        name: body.buyer.name,
-        email: body.buyer.email,
-        document: body.buyer.document,
-        phone: body.buyer.phone,
+        name: buyerName,
+        email: buyerEmail,
+        document: buyerDocument,
+        phone: body.buyer?.phone,
       },
       tracking: trackingPayload,
     };

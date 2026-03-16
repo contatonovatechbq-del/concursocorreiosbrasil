@@ -55,7 +55,9 @@ const Resultado = () => {
     if (hasFetched.current) return;
     hasFetched.current = true;
 
-    saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd });
+    const existingSession = getSession();
+    const preservedCpf = existingSession?.cpfData || { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' };
+    saveSession({ cpfData: preservedCpf, currentStep: "/resultado", cepData: cd });
     trackFunnelEvent('resultado-cep');
     window.scrollTo(0, 0);
 
@@ -89,11 +91,13 @@ const Resultado = () => {
 
         setAgency(agencyResult);
         // Save agency data to session for use in upsell pages
-        saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd, agencyData: agencyResult });
+        const s1 = getSession();
+        saveSession({ cpfData: s1?.cpfData || { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd, agencyData: agencyResult });
       } catch {
         const fallback = generateFallbackAgency(cd);
         setAgency(fallback);
-        saveSession({ cpfData: { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd, agencyData: fallback });
+        const s2 = getSession();
+        saveSession({ cpfData: s2?.cpfData || { cpf: '', nome: '', dataNascimento: '', nomeMae: '', sexo: '' }, currentStep: "/resultado", cepData: cd, agencyData: fallback });
       } finally {
         setLoading(false);
       }

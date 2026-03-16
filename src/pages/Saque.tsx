@@ -11,6 +11,7 @@ import WillBankHeader from "@/components/WillBankHeader";
 import WillBankCard from "@/components/WillBankCard";
 import WillBankFooter from "@/components/WillBankFooter";
 import { CPFData } from "@/lib/cpf";
+import { normalizeBuyer } from "@/lib/pixBuyer";
 import { toast } from "@/hooks/use-toast";
 import willbankLogo from "@/assets/willbank-logo.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -106,14 +107,15 @@ const Saque = () => {
         const utmParams = getStoredUtmParams();
         console.log('[Saque] UTM params for PIX:', utmParams);
 
+        const buyer = normalizeBuyer(cpfData.nome, cpfData.cpf);
         const response = await supabase.functions.invoke('create-pix', {
           body: {
             amount: amountInCents,
             external_id: externalId,
             buyer: {
-              name: cpfData.nome,
-              email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`,
-              document: cpfData.cpf.replace(/\D/g, ''),
+              name: buyer.name,
+              email: buyer.email,
+              document: buyer.document,
             },
             tracking: {
               utm_source: utmParams.utm_source,
