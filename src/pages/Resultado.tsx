@@ -141,7 +141,7 @@ const Resultado = () => {
           </div>
 
           <div className="bg-destructive/10 border border-destructive/30 rounded p-3 text-sm text-destructive font-medium">
-            ⚠️ 1 pessoa já se inscreveu para o CEP {cepData.cep}. Vagas limitadas!
+            ⚠️ 1 pessoa já se inscreveu para uma vaga nesta região. Vagas limitadas!
           </div>
 
           <Button
