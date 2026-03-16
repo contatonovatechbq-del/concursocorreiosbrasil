@@ -47,7 +47,7 @@
             } catch(e) {}
             
             // Merge: new values override, nulls keep existing
-            var utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'utm_id', 'src', 'sck', 'ref'];
+            var utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'utm_id', 'src', 'sck', 'ref', 'fbclid'];
             var merged = {};
             for (var i = 0; i < utmKeys.length; i++) {
               var key = utmKeys[i];
