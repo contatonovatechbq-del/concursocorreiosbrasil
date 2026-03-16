@@ -14,7 +14,7 @@ const DetalhesInscricao = () => {
   const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
   const cepData = location.state?.cepData;
   const [centavos] = useState(() => Math.floor(Math.random() * 99) + 1);
-  const valorInscricao = 67 + centavos / 100;
+  const valorInscricao = 42 + centavos / 100;
 
   useEffect(() => {
     if (!cpfData) { navigate("/"); return; }
