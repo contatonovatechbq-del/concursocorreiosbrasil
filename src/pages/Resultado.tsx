@@ -16,7 +16,7 @@ const getProvaDate = () => {
 };
 
 const generateFallbackAgency = (cepData: CepData) => ({
-  name: `Agência dos Correios — ${cepData.localidade}/${cepData.uf}`,
+  name: `Agência dos Correios — Centro`,
   endereco: `${cepData.localidade}/${cepData.uf}`,
 });
 
