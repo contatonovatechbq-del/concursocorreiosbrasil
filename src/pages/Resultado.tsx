@@ -83,8 +83,7 @@ const Resultado = () => {
 
   if (!cepData) return null;
 
-  const vagasRegiao = Math.floor(Math.random() * 40) + 30;
-  const provaDate = getProvaDate();
+  // vagasRegiao and provaDate now in useState above
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
