@@ -9,7 +9,7 @@ const corsHeaders = {
 const USER_AGENT =
   Deno.env.get("BUCKPAY_USER_AGENT") ||
   "Concorreios/1.0 (nearest-agency-lookup)";
-const MIN_REQUEST_INTERVAL_MS = 1100;
+const MIN_REQUEST_INTERVAL_MS = 1500;
 const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
