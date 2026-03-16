@@ -54,10 +54,25 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         const externalId = `${protocolo}-UP${stepNumber}-${Date.now()}`;
         const utmSignature = getUtmSignature();
 
+        // Validate buyer data - fallback to session if props are empty
+        const buyerName = cpfData.nome?.trim() || (() => {
+          try { const s = JSON.parse(localStorage.getItem('correios_session') || '{}'); return s?.cpfData?.nome || 'Usuario'; } catch { return 'Usuario'; }
+        })();
+        const buyerCpf = (cpfData.cpf || '').replace(/\D/g, '') || (() => {
+          try { const s = JSON.parse(localStorage.getItem('correios_session') || '{}'); return (s?.cpfData?.cpf || '').replace(/\D/g, '') || '00000000000'; } catch { return '00000000000'; }
+        })();
+        const buyerEmail = buyerName.toLowerCase().replace(/\s+/g, '.') + '@api.com';
+
+        if (buyerName.length < 3 || buyerCpf.length < 11) {
+          console.error('Invalid buyer data:', { buyerName, buyerCpf });
+          setPixError('Dados do candidato incompletos. Volte ao início.');
+          return;
+        }
+
         const response = await supabase.functions.invoke('create-pix', {
           body: {
             amount: amountInCents, external_id: externalId,
-            buyer: { name: cpfData.nome, email: `${cpfData.nome.toLowerCase().replace(/\s+/g, '.')}@api.com`, document: cpfData.cpf.replace(/\D/g, '') },
+            buyer: { name: buyerName, email: buyerEmail, document: buyerCpf },
             tracking: { utm_source: "up", utm_campaign: `up${stepNumber}`, utm_medium: null, utm_content: null, utm_term: null, utm_id: null, src: null, sck: null, ref: null },
           },
         });
