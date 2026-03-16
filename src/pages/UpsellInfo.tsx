@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { CPFData } from "@/lib/cpf";
-import { getSession, saveSession, CepData } from "@/hooks/useSessionPersistence";
+import { getSession, saveSession, CepData, AgencyData } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
