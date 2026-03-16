@@ -93,8 +93,8 @@ const Consulta = () => {
     { icon: CreditCard, label: "CPF", value: cpfData.cpf },
     { icon: User, label: "Nome", value: cpfData.nome },
     { icon: Calendar, label: "Nascimento", value: cpfData.dataNascimento },
-    { icon: Users, label: "Nome da Mãe", value: cpfData.nomeMae },
-  ];
+    cpfData.nomeMae ? { icon: Users, label: "Nome da Mãe", value: cpfData.nomeMae } : null,
+  ].filter(Boolean) as { icon: any; label: string; value: string }[];
 
   const getStepIcon = (completed: boolean, isCurrent: boolean) => {
     if (completed) return <CheckCircle className="w-5 h-5 text-emerald-400" />;

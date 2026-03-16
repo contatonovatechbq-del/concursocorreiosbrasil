@@ -593,11 +593,21 @@ const Chat = () => {
     );
     await delay(1200);
 
-    await addBotMessage(<span><strong>Qual o nome da sua mãe?</strong></span>, true, 25);
-    await delay(500);
-    await addBotMessage(<span className="text-muted-foreground text-sm">Escolha a alternativa correta.</span>, false);
-    setQuizOptions(generateFakeOptions(cpfData?.nomeMae || "", "mae"));
-    setStep("quiz-mae");
+    if (cpfData?.nomeMae) {
+      await addBotMessage(<span><strong>Qual o nome da sua mãe?</strong></span>, true, 25);
+      await delay(500);
+      await addBotMessage(<span className="text-muted-foreground text-sm">Escolha a alternativa correta.</span>, false);
+      setQuizOptions(generateFakeOptions(cpfData.nomeMae, "mae"));
+      setStep("quiz-mae");
+    } else {
+      await addBotMessage(<span><strong>Qual sua data de nascimento?</strong></span>, true, 30);
+      await delay(500);
+      await addBotMessage(<span className="text-muted-foreground text-sm">Escolha a alternativa correta.</span>, false);
+      const newOptions = generateFakeOptions(cpfData?.dataNascimento || "", "nascimento");
+      setStep("quiz-nascimento");
+      await delay(100);
+      setQuizOptions(newOptions);
+    }
   };
 
   const handleVideoClick = () => {
