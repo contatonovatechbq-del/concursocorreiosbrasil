@@ -116,7 +116,7 @@ const Resultado = () => {
                 )}
                 <tr><td className="font-semibold">Data da Prova</td><td>{provaDate}</td></tr>
                 <tr><td className="font-semibold">Vagas na Região</td><td className="font-bold text-primary">{vagasRegiao}</td></tr>
-                <tr><td className="font-semibold">Inscrições p/ este CEP</td><td className="font-bold text-destructive">1</td></tr>
+                <tr><td className="font-semibold">Inscrições na Região</td><td className="font-bold text-destructive">1</td></tr>
               </tbody>
             </table>
           )}
