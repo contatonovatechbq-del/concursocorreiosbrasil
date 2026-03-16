@@ -53,25 +53,27 @@ const buildUpsellInfo = (cepData?: CepData): UpsellInfoItem[] => {
       botaoTexto: "CONFIRMAR INSCRIÇÃO AGORA — NÃO PERDER MINHA VAGA",
     },
     {
-      title: "Garantia de Vaga na Região", valor: 97, icon: Star,
-      headline: "🏆 GARANTA QUE VAI TRABALHAR PERTO DE CASA",
-      explicacao: "Com esta taxa, se você for aprovado, vai trabalhar na agência MAIS PERTO da sua casa. Sem essa garantia, o órgão pode te enviar para QUALQUER cidade do estado — a CENTENAS de quilômetros de onde você mora. Imagine passar no concurso e ter que se mudar pra uma cidade que você nem conhece. Com a garantia, você ESCOLHE onde trabalha.",
+      title: "Confirmação do Local da Prova", valor: 37, icon: MapPin,
+      headline: "⚠️ CONFIRME SEU LOCAL DE PROVA AGORA OU SERÁ ENVIADO PRA QUALQUER LUGAR",
+      explicacao: cepData
+        ? `Com base no CEP ${cepData.cep} que você informou, o local de prova mais próximo da sua casa é a ${agenciaNome}, localizada em ${agenciaEndereco}. Se você NÃO confirmar AGORA, o sistema vai te jogar em QUALQUER local com vaga sobrando — pode ser a HORAS de distância da sua casa. Você vai ter que acordar de madrugada, gastar com transporte e chegar CANSADO na prova. Quem confirma o local AGORA garante a vaga no local mais perto.`
+        : "O sistema distribui os candidatos de forma ALEATÓRIA nos locais de prova disponíveis. Se você NÃO confirmar agora, pode ser enviado para um local a HORAS de distância da sua casa. Confirme AGORA e garanta o local mais perto de você.",
       items: [
-        "Trabalhe na agência dos Correios MAIS PERTO de você",
-        "Prioridade TOTAL na escolha da cidade de lotação",
-        "Acompanhamento VIP de todo o processo até a posse",
-        "Suporte dedicado para dúvidas sobre o concurso",
-        "Garantia registrada no sistema com número de protocolo",
-        "Certificado de inscrição enviado por e-mail",
+        cepData ? `✔ Local confirmado: ${agenciaNome}` : "Prova no local mais próximo de você",
+        cepData ? `✔ Endereço: ${agenciaEndereco}` : "Endereço enviado por e-mail e SMS",
+        "Sala com acessibilidade garantida",
+        "Prioridade TOTAL na alocação — você escolhe, não o sistema",
+        "Mapa com direções para o local da prova",
+        "Opção de trocar o local até 48h antes da prova",
       ],
       consequencias: [
-        "Pode ser enviado para QUALQUER cidade do estado — sem escolha",
-        "NÃO terá prioridade na escolha do local de trabalho",
-        "Pode ter que se MUDAR para cidade desconhecida",
-        "Sem acompanhamento VIP do processo",
+        "Você SERÁ ENVIADO para qualquer local com vaga sobrando",
+        "Pode ter que viajar HORAS no dia da prova — acordar de madrugada",
+        "NÃO terá direito a solicitar mudança de local depois",
+        "Chegará CANSADO e NERVOSO na prova por causa da viagem",
       ],
-      nota: "🏆 GARANTA SUA VAGA NA REGIÃO AGORA. NÃO DEIXE PRA DEPOIS.",
-      botaoTexto: "GARANTIR MINHA VAGA NA REGIÃO AGORA",
+      nota: "⚠️ QUEM NÃO CONFIRMA O LOCAL VAI PRA ONDE SOBRAR VAGA. NÃO TEM COMO RECLAMAR DEPOIS.",
+      botaoTexto: "CONFIRMAR MEU LOCAL AGORA",
     },
     {
       title: "Cartão de Acesso à Prova", valor: 39, icon: CreditCard,
@@ -202,27 +204,26 @@ const buildUpsellInfo = (cepData?: CepData): UpsellInfoItem[] => {
       botaoTexto: "ATIVAR ALERTAS AGORA",
     },
     {
-      title: "Confirmação do Local da Prova", valor: 37, icon: MapPin,
-      headline: "⚠️ ÚLTIMA ETAPA — CONFIRME SEU LOCAL DE PROVA",
-      explicacao: cepData
-        ? `Esta é a ÚLTIMA taxa do processo. Com base no CEP ${cepData.cep} que você informou, o local de prova mais próximo da sua casa é a ${agenciaNome}, localizada em ${agenciaEndereco}. Se você NÃO confirmar AGORA, o sistema vai te jogar em QUALQUER local com vaga sobrando — pode ser a HORAS de distância da sua casa. Após o pagamento, sua inscrição estará 100% CONCLUÍDA.`
-        : "Esta é a ÚLTIMA taxa do processo. O sistema distribui os candidatos de forma ALEATÓRIA nos locais de prova disponíveis. Se você NÃO confirmar agora, pode ser enviado para um local a HORAS de distância da sua casa. Confirme AGORA e garanta o local mais perto de você. Após o pagamento, sua inscrição estará 100% CONCLUÍDA.",
+      title: "Garantia de Vaga na Região", valor: 97, icon: Star,
+      headline: "🏆 ÚLTIMA ETAPA — GARANTA QUE VAI TRABALHAR PERTO DE CASA",
+      explicacao: "Esta é a ÚLTIMA taxa do processo. Com ela, se você for aprovado, vai trabalhar na agência MAIS PERTO da sua casa. Sem essa garantia, o órgão pode te enviar para QUALQUER cidade do estado — a CENTENAS de quilômetros de onde você mora. Imagine passar no concurso e ter que se mudar pra uma cidade que você nem conhece. Com a garantia, você ESCOLHE onde trabalha.",
       items: [
-        cepData ? `✔ Local confirmado: ${agenciaNome}` : "Prova no local mais próximo de você",
-        cepData ? `✔ Endereço: ${agenciaEndereco}` : "Endereço enviado por e-mail e SMS",
-        "Sala com acessibilidade garantida",
-        "Prioridade TOTAL na alocação — você escolhe, não o sistema",
+        "Trabalhe na agência dos Correios MAIS PERTO de você",
+        "Prioridade TOTAL na escolha da cidade de lotação",
+        "Acompanhamento VIP de todo o processo até a posse",
         "Inscrição 100% CONCLUÍDA após este pagamento",
-        "Opção de trocar o local até 48h antes da prova",
+        "Suporte dedicado para dúvidas sobre o concurso",
+        "Garantia registrada no sistema com número de protocolo",
+        "Certificado de inscrição completa enviado por e-mail",
       ],
       consequencias: [
-        "Você SERÁ ENVIADO para qualquer local com vaga sobrando",
-        "Pode ter que viajar HORAS no dia da prova — acordar de madrugada",
+        "Pode ser enviado para QUALQUER cidade do estado — sem escolha",
+        "NÃO terá prioridade na escolha do local de trabalho",
         "Sua inscrição ficará como INCOMPLETA no sistema",
-        "Chegará CANSADO e NERVOSO na prova por causa da viagem",
+        "Pode ter que se MUDAR para cidade desconhecida",
       ],
       nota: "🏆 ÚLTIMA TAXA. APÓS O PAGAMENTO, SUA INSCRIÇÃO ESTARÁ 100% CONCLUÍDA. NÃO DEIXE PRA DEPOIS.",
-      botaoTexto: "FINALIZAR MINHA INSCRIÇÃO — CONFIRMAR LOCAL AGORA",
+      botaoTexto: "FINALIZAR MINHA INSCRIÇÃO AGORA",
     },
   ];
 };
@@ -278,7 +279,7 @@ const UpsellInfo = () => {
           </div>
 
           {/* Local da prova - dados do CEP (only on step 2) */}
-          {stepNumber === 9 && (
+          {stepNumber === 2 && (
             <table className="tabela-zebra">
               <thead><tr><th colSpan={2}>📍 Local de Prova Atribuído ao Seu CEP</th></tr></thead>
               <tbody>
