@@ -1,165 +1,74 @@
 
-# Plano: Dashboard Admin Completaco com Dados Limpos e Tempo Real
 
-## Problema Atual
-- **7.116 eventos de "saque" duplicados** causados pelo bug de loop infinito (ja corrigido)
-- Eventos antigos de "noticia" e "verificacao" que nao existem mais no funil
-- Falta refresh automatico para ver em tempo real
-- UTMs nao estao bem destacados (Facebook vs Direto)
-- Falta mais metricas visuais
+# Plano: 3 Correções + 10 Novos Upsells
 
-## Solucao Completa
+## Problemas identificados
 
-### 1. Limpar Dados Antigos (Zerar o Painel)
+1. **Só tem 9 upsells** — usuário quer 19 no total (adicionar 10 novos)
+2. **Agência demora** — `find-agency` leva muito tempo porque Nominatim/Overpass retornam 429/504 (rate limit). Precisa de um timeout curto com fallback rápido
+3. **"Gerando boleto"** — texto errado no Pagamento.tsx (linha 140 diz "boleto" mas é PIX)
+4. **UTMs não marcando em algumas campanhas** — o `track-funnel` está enviando `utm_source: null` nos requests (visível nos network logs). O `useFunnelTracking` não está lendo os UTMs do localStorage
 
-Vou deletar todos os eventos antigos para comecar do zero:
-- Remover os 7116 eventos de "saque" duplicados
-- Remover eventos de "noticia" e "verificacao" (etapas removidas)
-- Resultado: painel limpo para rastrear novos usuarios
+---
 
-### 2. Adicionar Refresh Automatico (Tempo Real)
+## Alterações
+
+### 1. Adicionar 10 novos upsells (steps 10-19)
+
+Arquivos: `src/pages/UpsellInfo.tsx`, `src/pages/Upsell.tsx`, `src/hooks/useSessionPersistence.ts`
+
+**Novos upsells (temática concurso Correios):**
+- 10: Kit Documentos para Posse (R$ 29)
+- 11: Curso Preparatório Express (R$ 57)
+- 12: Recurso Administrativo (R$ 22)
+- 13: Atualização do Edital (R$ 17)
+- 14: Prioridade na Correção (R$ 31)
+- 15: Certificado de Conclusão de Curso (R$ 23)
+- 16: Acesso ao Grupo VIP (R$ 14)
+- 17: Seguro Contra Atraso (R$ 18)
+- 18: Consultoria Individual (R$ 43)
+- 19: Pacote de Posse Garantida (R$ 67)
+
+Mudanças:
+- `UpsellInfo.tsx`: Adicionar 10 novos itens no array `buildUpsellInfo` com headline, explicação, items, consequências e nota (mesmo padrão agressivo dos existentes). Mudar o `Math.max(parsedStep, 1), 9)` para `19`
+- `Upsell.tsx`: Adicionar 10 novos itens no array `UPSELLS`. Mudar limit de 9 para 19
+- `useSessionPersistence.ts`: Adicionar as novas rotas `/upsell-info/10` até `/upsell/19` no `FUNNEL_STEPS`
+
+### 2. Corrigir demora da busca de agência
+
+Arquivo: `src/pages/Resultado.tsx`
+
+Adicionar um **timeout de 8 segundos** no fetch da agência. Se não responder a tempo, usar o fallback imediatamente em vez de esperar o edge function pendurar por 30+ segundos com retries.
 
 ```typescript
-// Auto-refresh a cada 30 segundos
-useEffect(() => {
-  const interval = setInterval(() => {
-    verifyAndFetchData(false); // refresh silencioso
-  }, 30000);
-  return () => clearInterval(interval);
-}, []);
+const timeoutPromise = new Promise((_, reject) => 
+  setTimeout(() => reject(new Error('timeout')), 8000)
+);
+const result = await Promise.race([fetchFromEdge(), timeoutPromise]);
 ```
 
-Indicador visual mostrando "Atualizado ha X segundos"
+### 3. Corrigir texto "boleto" → "PIX"
 
-### 3. Melhorar Exibicao das Fontes de Trafego
+Arquivo: `src/pages/Pagamento.tsx` (linha 140)
 
-**Card de destaque por fonte:**
-```text
-┌────────────────────────────────────────────────────────┐
-│ TRAFEGO EM TEMPO REAL                                  │
-├──────────────┬──────────────┬──────────────────────────┤
-│ 📘 Facebook  │ 📱 Direto    │ 📊 Google                │
-│ 45 visitas   │ 12 visitas   │ 8 visitas                │
-│ 62.3%        │ 16.7%        │ 11.1%                    │
-└──────────────┴──────────────┴──────────────────────────┘
-```
+Trocar `"Gerando boleto de inscrição..."` por `"Gerando PIX de inscrição..."`
 
-Cores distintas:
-- Facebook = Azul (#1877F2)
-- Direto = Cinza
-- Google = Verde
-- Instagram = Rosa/Roxo
-- TikTok = Preto
-- Outros = Neutro
+### 4. Corrigir UTMs não marcando no track-funnel
 
-### 4. Eventos Recentes Melhorados
+Arquivo: `src/hooks/useFunnelTracking.ts`
 
-Mostrar mais detalhes em cada evento:
-```text
-┌─────────────────────────────────────────────────────────┐
-│ EVENTOS EM TEMPO REAL (ultimos 50)           🔴 AO VIVO │
-├─────────────────────────────────────────────────────────┤
-│ 🟢 Login (CPF)     📘 facebook    agora mesmo          │
-│ 🟢 Verificando     📘 facebook    ha 5 seg             │
-│ 🟢 Biometria       📱 direto      ha 32 seg            │
-│ 🟡 Chat            📘 facebook    ha 1 min             │
-│ 🔵 Saque           📘 facebook    ha 2 min             │
-│ ✅ Pagamento       📱 direto      ha 5 min             │
-└─────────────────────────────────────────────────────────┘
-```
+O problema: o `trackFunnelEvent` provavelmente não está lendo `getStoredUtmParams()` antes de enviar. Nos network logs, vemos `utm_source: null` em TODOS os track-funnel requests, mesmo quando o create-pix recebe UTMs corretos (como CLECIA com C11). Preciso verificar e corrigir para que o tracking de funil também capture os UTMs do localStorage.
 
-Cores por etapa do funil:
-- Verde = Inicio (login, verificando, confirma-dados)
-- Amarelo = Meio (biometria, video, chat)
-- Azul = Fim (saque, pix-generated)
-- Verde Check = Pagamento confirmado
+---
 
-### 5. Cards de Metricas Adicionais
+## Resumo de arquivos
 
-Novos cards no topo:
-- **PIX Gerados** - quantos chegaram na tela de PIX
-- **Taxa de Pagamento do PIX** - pix-generated -> payment-confirmed
-- **Tempo Medio no Funil** (se possivel calcular)
-
-### 6. Funil por Fonte de Trafego
-
-Filtro para ver o funil separado por UTM:
-- "Todos"
-- "Facebook"
-- "Direto"
-- "Google"
-- etc.
-
-Isso ajuda a ver qual fonte converte melhor!
-
-## Alteracoes Tecnicas
-
-### Arquivos a Modificar
-
-| Arquivo | Mudanca |
+| Arquivo | Mudança |
 |---------|---------|
-| `src/pages/Admin.tsx` | Auto-refresh, cards de UTM, eventos melhorados, filtro por fonte |
-| `supabase/functions/admin-analytics/index.ts` | Retornar mais dados (ultimos 50 eventos, breakdown por UTM+step) |
+| `src/pages/UpsellInfo.tsx` | +10 upsells no buildUpsellInfo, limit 9→19 |
+| `src/pages/Upsell.tsx` | +10 upsells no UPSELLS array, limit 9→19 |
+| `src/hooks/useSessionPersistence.ts` | +20 novas rotas no FUNNEL_STEPS |
+| `src/pages/Resultado.tsx` | Timeout 8s no fetch da agência |
+| `src/pages/Pagamento.tsx` | "boleto" → "PIX" |
+| `src/hooks/useFunnelTracking.ts` | Ler UTMs do localStorage e enviar no tracking |
 
-### Migracao de Banco
-
-Limpar eventos antigos:
-```sql
-DELETE FROM funnel_events 
-WHERE step IN ('noticia', 'verificacao') 
-   OR created_at < '2026-02-06T09:00:00Z';
-```
-
-## Layout Final do Dashboard
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ Dashboard Admin                     🔄 10s [Hoje][7d][30d]  │
-├─────────────────────────────────────────────────────────────┤
-│ METRICAS PRINCIPAIS                                         │
-├────────────┬────────────┬────────────┬──────────────────────┤
-│ Sessoes    │ Conversao  │ Pagamentos │ PIX Gerados          │
-│ 👥 142     │ 📈 8.2%    │ ✅ 12      │ 💸 52                │
-├────────────┼────────────┼────────────┼──────────────────────┤
-│ Login→Chat │ Chat→Saque │ Saque→Pag  │ PIX→Pagamento        │
-│ 💬 45.3%   │ ➡️ 78.2%   │ 💰 23.1%   │ 💳 23.1%             │
-├────────────┴────────────┴────────────┴──────────────────────┤
-│ TRAFEGO POR FONTE                                           │
-├───────────────┬───────────────┬─────────────────────────────┤
-│ 📘 Facebook   │ 📱 Direto     │ 📊 Google                   │
-│ 89 (62.7%)    │ 38 (26.8%)    │ 15 (10.5%)                  │
-├───────────────┴───────────────┴─────────────────────────────┤
-│ FUNIL DE CONVERSAO                       [Grafico] [Tabela] │
-│ Filtrar: [Todos ▼] [Facebook] [Direto] [Google]             │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Login (CPF)       ████████████████████ 142  100.0%      │ │
-│ │ Verificando       ███████████████████  138  97.2%   -3% │ │
-│ │ Confirma Dados    ██████████████████   125  88.0%  -10% │ │
-│ │ Biometria         █████████████████    118  83.1%   -6% │ │
-│ │ Video             ██████████████       98   69.0%  -17% │ │
-│ │ Chat              █████████████        89   62.7%   -9% │ │
-│ │ Saque             ██████████           64   45.1%  -28% │ │
-│ │ PIX Gerado        ████████             52   36.6%  -19% │ │
-│ │ Pagamento ✅      ████                 12   8.5%   -77% │ │
-│ └─────────────────────────────────────────────────────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│ UPSELLS (base: 64 saques)                                   │
-│ [UP1: 8 (12.5%)] [UP2: 5 (7.8%)] [UP3: 3 (4.7%)]           │
-├─────────────────────────────┬───────────────────────────────┤
-│ EVENTOS EM TEMPO REAL 🔴    │ RESUMO POR FONTE              │
-│ 🟢 Login    📘 fb   agora   │ 📘 Facebook  ████████ 62.7%   │
-│ 🟢 Verif.   📘 fb   5s      │ 📱 Direto    █████    26.8%   │
-│ 🟡 Chat     📱 dir  32s     │ 📊 Google    ███      10.5%   │
-│ 🔵 Saque    📘 fb   1min    │                               │
-│ ✅ Pagam.   📱 dir  5min    │                               │
-└─────────────────────────────┴───────────────────────────────┘
-```
-
-## Resultado Esperado
-
-1. **Dados limpos** - sem eventos duplicados ou obsoletos
-2. **Tempo real** - auto-refresh a cada 30s com indicador visual
-3. **UTMs destacados** - cores distintas para Facebook, Direto, Google
-4. **Mais metricas** - PIX gerados, taxa de pagamento do PIX
-5. **Filtro por fonte** - ver funil apenas de Facebook, ou apenas Direto
-6. **Eventos ao vivo** - lista com cores por etapa e fonte
