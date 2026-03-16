@@ -18,6 +18,16 @@ const UPSELLS = [
   { valor: 19, title: "Certificado de Pré-Aprovação", description: "Documento que comprova que você cumpriu todos os requisitos. Pode usar pra pedir folga no trabalho no dia da prova." },
   { valor: 15, title: "Acompanhamento por SMS e E-mail", description: "Fique sabendo de tudo: mudança de data, local, gabarito, resultado. Quem não se cadastra, perde prazo e perde vaga." },
   { valor: 97, title: "Garantia de Vaga na Região", description: "Essa é a última taxa. Com ela, você garante que se passar, vai trabalhar na agência mais perto da sua casa." },
+  { valor: 29, title: "Kit Documentos para Posse", description: "Todos os documentos necessários para tomar posse. Sem eles, mesmo aprovado, você perde a vaga." },
+  { valor: 57, title: "Curso Preparatório Express", description: "Curso intensivo de 7 dias focado no que cai na prova. Candidatos preparados passam 3x mais." },
+  { valor: 22, title: "Recurso Administrativo", description: "Modelos de recurso prontos e orientação jurídica. Se a prova tiver erro, você pode contestar e ganhar pontos." },
+  { valor: 17, title: "Atualização do Edital", description: "Receba imediatamente qualquer mudança no edital. Datas, conteúdos e vagas mudam sem aviso." },
+  { valor: 31, title: "Prioridade na Correção", description: "Sua prova corrigida em até 48h. Saiba o resultado antes de todo mundo." },
+  { valor: 23, title: "Certificado de Conclusão de Curso", description: "Validação do seu certificado escolar. Obrigatório para a posse — sem ele, você é eliminado." },
+  { valor: 14, title: "Acesso ao Grupo VIP", description: "Grupo exclusivo com dicas, macetes e troca de experiências entre candidatos sérios." },
+  { valor: 18, title: "Seguro Contra Atraso", description: "Se você não conseguir chegar na prova por imprevisto, recebe reembolso integral." },
+  { valor: 43, title: "Consultoria Individual", description: "Orientação personalizada de um especialista. Plano de estudo feito sob medida pro seu perfil." },
+  { valor: 67, title: "Pacote de Posse Garantida", description: "Pacote completo: documentação, exames, orientação jurídica. Tudo para tomar posse sem problemas." },
 ];
 
 const Upsell = () => {
