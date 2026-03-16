@@ -5,7 +5,7 @@ import CorreiosFooter from "@/components/CorreiosFooter";
 import UpsellStep from "@/components/UpsellStep";
 import { CPFData } from "@/lib/cpf";
 import { getSession, saveSession } from "@/hooks/useSessionPersistence";
-import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const UPSELLS = [
