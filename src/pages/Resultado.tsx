@@ -43,7 +43,7 @@ const Resultado = () => {
   const hasFetched = useRef(false);
   const [agency, setAgency] = useState<AgencyInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const [vagasRegiao] = useState(() => Math.floor(Math.random() * 40) + 30);
+  const [vagasRegiao] = useState(() => Math.floor(Math.random() * 6) + 2);
   const [provaDate] = useState(getProvaDate);
 
   useEffect(() => {
@@ -116,6 +116,7 @@ const Resultado = () => {
                 )}
                 <tr><td className="font-semibold">Data da Prova</td><td>{provaDate}</td></tr>
                 <tr><td className="font-semibold">Vagas na Região</td><td className="font-bold text-primary">{vagasRegiao}</td></tr>
+                <tr><td className="font-semibold">Inscrições p/ este CEP</td><td className="font-bold text-destructive">1</td></tr>
               </tbody>
             </table>
           )}
@@ -137,6 +138,10 @@ const Resultado = () => {
             <p>• Prova aplicada na agência ou escola mais próxima do endereço informado.</p>
             <p>• Duração: 4 horas. Portões abrem às 12h, fecham às 13h.</p>
             <p>• Levar documento com foto e caneta esferográfica preta.</p>
+          </div>
+
+          <div className="bg-destructive/10 border border-destructive/30 rounded p-3 text-sm text-destructive font-medium">
+            ⚠️ 1 pessoa já se inscreveu para o CEP {cepData.cep}. Vagas limitadas!
           </div>
 
           <Button
