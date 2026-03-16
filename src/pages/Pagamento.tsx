@@ -71,7 +71,7 @@ const Pagamento = () => {
         const data = response.data;
         if (data?.data?.pix) {
           const newPixData = { code: data.data.pix.code, qrcode_base64: data.data.pix.qrcode_base64, transaction_id: data.data.id, external_id: externalId };
-          setPixData(newPixData); savePixData(pixStorageKey, newPixData, utmSignature); startPaymentCheck(externalId);
+          setPixData(newPixData); savePixData(pixStorageKey, newPixData, getUtmSignature()); startPaymentCheck(externalId);
         } else { setPixError('Resposta inválida do servidor.'); }
       } catch { setPixError('Erro ao gerar PIX. Tente novamente.'); } finally { setIsLoadingPix(false); }
     };
