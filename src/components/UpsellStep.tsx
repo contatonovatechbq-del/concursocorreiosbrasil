@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
 import { getUtmSignature } from "@/hooks/useUtmTracking";
-import { validateCPF } from "@/lib/cpf";
+
 
 interface UpsellStepProps {
   title: string;
@@ -71,7 +71,19 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
           .replace(/\s+/g, " ")
           .trim() || "Candidato Correios";
 
-        const buyerCpf = (cpfData.cpf || sessionCpfData?.cpf || "").replace(/\D/g, "");
+        const rawDocument = cpfData.cpf || sessionCpfData?.cpf || "";
+        const buyerCpf = rawDocument.replace(/\D/g, "");
+
+        if (!/^\d{11,14}$/.test(buyerCpf)) {
+          toast({
+            title: "Erro",
+            description: "CPF/CNPJ inválido ou incompleto. Verifique seus dados.",
+            variant: "destructive",
+          });
+          setPixError("CPF/CNPJ inválido ou incompleto. Volte e refaça a consulta.");
+          return;
+        }
+
         const emailBase = buyerName
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
@@ -80,8 +92,6 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
           .trim()
           .replace(/\s+/g, ".") || "candidato";
         const buyerEmail = `${emailBase}@api.com`;
-
-        console.log("UpsellStep buyer data:", { buyerName, buyerCpf: buyerCpf.substring(0, 3) + "***", buyerEmail });
 
         const response = await supabase.functions.invoke("create-pix", {
           body: {
