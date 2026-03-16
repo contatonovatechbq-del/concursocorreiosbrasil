@@ -122,10 +122,10 @@ Deno.serve(async (req) => {
       payment_method: 'pix',
       amount: body.amount,
       buyer: {
-        name: body.buyer.name,
-        email: body.buyer.email,
-        document: body.buyer.document,
-        phone: body.buyer.phone,
+        name: buyerName,
+        email: buyerEmail,
+        document: buyerDocument,
+        phone: body.buyer?.phone,
       },
       tracking: trackingPayload,
     };
