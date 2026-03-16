@@ -278,7 +278,7 @@ const UpsellInfo = () => {
           </div>
 
           {/* Local da prova - dados do CEP (only on step 2) */}
-          {stepNumber === 2 && (
+          {stepNumber === 9 && (
             <table className="tabela-zebra">
               <thead><tr><th colSpan={2}>📍 Local de Prova Atribuído ao Seu CEP</th></tr></thead>
               <tbody>

@@ -17,7 +17,7 @@ const UPSELLS = [
   { valor: 24, title: "Simulado Online da Banca", description: "Faça um simulado no mesmo formato da prova real. Você vai saber exatamente como vai ser no dia." },
   { valor: 19, title: "Certificado de Pré-Aprovação", description: "Documento que comprova que você cumpriu todos os requisitos. Pode usar pra pedir folga no trabalho no dia da prova." },
   { valor: 15, title: "Acompanhamento por SMS e E-mail", description: "Fique sabendo de tudo: mudança de data, local, gabarito, resultado. Quem não se cadastra, perde prazo e perde vaga." },
-  { valor: 97, title: "Garantia de Vaga na Região", description: "Essa é a última taxa. Com ela, você garante que se passar, vai trabalhar na agência mais perto da sua casa." },
+  { valor: 37, title: "Confirmação do Local da Prova", description: "Confirme o local da prova mais perto de você. Sem a confirmação, você será alocado em qualquer local com vaga disponível." },
 ];
 
 const Upsell = () => {
