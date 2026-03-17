@@ -55,11 +55,6 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         const externalId = `${protocolo}-UP${stepNumber}-${Date.now()}`;
         const utmSignature = getUtmSignature();
 
-        // Safety net: capture UTMs before reading
-        captureUtmParams();
-        const utmParams = getStoredUtmParams();
-        console.log('[UpsellStep] UTM params for PIX:', utmParams);
-
         // Get buyer data from props or session fallback
         const sessionCpfData = (() => {
           try {
