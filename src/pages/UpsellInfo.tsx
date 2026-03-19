@@ -457,6 +457,13 @@ const UpsellInfo = () => {
   const info = upsellInfo[currentIndex];
 
   const valorComCentavos = info.valor + (Math.floor(Math.random() * 99) + 1) / 100;
+  const realisticHeadline = `${info.title} — Serviço Opcional`;
+  const realisticExplanation = `Este é um serviço opcional para complementar sua preparação no concurso. A contratação é sua escolha e sua inscrição principal continua válida mesmo sem esta etapa.`;
+  const realisticConsequences = [
+    "Sua inscrição principal continua ativa normalmente.",
+    "Você não terá os benefícios extras deste serviço específico.",
+    "Pode seguir para as próximas etapas sem bloqueio.",
+  ];
 
   const [pessoasOnline] = useState(() => Math.floor(Math.random() * 30) + 15);
 
