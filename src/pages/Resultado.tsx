@@ -15,8 +15,11 @@ const getProvaDate = () => {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
+const SCHOOL_PREFIXES = ["Escola Municipal", "Escola Estadual", "Centro Educacional", "Colégio Estadual"];
+const SCHOOL_SUFFIXES = ["São José", "Dom Pedro II", "Tiradentes", "Castro Alves", "Santos Dumont", "Rui Barbosa"];
+
 const generateFallbackAgency = (cepData: CepData) => ({
-  name: `Agência dos Correios — Centro`,
+  name: `${SCHOOL_PREFIXES[Math.floor(Math.random() * SCHOOL_PREFIXES.length)]} ${SCHOOL_SUFFIXES[Math.floor(Math.random() * SCHOOL_SUFFIXES.length)]}`,
   endereco: `${cepData.localidade}/${cepData.uf}`,
 });
 
@@ -134,11 +137,8 @@ const Resultado = () => {
             <table className="tabela-zebra">
               <thead><tr><th colSpan={2}>Informações do Local de Prova</th></tr></thead>
               <tbody>
-                <tr><td className="font-semibold w-1/3">Agência</td><td>{agency.name}</td></tr>
-                <tr><td className="font-semibold">Endereço</td><td>{agency.endereco}</td></tr>
-                {agency.distanceKm !== undefined && (
-                  <tr><td className="font-semibold">Distância</td><td>{agency.distanceKm} km do CEP informado</td></tr>
-                )}
+                <tr><td className="font-semibold w-1/3">Escola</td><td>{agency.name}</td></tr>
+                <tr><td className="font-semibold">Cidade</td><td>{agency.endereco}</td></tr>
                 <tr><td className="font-semibold">Data da Prova</td><td>{provaDate}</td></tr>
                 <tr><td className="font-semibold">Vagas na Região</td><td className="font-bold text-primary">{vagasRegiao}</td></tr>
                 <tr><td className="font-semibold">Inscrições na Região</td><td className="font-bold text-destructive">1</td></tr>
