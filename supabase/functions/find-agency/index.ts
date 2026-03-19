@@ -321,7 +321,7 @@ Deno.serve(async (req) => {
       agency: {
         name: buildSchoolName(tags),
         endereco: fullAddress,
-        cidade: cityDisplay,
+        cidade: cidadeResult,
       },
       metadata: {
         city: cityDisplay,
