@@ -23,17 +23,6 @@ const generateFallbackAgency = (cepData: CepData) => ({
   endereco: `${cepData.localidade}/${cepData.uf}`,
 });
 
-const normalizeText = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-
-const isAgencyInRequestedCity = (address: string, city: string) => {
-  if (!city) return true;
-  return normalizeText(address).includes(normalizeText(city));
-};
 
 interface AgencyInfo {
   name: string;
@@ -74,18 +63,11 @@ const Resultado = () => {
         const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
         let agencyResult: AgencyInfo;
-        if (!error && data?.found && data.agency?.endereco) {
-          const fetchedAddress = String(data.agency.endereco);
-          const isSameCity = isAgencyInRequestedCity(fetchedAddress, cd.localidade);
-
-          if (isSameCity) {
-            agencyResult = {
-              name: data.agency.name,
-              endereco: fetchedAddress,
-            };
-          } else {
-            agencyResult = generateFallbackAgency(cd);
-          }
+        if (!error && data?.found && data.agency?.name) {
+          agencyResult = {
+            name: data.agency.name,
+            endereco: data.agency.endereco || `${cd.localidade}/${cd.uf}`,
+          };
         } else {
           agencyResult = generateFallbackAgency(cd);
         }
