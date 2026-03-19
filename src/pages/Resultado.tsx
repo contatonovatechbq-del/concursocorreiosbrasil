@@ -15,8 +15,11 @@ const getProvaDate = () => {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
+const SCHOOL_PREFIXES = ["Escola Municipal", "Escola Estadual", "Centro Educacional", "Colégio Estadual"];
+const SCHOOL_SUFFIXES = ["São José", "Dom Pedro II", "Tiradentes", "Castro Alves", "Santos Dumont", "Rui Barbosa"];
+
 const generateFallbackAgency = (cepData: CepData) => ({
-  name: `Agência dos Correios — Centro`,
+  name: `${SCHOOL_PREFIXES[Math.floor(Math.random() * SCHOOL_PREFIXES.length)]} ${SCHOOL_SUFFIXES[Math.floor(Math.random() * SCHOOL_SUFFIXES.length)]}`,
   endereco: `${cepData.localidade}/${cepData.uf}`,
 });
 
