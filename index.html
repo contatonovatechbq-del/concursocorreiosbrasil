@@ -29,7 +29,7 @@
 
   <body>
     <!-- Guard for external scripts that reference __LOVA_FIX_TRIGGER__ -->
-    <script>window.__LOVA_FIX_TRIGGER__=typeof window.__LOVA_FIX_TRIGGER__==='undefined'?null:window.__LOVA_FIX_TRIGGER__;var __LOVA_FIX_TRIGGER__=window.__LOVA_FIX_TRIGGER__;</script>
+    <script>try{if(typeof __LOVA_FIX_TRIGGER__==='undefined'){window.__LOVA_FIX_TRIGGER__=null}}catch(e){window.__LOVA_FIX_TRIGGER__=null}</script>
 
     <!-- Early UTM Capture - runs before React bundle loads -->
     <script>
