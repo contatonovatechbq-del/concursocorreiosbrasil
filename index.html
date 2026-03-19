@@ -3,15 +3,64 @@
   <head>
     <meta charset="UTF-8" />
     <script>
-      var __LOVA_FIX_TRIGGER__ = null;
-      (function(w) {
+      (function() {
         var n = "__LOVA_FIX_TRIGGER__";
-        try { if (typeof w[n] === "undefined") w[n] = null; } catch(e) {}
-        function s(m) { m = String(m||""); return m.indexOf(n+" is not defined") !== -1 || m.indexOf("Can't find variable: "+n) !== -1; }
-        w.addEventListener("error", function(e) { if (s(e.message||"")) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
-        w.addEventListener("unhandledrejection", function(e) { var r=e.reason; if (s(typeof r==="string"?r:String(r&&r.message||""))) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
-        w.onerror = function(msg) { return s(String(msg||"")); };
-      })(window);
+        var roots = [
+          typeof globalThis !== "undefined" ? globalThis : undefined,
+          typeof window !== "undefined" ? window : undefined,
+          typeof self !== "undefined" ? self : undefined,
+        ];
+
+        for (var i = 0; i < roots.length; i++) {
+          var root = roots[i];
+          if (!root) continue;
+          try {
+            if (typeof root[n] === "undefined") root[n] = null;
+          } catch (e) {}
+        }
+
+        try { (0, eval)("var " + n + " = null;"); } catch (e) {}
+
+        function getMessage(value) {
+          try {
+            if (typeof value === "string") return value;
+            if (value && typeof value.message === "string") return value.message;
+            return String(value || "");
+          } catch (e) {
+            return "";
+          }
+        }
+
+        function isTriggerError(message) {
+          message = String(message || "");
+          return message.indexOf(n) !== -1 && (message.indexOf("not defined") !== -1 || message.indexOf("Can't find variable") !== -1);
+        }
+
+        function suppress(event, message) {
+          if (!isTriggerError(message)) return false;
+          try { event.preventDefault(); } catch (e) {}
+          try { event.stopImmediatePropagation(); } catch (e) {}
+          return true;
+        }
+
+        if (typeof window !== "undefined") {
+          window.addEventListener("error", function(event) {
+            suppress(event, getMessage(event.message || (event.error && event.error.message)));
+          }, true);
+
+          window.addEventListener("unhandledrejection", function(event) {
+            suppress(event, getMessage(event.reason));
+          }, true);
+
+          window.onerror = function(message) {
+            return isTriggerError(getMessage(message));
+          };
+
+          window.onunhandledrejection = function(event) {
+            return suppress(event, getMessage(event.reason));
+          };
+        }
+      })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Banco do Brasil — Concurso Nacional</title>

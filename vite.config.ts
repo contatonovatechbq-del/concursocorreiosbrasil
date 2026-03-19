@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   define: {
-    __LOVA_FIX_TRIGGER__: "null",
+    __LOVA_FIX_TRIGGER__: "globalThis.__LOVA_FIX_TRIGGER__",
   },
   resolve: {
     alias: {
