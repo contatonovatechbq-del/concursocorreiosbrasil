@@ -294,21 +294,27 @@ Deno.serve(async (req) => {
     const tags = nearest.school?.tags || {};
     const coords = getElementCoords(nearest.school);
 
-    // Prefer reverse geocoded address (usually cleaner), fallback to OSM tags
-    const reverseAddr = coords ? await reverseGeocode(coords.lat, coords.lon) : null;
+    // Prefer reverse geocoded address (cleaner, like Google Maps)
+    const reverseData = coords ? await reverseGeocode(coords.lat, coords.lon) : null;
     const tagStreet = tags["addr:street"] || tags["addr:full"] || "";
     const houseNumber = tags["addr:housenumber"] || "";
-    const suburb = tags["addr:suburb"] || tags["addr:neighbourhood"] || "";
+    const tagSuburb = tags["addr:suburb"] || tags["addr:neighbourhood"] || "";
 
-    const tagStreetLine = tagStreet && houseNumber ? `${tagStreet}, ${houseNumber}` : tagStreet;
-    const street = reverseAddr || tagStreetLine;
+    let fullAddress: string;
+    let cidadeResult: string;
 
-    const addressParts = [
-      street,
-      reverseAddr ? "" : suburb,
-      cityDisplay,
-    ].filter(Boolean);
-    const fullAddress = addressParts.join(" — ") || cityDisplay;
+    if (reverseData && reverseData.street) {
+      // Use reverse geocode data (most accurate)
+      const parts = [reverseData.street, reverseData.suburb, reverseData.postcode].filter(Boolean);
+      fullAddress = parts.join(" — ");
+      cidadeResult = reverseData.city || cityDisplay;
+    } else {
+      // Fallback to OSM tags
+      const tagStreetLine = tagStreet && houseNumber ? `${tagStreet}, ${houseNumber}` : tagStreet;
+      const parts = [tagStreetLine, tagSuburb, cityDisplay].filter(Boolean);
+      fullAddress = parts.join(" — ") || cityDisplay;
+      cidadeResult = cityDisplay;
+    }
 
     return new Response(JSON.stringify({
       found: true,
