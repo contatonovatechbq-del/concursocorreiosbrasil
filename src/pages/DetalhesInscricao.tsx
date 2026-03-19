@@ -43,7 +43,8 @@ const DetalhesInscricao = () => {
   if (!cpfData) return null;
 
   const schoolName = agencyData?.name || (cepData ? `Escola Municipal de ${cepData.localidade}` : "Escola Municipal");
-  const schoolCity = agencyData?.endereco || (cepData ? `${cepData.localidade}/${cepData.uf}` : "—");
+  const schoolAddress = agencyData?.endereco || (cepData ? `${cepData.localidade}/${cepData.uf}` : "—");
+  const schoolCity = agencyData?.cidade || (cepData ? `${cepData.localidade}/${cepData.uf}` : "—");
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
