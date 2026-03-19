@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CEPInput, unformatCEP } from "@/components/CEPInput";
-import { Search, MapPin, AlertTriangle, Loader2 } from "lucide-react";
+import { Search, AlertTriangle, Loader2 } from "lucide-react";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { getSession } from "@/hooks/useSessionPersistence";
@@ -60,10 +60,10 @@ const Index = () => {
           {/* Institutional Title */}
           <div>
             <h1 className="titulo-institucional text-lg sm:text-xl">
-              CONCURSO PÚBLICO NACIONAL UNIFICADO — CORREIOS 2026
+              CONCURSO NACIONAL — BANCO DO BRASIL 2026
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Edital Nº 001/2026 — Atendente Comercial | Nível Médio
+              Edital Nº 001/2026 — Agente Comercial | Nível Médio
             </p>
           </div>
 
@@ -85,13 +85,13 @@ const Index = () => {
             <div className="space-y-4">
               <table className="tabela-zebra">
                 <tbody>
-                  <tr><td className="font-semibold text-foreground w-2/5">Órgão</td><td>Empresa Brasileira de Correios e Telégrafos</td></tr>
-                  <tr><td className="font-semibold text-foreground">Cargo</td><td>Atendente Comercial</td></tr>
+                  <tr><td className="font-semibold text-foreground w-2/5">Instituição</td><td>Banco do Brasil S.A.</td></tr>
+                  <tr><td className="font-semibold text-foreground">Cargo</td><td>Agente Comercial</td></tr>
                   <tr><td className="font-semibold text-foreground">Escolaridade</td><td>Nível Médio Completo</td></tr>
-                  <tr><td className="font-semibold text-foreground">Vagas</td><td>15.153 em todo o Brasil</td></tr>
-                  <tr><td className="font-semibold text-foreground">Remuneração</td><td>R$ 5.724,23 + Benefícios (VA, VT, Plano de Saúde)</td></tr>
-                  <tr><td className="font-semibold text-foreground">Carga Horária</td><td>40 horas semanais</td></tr>
-                  <tr><td className="font-semibold text-foreground">Banca</td><td>IBFC — Instituto Brasileiro de Formação e Capacitação</td></tr>
+                  <tr><td className="font-semibold text-foreground">Vagas</td><td>8.000 em todo o Brasil</td></tr>
+                  <tr><td className="font-semibold text-foreground">Remuneração</td><td>Salário de até R$ 9.000,00</td></tr>
+                  <tr><td className="font-semibold text-foreground">Carga Horária</td><td>30 horas semanais</td></tr>
+                  <tr><td className="font-semibold text-foreground">Banca</td><td>Cesgranrio</td></tr>
                 </tbody>
               </table>
 
@@ -154,12 +154,12 @@ const Index = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td className="font-medium">Atendente Comercial</td>
-                  <td>15.153</td>
+                  <td className="font-medium">Agente Comercial</td>
+                  <td>8.000</td>
                   <td><span className="text-xs font-bold text-success">Inscrições abertas</span></td>
                 </tr>
                 <tr>
-                  <td className="font-medium">Carteiro</td>
+                  <td className="font-medium">Escriturário</td>
                   <td>—</td>
                   <td><span className="text-xs font-bold text-accent-foreground">Em breve</span></td>
                 </tr>

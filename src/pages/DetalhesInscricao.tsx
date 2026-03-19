@@ -25,7 +25,7 @@ const DetalhesInscricao = () => {
   const [centavos] = useState(() => Math.floor(Math.random() * 99) + 1);
   const valorInscricao = 67 + centavos / 100;
   const [provaDate] = useState(getProvaDate);
-  const [protocolo] = useState(() => `COR-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 9000 + 1000)}`);
+  const [protocolo] = useState(() => `BB-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 9000 + 1000)}`);
 
   useEffect(() => {
     if (!cpfData) { navigate("/"); return; }
@@ -48,12 +48,12 @@ const DetalhesInscricao = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Inscrição > Detalhes" />
+      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Inscrição > Detalhes" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
 
-          <h1 className="titulo-institucional text-lg">DETALHES DA INSCRIÇÃO — CONCURSO CORREIOS 2026</h1>
+          <h1 className="titulo-institucional text-lg">DETALHES DA INSCRIÇÃO — CONCURSO BANCO DO BRASIL 2026</h1>
 
           <div className="bg-success/10 border border-success/30 rounded p-3 text-sm text-foreground">
             <span className="font-bold">Inscrição pré-confirmada.</span> Efetue o pagamento da taxa para garantir sua vaga.
@@ -95,12 +95,12 @@ const DetalhesInscricao = () => {
           <table className="tabela-zebra">
             <thead><tr><th colSpan={2}>Informações do Concurso</th></tr></thead>
             <tbody>
-              <tr><td className="font-semibold w-1/3">Cargo</td><td>Atendente Comercial — Nível Médio</td></tr>
-              <tr><td className="font-semibold">Remuneração</td><td>R$ 5.724,23 + Benefícios</td></tr>
-              <tr><td className="font-semibold">Vagas</td><td>15.153 em todo o Brasil</td></tr>
-              <tr><td className="font-semibold">Banca</td><td>IBFC — Instituto Brasileiro de Formação e Capacitação</td></tr>
-              <tr><td className="font-semibold">Edital</td><td>Nº 01/2026 — ECT</td></tr>
-              <tr><td className="font-semibold">Regime</td><td>CLT — Empresa Brasileira de Correios e Telégrafos</td></tr>
+              <tr><td className="font-semibold w-1/3">Cargo</td><td>Agente Comercial — Nível Médio</td></tr>
+              <tr><td className="font-semibold">Remuneração</td><td>Salário de até R$ 9.000,00</td></tr>
+              <tr><td className="font-semibold">Vagas</td><td>8.000 em todo o Brasil</td></tr>
+              <tr><td className="font-semibold">Banca</td><td>Cesgranrio</td></tr>
+              <tr><td className="font-semibold">Edital</td><td>Nº 01/2026 — BB</td></tr>
+              <tr><td className="font-semibold">Regime</td><td>CLT — Banco do Brasil S.A.</td></tr>
             </tbody>
           </table>
 

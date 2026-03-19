@@ -47,14 +47,14 @@ const Inscricao = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Inscrição > CPF" />
+      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Inscrição > CPF" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-md mx-auto space-y-5">
 
           <h1 className="titulo-institucional text-lg">VERIFICAÇÃO DO CANDIDATO</h1>
           <p className="text-sm text-muted-foreground">
-            Para prosseguir com a inscrição no Concurso Público Correios 2026 (Edital Nº 001/2026), informe o CPF do candidato. A verificação de elegibilidade é obrigatória conforme normas do edital.
+            Para prosseguir com a inscrição no Concurso Nacional Banco do Brasil 2026 (Edital Nº 001/2026), informe o CPF do candidato. A verificação de elegibilidade é obrigatória conforme normas do edital.
           </p>
 
           <div className="border border-border rounded bg-card p-4 sm:p-5 space-y-4">

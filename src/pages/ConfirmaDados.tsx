@@ -31,7 +31,7 @@ const ConfirmaDados = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Inscrição > Confirmação" />
+      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Inscrição > Confirmação" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
@@ -60,9 +60,9 @@ const ConfirmaDados = () => {
           <table className="tabela-zebra">
             <thead><tr><th colSpan={2}>Concurso</th></tr></thead>
             <tbody>
-              <tr><td className="font-semibold w-2/5">Cargo</td><td>Atendente Comercial — Nível Médio</td></tr>
-              <tr><td className="font-semibold">Edital</td><td>Nº 001/2026 — ECT</td></tr>
-              <tr><td className="font-semibold">Banca</td><td>IBFC</td></tr>
+              <tr><td className="font-semibold w-2/5">Cargo</td><td>Agente Comercial — Nível Médio</td></tr>
+              <tr><td className="font-semibold">Edital</td><td>Nº 001/2026 — BB</td></tr>
+              <tr><td className="font-semibold">Banca</td><td>Cesgranrio</td></tr>
             </tbody>
           </table>
 

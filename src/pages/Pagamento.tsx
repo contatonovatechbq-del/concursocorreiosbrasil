@@ -129,7 +129,7 @@ const Pagamento = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Inscrição > Pagamento" />
+      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Inscrição > Pagamento" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
