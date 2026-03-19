@@ -6,27 +6,56 @@ const corsHeaders = {
 
 const USER_AGENT =
   Deno.env.get("BUCKPAY_USER_AGENT") ||
-  "Concorreios/1.0 (nearest-school-lookup; concorreios.lovable.app)";
-const MIN_REQUEST_INTERVAL_MS = 1500;
+  "Concorreios/1.0 (city-school-lookup; concorreios.lovable.app)";
+const MIN_REQUEST_INTERVAL_MS = 1200;
 const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
 ];
 
 let lastExternalCallAt = 0;
-const geocodeCache = new Map<string, { lat: number; lon: number }>();
 const overpassCache = new Map<string, any[]>();
+const cityAreaCache = new Map<string, number | null>();
 
-function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+const SCHOOL_PREFIXES = [
+  "Escola Municipal",
+  "Escola Estadual",
+  "Centro Educacional",
+  "Colégio Estadual",
+  "Escola de Ensino Fundamental",
+];
+
+const SCHOOL_SUFFIXES = [
+  "São José",
+  "Nossa Senhora Aparecida",
+  "Dom Pedro II",
+  "Presidente Vargas",
+  "Tiradentes",
+  "Castro Alves",
+  "Santos Dumont",
+  "Rui Barbosa",
+  "Machado de Assis",
+  "Monteiro Lobato",
+];
+
+function normalizeText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function escapeOverpassValue(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function randomFrom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generateFallbackSchoolName(): string {
+  return `${randomFrom(SCHOOL_PREFIXES)} ${randomFrom(SCHOOL_SUFFIXES)}`;
 }
 
 function sleep(ms: number) {
@@ -43,17 +72,24 @@ async function waitRateLimit() {
 
 function parseRetryAfterMs(retryAfter: string | null): number | null {
   if (!retryAfter) return null;
+
   const seconds = Number.parseInt(retryAfter, 10);
-  if (Number.isFinite(seconds)) return Math.max(250, seconds * 1000);
+  if (Number.isFinite(seconds)) {
+    return Math.max(250, seconds * 1000);
+  }
+
   const dateMs = Date.parse(retryAfter);
-  if (Number.isFinite(dateMs)) return Math.max(250, dateMs - Date.now());
+  if (Number.isFinite(dateMs)) {
+    return Math.max(250, dateMs - Date.now());
+  }
+
   return null;
 }
 
 function computeBackoffMs(attempt: number): number {
-  const exponential = 1000 * Math.pow(2, attempt - 1);
-  const jitter = Math.floor(Math.random() * 800);
-  return Math.min(exponential + jitter, 12000);
+  const exponential = 800 * Math.pow(2, attempt - 1);
+  const jitter = Math.floor(Math.random() * 500);
+  return Math.min(exponential + jitter, 10000);
 }
 
 async function safeFetchJson(
@@ -64,141 +100,189 @@ async function safeFetchJson(
 ): Promise<any | null> {
   for (let attempt = 1; attempt <= attempts; attempt++) {
     let timeoutId: number | undefined;
+
     try {
       await waitRateLimit();
+
       const controller = new AbortController();
-      timeoutId = setTimeout(() => controller.abort(), 14000);
+      timeoutId = setTimeout(() => controller.abort(), 13000);
+
       const mergedHeaders = {
         "User-Agent": USER_AGENT,
         Accept: "application/json,text/plain,*/*",
         ...(init.headers || {}),
       };
-      const res = await fetch(url, { ...init, headers: mergedHeaders, signal: controller.signal });
+
+      const res = await fetch(url, {
+        ...init,
+        headers: mergedHeaders,
+        signal: controller.signal,
+      });
+
       const text = await res.text();
 
       if (res.status === 429) {
-        console.error(`${label} 429: ${text.substring(0, 150)}`);
-        if (attempt < attempts) { await sleep(parseRetryAfterMs(res.headers.get("Retry-After")) ?? computeBackoffMs(attempt)); continue; }
+        if (attempt < attempts) {
+          const retryAfterMs = parseRetryAfterMs(res.headers.get("Retry-After"));
+          await sleep(retryAfterMs ?? computeBackoffMs(attempt));
+          continue;
+        }
+
         return null;
       }
+
       if (res.status >= 500) {
-        console.error(`${label} ${res.status}: ${text.substring(0, 150)}`);
-        if (attempt < attempts) { await sleep(computeBackoffMs(attempt)); continue; }
+        if (attempt < attempts) {
+          await sleep(computeBackoffMs(attempt));
+          continue;
+        }
+
         return null;
       }
-      if (!res.ok) { console.error(`${label} ${res.status}: ${text.substring(0, 150)}`); return null; }
-      try { return JSON.parse(text); } catch { console.error(`${label} non-JSON: ${text.substring(0, 150)}`); return null; }
-    } catch (e) {
-      console.error(`${label} fetch failed: ${e instanceof Error ? e.message : String(e)}`);
-      if (attempt < attempts) { await sleep(computeBackoffMs(attempt)); continue; }
+
+      if (!res.ok) {
+        return null;
+      }
+
+      try {
+        return JSON.parse(text);
+      } catch {
+        return null;
+      }
+    } catch {
+      if (attempt < attempts) {
+        await sleep(computeBackoffMs(attempt));
+        continue;
+      }
+
       return null;
     } finally {
       if (timeoutId !== undefined) clearTimeout(timeoutId);
     }
   }
+
   return null;
 }
 
-async function geocodeNominatim(query: string, label: string): Promise<{ lat: number; lon: number } | null> {
-  const cacheKey = `nominatim:${query}`;
-  const cached = geocodeCache.get(cacheKey);
-  if (cached) return cached;
-  const params = new URLSearchParams({ q: query, format: "json", limit: "1", countrycodes: "br", addressdetails: "0" });
-  const data = await safeFetchJson(`https://nominatim.openstreetmap.org/search?${params.toString()}`, label);
-  if (Array.isArray(data) && data.length > 0) {
-    const lat = Number.parseFloat(data[0]?.lat);
-    const lon = Number.parseFloat(data[0]?.lon);
-    if (Number.isFinite(lat) && Number.isFinite(lon)) {
-      const result = { lat, lon };
-      geocodeCache.set(cacheKey, result);
-      return result;
+function osmToAreaId(osmType: string, osmId: number): number | null {
+  if (!Number.isFinite(osmId)) return null;
+
+  if (osmType === "relation") return 3600000000 + osmId;
+  if (osmType === "way") return 2400000000 + osmId;
+
+  return null;
+}
+
+async function resolveCityAreaId(city: string, uf: string): Promise<number | null> {
+  const key = `${normalizeText(city)}:${uf}`;
+
+  if (cityAreaCache.has(key)) {
+    return cityAreaCache.get(key) ?? null;
+  }
+
+  const params = new URLSearchParams({
+    q: `${city}, ${uf}, Brasil`,
+    format: "jsonv2",
+    limit: "8",
+    countrycodes: "br",
+    addressdetails: "1",
+  });
+
+  const data = await safeFetchJson(
+    `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+    "Nominatim-city-area",
+  );
+
+  if (!Array.isArray(data) || data.length === 0) {
+    cityAreaCache.set(key, null);
+    return null;
+  }
+
+  const normalizedCity = normalizeText(city);
+  let bestAreaId: number | null = null;
+  let bestScore = -1;
+
+  for (const item of data) {
+    const osmType = String(item?.osm_type || "");
+    const osmId = Number(item?.osm_id);
+    const areaId = osmToAreaId(osmType, osmId);
+    if (!areaId) continue;
+
+    const address = item?.address || {};
+    const stateCode = String(address?.state_code || "")
+      .replace(/^br-/i, "")
+      .toUpperCase();
+    const cityName = String(
+      address?.city ||
+        address?.town ||
+        address?.municipality ||
+        address?.village ||
+        address?.city_district ||
+        "",
+    );
+
+    const normalizedResultCity = normalizeText(cityName);
+
+    let score = 0;
+    if (stateCode === uf) score += 4;
+    if (normalizedResultCity === normalizedCity) score += 4;
+    if (["administrative", "city", "town", "municipality"].includes(String(item?.type || ""))) score += 1;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestAreaId = areaId;
     }
   }
-  return null;
-}
 
-async function geocodePhoton(query: string, label: string): Promise<{ lat: number; lon: number } | null> {
-  const cacheKey = `photon:${query}`;
-  const cached = geocodeCache.get(cacheKey);
-  if (cached) return cached;
-  const params = new URLSearchParams({ q: query, limit: "1" });
-  const data = await safeFetchJson(`https://photon.komoot.io/api/?${params.toString()}`, label);
-  const coords = data?.features?.[0]?.geometry?.coordinates;
-  if (Array.isArray(coords) && coords.length >= 2) {
-    const lon = Number(coords[0]);
-    const lat = Number(coords[1]);
-    if (Number.isFinite(lat) && Number.isFinite(lon)) {
-      const result = { lat, lon };
-      geocodeCache.set(cacheKey, result);
-      return result;
-    }
-  }
-  return null;
-}
-
-function escapeOverpassValue(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  cityAreaCache.set(key, bestAreaId);
+  return bestAreaId;
 }
 
 async function queryOverpass(query: string, label: string): Promise<any[]> {
   const cacheKey = `overpass:${query}`;
   const cached = overpassCache.get(cacheKey);
   if (cached) return cached;
+
   for (const endpoint of OVERPASS_ENDPOINTS) {
-    const data = await safeFetchJson(endpoint, `${label}-${new URL(endpoint).host}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
-      body: `data=${encodeURIComponent(query)}`,
-    }, 3);
+    const data = await safeFetchJson(
+      endpoint,
+      `${label}-${new URL(endpoint).host}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        },
+        body: `data=${encodeURIComponent(query)}`,
+      },
+      3,
+    );
+
     if (data && Array.isArray(data.elements)) {
       overpassCache.set(cacheKey, data.elements);
       return data.elements;
     }
   }
+
   return [];
 }
 
-function extractElementCoords(element: any): { lat: number; lon: number } | null {
-  const lat = Number(element?.lat ?? element?.center?.lat);
-  const lon = Number(element?.lon ?? element?.center?.lon);
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-  return { lat, lon };
+function buildSchoolQueryFromAreaId(areaId: number): string {
+  return `[out:json][timeout:25];area(${areaId})->.a;(node["amenity"="school"](area.a);way["amenity"="school"](area.a);relation["amenity"="school"](area.a););out body center 200;`;
 }
 
-// School-specific Overpass query helper
-function buildSchoolOverpassQuery(lat: number, lon: number, radius: number): string {
-  return `[out:json][timeout:20];(node["amenity"="school"](around:${radius},${lat},${lon});way["amenity"="school"](around:${radius},${lat},${lon});relation["amenity"="school"](around:${radius},${lat},${lon}););out body center;`;
+function buildSchoolQueryFromCityName(city: string): string {
+  const safeCity = escapeOverpassValue(city);
+  return `[out:json][timeout:25];area["name"="${safeCity}"]["boundary"="administrative"]["admin_level"~"7|8"]->.a;(node["amenity"="school"](area.a);way["amenity"="school"](area.a);relation["amenity"="school"](area.a););out body center 200;`;
 }
 
-function buildSchoolAreaQuery(cityName: string): string {
-  return `[out:json][timeout:20];area["name"="${cityName}"]["boundary"="administrative"]->.a;(node["amenity"="school"](area.a);way["amenity"="school"](area.a);relation["amenity"="school"](area.a););out body center 40;`;
-}
-
-// School name fallback list for when no school is found via API
-const SCHOOL_PREFIXES = [
-  "Escola Municipal",
-  "Escola Estadual",
-  "Centro Educacional",
-  "Colégio Estadual",
-  "Escola de Ensino Fundamental",
-];
-const SCHOOL_SUFFIXES = [
-  "São José",
-  "Nossa Senhora Aparecida",
-  "Dom Pedro II",
-  "Presidente Vargas",
-  "Tiradentes",
-  "Castro Alves",
-  "Santos Dumont",
-  "Rui Barbosa",
-  "Machado de Assis",
-  "Monteiro Lobato",
-];
-
-function generateFallbackSchoolName(): string {
-  const prefix = SCHOOL_PREFIXES[Math.floor(Math.random() * SCHOOL_PREFIXES.length)];
-  const suffix = SCHOOL_SUFFIXES[Math.floor(Math.random() * SCHOOL_SUFFIXES.length)];
-  return `${prefix} ${suffix}`;
+function buildSchoolName(tags: Record<string, string>): string {
+  return (
+    tags.name ||
+    tags["official_name"] ||
+    tags["short_name"] ||
+    tags["name:pt"] ||
+    generateFallbackSchoolName()
+  );
 }
 
 Deno.serve(async (req) => {
@@ -209,104 +293,79 @@ Deno.serve(async (req) => {
   try {
     const { cep, localidade, uf } = await req.json();
 
-    if (!cep) {
-      return new Response(JSON.stringify({ found: false, reason: "missing_cep" }), {
+    const cleanCep = String(cep || "").replace(/\D/g, "");
+    const city = String(localidade || "").trim();
+    const state = String(uf || "").trim().toUpperCase();
+
+    if (!city) {
+      return new Response(JSON.stringify({ found: false, reason: "missing_city" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const cleanCep = String(cep).replace(/\D/g, "");
-    const safeLocalidade = localidade ? escapeOverpassValue(String(localidade)) : "";
-    const cityDisplay = localidade && uf ? `${localidade}/${uf}` : localidade || "";
+    const cityDisplay = state ? `${city}/${state}` : city;
+    const areaId = await resolveCityAreaId(city, state);
 
-    // Geocode the CEP/city
-    let coords: { lat: number; lon: number } | null = null;
-
-    if (cleanCep.length >= 8) {
-      coords = await geocodeNominatim(`${cleanCep}, Brasil`, "Nominatim-cep");
-    }
-    if (!coords && localidade && uf) {
-      coords = await geocodeNominatim(`${localidade}, ${uf}, Brasil`, "Nominatim-city");
-    }
-    if (!coords) {
-      const composed = [cleanCep, localidade, uf, "Brasil"].filter(Boolean).join(", ");
-      coords = await geocodePhoton(composed, "Photon-cep-city");
-    }
-
-    // If we can't geocode at all, return fallback school
-    if (!coords && !localidade) {
-      return new Response(JSON.stringify({ found: false, reason: "geocoding_failed" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Search for schools
     let schools: any[] = [];
 
-    if (coords) {
-      for (const radius of [5000, 15000, 30000, 60000]) {
-        const query = buildSchoolOverpassQuery(coords.lat, coords.lon, radius);
-        const elements = await queryOverpass(query, `Overpass-school-${radius}`);
-        if (elements.length > 0) {
-          schools = elements;
-          break;
-        }
-      }
+    if (areaId) {
+      schools = await queryOverpass(buildSchoolQueryFromAreaId(areaId), "Overpass-school-area-id");
     }
 
-    // Fallback: search by city area
-    if (schools.length === 0 && localidade) {
-      const areaQuery = buildSchoolAreaQuery(safeLocalidade);
-      schools = await queryOverpass(areaQuery, "Overpass-school-area");
-    }
-
-    // If no schools found via API, use generated fallback
     if (schools.length === 0) {
-      return new Response(JSON.stringify({
+      schools = await queryOverpass(buildSchoolQueryFromCityName(city), "Overpass-school-city-name");
+    }
+
+    if (schools.length === 0) {
+      return new Response(
+        JSON.stringify({
+          found: true,
+          agency: {
+            name: generateFallbackSchoolName(),
+            endereco: cityDisplay,
+          },
+          reason: "city_without_mapped_schools",
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    const picked = randomFrom(schools);
+    const tags = picked?.tags || {};
+
+    return new Response(
+      JSON.stringify({
         found: true,
         agency: {
-          name: generateFallbackSchoolName(),
+          name: buildSchoolName(tags),
           endereco: cityDisplay,
         },
-      }), {
+        metadata: {
+          city: cityDisplay,
+          source: areaId ? "area-id" : "city-name",
+          totalSchoolsFound: schools.length,
+          cep: cleanCep || null,
+        },
+      }),
+      {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Find closest school
-    let closest = schools[0];
-    let minDist = Infinity;
-
-    if (coords) {
-      for (const s of schools) {
-        const sc = extractElementCoords(s);
-        if (sc) {
-          const dist = haversineDistance(coords.lat, coords.lon, sc.lat, sc.lon);
-          if (dist < minDist) { minDist = dist; closest = s; }
-        }
-      }
-    }
-
-    const tags = closest?.tags || {};
-    const schoolName = tags.name || tags["official_name"] || generateFallbackSchoolName();
-
-    const result: Record<string, string | number> = {
-      name: schoolName,
-      endereco: cityDisplay,
-    };
-
-    if (coords && Number.isFinite(minDist)) {
-      result.distanceKm = Math.round(minDist * 10) / 10;
-    }
-
-    return new Response(JSON.stringify({ found: true, agency: result }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+      },
+    );
   } catch (error) {
     console.error("Error finding school:", error);
+
     return new Response(
-      JSON.stringify({ found: false, reason: "error", message: error instanceof Error ? error.message : String(error) }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      JSON.stringify({
+        found: false,
+        reason: "error",
+        message: error instanceof Error ? error.message : String(error),
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 });
