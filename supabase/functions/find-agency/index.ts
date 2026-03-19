@@ -189,22 +189,38 @@ function buildSchoolName(tags: Record<string, string>): string {
   return tags.name || tags["official_name"] || tags["short_name"] || tags["name:pt"] || generateFallbackSchoolName();
 }
 
-// Reverse geocode coordinates to get a street address
+// Reverse geocode coordinates to get a proper street address (like Google Maps)
 async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
   const params = new URLSearchParams({
     lat: lat.toString(),
     lon: lon.toString(),
     format: "jsonv2",
     zoom: "18",
+    addressdetails: "1",
   });
   const data = await safeFetchJson(
     `https://nominatim.openstreetmap.org/reverse?${params.toString()}`,
     "Nominatim-reverse",
   );
-  if (!data || !data.display_name) return null;
-  // Extract just the street portion (first 2-3 parts before the city)
-  const parts = data.display_name.split(", ");
-  return parts.slice(0, Math.min(3, parts.length)).join(", ");
+  if (!data) return null;
+
+  const addr = data.address;
+  if (!addr) {
+    // Fallback to display_name parsing
+    if (!data.display_name) return null;
+    const parts = data.display_name.split(", ");
+    return parts.slice(0, Math.min(3, parts.length)).join(", ");
+  }
+
+  // Build a clean street address like Google Maps would show
+  const road = addr.road || addr.pedestrian || addr.footway || addr.street || "";
+  const houseNum = addr.house_number || "";
+  const suburb = addr.suburb || addr.neighbourhood || addr.quarter || "";
+  const postcode = addr.postcode || "";
+
+  const streetLine = road && houseNum ? `${road}, ${houseNum}` : road;
+  const parts = [streetLine, suburb, postcode].filter(Boolean);
+  return parts.join(" — ") || null;
 }
 
 Deno.serve(async (req) => {
