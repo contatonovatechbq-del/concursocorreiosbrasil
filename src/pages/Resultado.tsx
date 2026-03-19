@@ -27,6 +27,7 @@ const generateFallbackAgency = (cepData: CepData) => ({
 interface AgencyInfo {
   name: string;
   endereco: string;
+  cidade?: string;
 }
 
 const Resultado = () => {
