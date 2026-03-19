@@ -132,8 +132,11 @@ const Resultado = () => {
             <tbody>
               <tr><td className="font-semibold w-1/3">Cargo</td><td>Agente Comercial</td></tr>
               <tr><td className="font-semibold">Nível</td><td>Médio Completo</td></tr>
-              <tr><td className="font-semibold">Salário</td><td>Até R$ 9.000,00 + Participação nos Lucros (PLR)</td></tr>
+              <tr><td className="font-semibold">Salário</td><td>Inicial de R$ 6.000,00 a R$ 9.000,00 + Participação nos Lucros (PLR)</td></tr>
               <tr><td className="font-semibold">Carga Horária</td><td>30 horas semanais (jornada reduzida)</td></tr>
+              <tr><td className="font-semibold">Vale-Alimentação</td><td>R$ 1.014,42/mês</td></tr>
+              <tr><td className="font-semibold">Plano de Saúde</td><td>Cassi (família incluída)</td></tr>
+              <tr><td className="font-semibold">Previdência Complementar</td><td>Previ — Banco do Brasil</td></tr>
               <tr><td className="font-semibold">Vagas (Nacional)</td><td>8.000</td></tr>
             </tbody>
           </table>
