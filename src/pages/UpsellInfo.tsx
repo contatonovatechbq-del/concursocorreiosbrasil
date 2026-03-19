@@ -421,7 +421,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
         "Orientação para exame médico admissional",
         "Checklist de documentos com status em tempo real",
         "Orientação jurídica para questões trabalhistas",
-        "Guia do primeiro dia de trabalho nos Correios",
+        "Guia do primeiro dia de trabalho no Banco do Brasil",
         "Suporte por 90 dias após a posse",
         "Certificado de inscrição COMPLETA e DEFINITIVA",
       ],
