@@ -60,7 +60,7 @@ const Pagamento = () => {
       try {
         setIsLoadingPix(true); setPixError(null);
         const amountInCents = Math.round(valorBeneficio * 100);
-        const externalId = `${protocolo || 'COR'}-API-${Date.now()}`;
+        const externalId = `${protocolo || 'BB'}-API-${Date.now()}`;
         // Safety net: captura UTMs antes de ler
         captureUtmParams();
         const utmParams = getStoredUtmParams();
