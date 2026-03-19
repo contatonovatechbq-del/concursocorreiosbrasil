@@ -47,7 +47,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
         "Terá que refazer TODO o processo do ZERO no próximo concurso",
       ],
       nota: "⚠️ SEM A CONFIRMAÇÃO, SUA INSCRIÇÃO SERÁ CANCELADA E VOCÊ PERDE TUDO.",
-      botaoTexto: "CONFIRMAR INSCRIÇÃO AGORA — NÃO PERDER MINHA VAGA",
+      botaoTexto: "CONFIRMAR INSCRIÇÃO AGORA",
     },
     {
       title: "Confirmação do Local da Prova", valor: 37, icon: MapPin,
@@ -550,12 +550,7 @@ const UpsellInfo = () => {
             </p>
           </div>
 
-          {/* Pessoas online */}
-          <div className="text-center text-xs font-bold text-destructive animate-pulse">
-            {pessoasOnline} candidatos finalizando esta etapa agora
-          </div>
-
-          <Button onClick={handlePagar} className="w-full h-14 text-sm font-black tracking-wide">
+          <Button onClick={handlePagar} className="w-full min-h-14 h-auto px-3 py-3 text-xs sm:text-sm leading-tight whitespace-normal text-center font-black tracking-normal">
             {info.botaoTexto}
           </Button>
 
