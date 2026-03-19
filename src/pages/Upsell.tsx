@@ -68,7 +68,7 @@ const Upsell = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Inscrição > Taxas" />
+      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Taxas Opcionais" />
 
       <main className="flex-1 flex items-center justify-center px-4 py-6 sm:py-8">
         <UpsellStep
