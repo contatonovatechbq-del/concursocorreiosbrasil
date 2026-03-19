@@ -5,35 +5,32 @@ import "./index.css";
 // Guard for external/injected scripts that reference this global symbol
 (() => {
   const triggerName = "__LOVA_FIX_TRIGGER__";
-  const globalRef = globalThis as Record<string, unknown>;
+  const targets = [
+    globalThis,
+    typeof window !== "undefined" ? window : undefined,
+    typeof self !== "undefined" ? self : undefined,
+  ];
 
-  if (typeof globalRef[triggerName] === "undefined") {
-    Object.defineProperty(globalRef, triggerName, {
-      value: null,
-      writable: true,
-      configurable: true,
-    });
-  }
+  for (const target of targets) {
+    if (!target) continue;
+    const scopedTarget = target as Record<string, unknown>;
 
-  if (typeof window !== "undefined") {
-    const windowRef = window as unknown as Record<string, unknown>;
-    if (typeof windowRef[triggerName] === "undefined") {
-      windowRef[triggerName] = globalRef[triggerName];
-    }
-  }
-
-  if (typeof self !== "undefined") {
-    const selfRef = self as unknown as Record<string, unknown>;
-    if (typeof selfRef[triggerName] === "undefined") {
-      selfRef[triggerName] = globalRef[triggerName];
+    if (typeof scopedTarget[triggerName] === "undefined") {
+      Object.defineProperty(scopedTarget, triggerName, {
+        value: null,
+        writable: true,
+        configurable: true,
+      });
     }
   }
 
   try {
-    (0, eval)("var __LOVA_FIX_TRIGGER__ = globalThis.__LOVA_FIX_TRIGGER__;");
+    globalThis.Function?.(`var ${triggerName} = globalThis.${triggerName};`)();
   } catch {
     // no-op
   }
+
+  if (typeof window === "undefined") return;
 
   const suppressTriggerError = (message: string) => {
     return message.includes("__LOVA_FIX_TRIGGER__ is not defined")
