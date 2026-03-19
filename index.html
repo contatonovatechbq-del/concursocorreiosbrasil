@@ -13,7 +13,7 @@
 
         for (const target of targets) {
           if (!target) continue;
-          if (typeof (target as Record<string, unknown>)[triggerName] === "undefined") {
+          if (typeof target[triggerName] === "undefined") {
             Object.defineProperty(target, triggerName, {
               value: null,
               writable: true,
