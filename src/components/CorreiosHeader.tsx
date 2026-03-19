@@ -1,4 +1,5 @@
 import { Menu } from "lucide-react";
+import bbLogoTop from "@/assets/bb-logo-top.png";
 
 interface CorreiosHeaderProps {
   breadcrumb?: string;
