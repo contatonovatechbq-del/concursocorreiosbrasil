@@ -481,11 +481,11 @@ const UpsellInfo = () => {
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
 
-          <h1 className="titulo-institucional text-lg">{realisticHeadline}</h1>
+          <h1 className="titulo-institucional text-lg">{info.headline}</h1>
 
           {/* Explicação detalhada */}
-          <div className="rounded border border-border bg-muted/30 p-4 text-sm text-foreground leading-relaxed font-medium">
-            {realisticExplanation}
+          <div className="rounded border-2 border-destructive/30 bg-muted/30 p-4 text-sm text-foreground leading-relaxed font-medium">
+            {info.explicacao}
           </div>
 
           {/* Local da prova - dados do CEP (only on step 2) */}
