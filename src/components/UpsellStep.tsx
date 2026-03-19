@@ -58,7 +58,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         // Get buyer data from props or session fallback
         const sessionCpfData = (() => {
           try {
-            const session = JSON.parse(localStorage.getItem("correios_session") || "{}");
+            const session = JSON.parse(localStorage.getItem("bb_session") || "{}");
             return session?.cpfData ?? null;
           } catch {
             return null;
