@@ -38,7 +38,6 @@ const isAgencyInRequestedCity = (address: string, city: string) => {
 interface AgencyInfo {
   name: string;
   endereco: string;
-  distanceKm?: number;
 }
 
 const Resultado = () => {
