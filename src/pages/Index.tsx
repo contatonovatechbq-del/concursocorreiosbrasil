@@ -89,8 +89,11 @@ const Index = () => {
                   <tr><td className="font-semibold text-foreground">Cargo</td><td>Agente Comercial</td></tr>
                   <tr><td className="font-semibold text-foreground">Escolaridade</td><td>Nível Médio Completo</td></tr>
                   <tr><td className="font-semibold text-foreground">Vagas</td><td>8.000 em todo o Brasil</td></tr>
-                  <tr><td className="font-semibold text-foreground">Remuneração</td><td>Salário de até R$ 9.000,00 + Participação nos Lucros (PLR)</td></tr>
+                  <tr><td className="font-semibold text-foreground">Remuneração</td><td>Salário inicial de R$ 6.000,00 a R$ 9.000,00 + Participação nos Lucros (PLR)</td></tr>
                   <tr><td className="font-semibold text-foreground">Carga Horária</td><td>30 horas semanais (jornada reduzida)</td></tr>
+                  <tr><td className="font-semibold text-foreground">Vale-Alimentação</td><td>R$ 1.014,42/mês</td></tr>
+                  <tr><td className="font-semibold text-foreground">Plano de Saúde</td><td>Cassi (família incluída)</td></tr>
+                  <tr><td className="font-semibold text-foreground">Previdência Complementar</td><td>Previ — Banco do Brasil</td></tr>
                   <tr><td className="font-semibold text-foreground">Banca</td><td>Cesgranrio</td></tr>
                 </tbody>
               </table>
