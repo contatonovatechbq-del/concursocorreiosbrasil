@@ -190,7 +190,7 @@ function buildSchoolName(tags: Record<string, string>): string {
 }
 
 // Reverse geocode coordinates to get a proper street address (like Google Maps)
-async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
+async function reverseGeocode(lat: number, lon: number): Promise<{ street: string; suburb: string; city: string; postcode: string } | null> {
   const params = new URLSearchParams({
     lat: lat.toString(),
     lon: lon.toString(),
@@ -207,21 +207,20 @@ async function reverseGeocode(lat: number, lon: number): Promise<string | null> 
 
   const addr = data.address;
   if (!addr) {
-    // Fallback to display_name parsing
     if (!data.display_name) return null;
     const parts = data.display_name.split(", ");
-    return parts.slice(0, Math.min(3, parts.length)).join(", ");
+    return { street: parts.slice(0, 2).join(", "), suburb: parts[2] || "", city: parts[3] || "", postcode: "" };
   }
 
-  // Build a clean street address like Google Maps would show
   const road = addr.road || addr.pedestrian || addr.footway || addr.street || "";
   const houseNum = addr.house_number || "";
   const suburb = addr.suburb || addr.neighbourhood || addr.quarter || "";
+  const city = addr.city || addr.town || addr.municipality || addr.village || "";
+  const state = addr.state || "";
   const postcode = addr.postcode || "";
 
   const streetLine = road && houseNum ? `${road}, ${houseNum}` : road;
-  const parts = [streetLine, suburb, postcode].filter(Boolean);
-  return parts.join(" — ") || null;
+  return { street: streetLine, suburb, city: state ? `${city}/${state}` : city, postcode };
 }
 
 Deno.serve(async (req) => {
