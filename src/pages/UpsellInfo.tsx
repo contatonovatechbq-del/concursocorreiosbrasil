@@ -69,7 +69,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
         "NÃO terá direito a solicitar mudança de local depois",
         "Chegará CANSADO e NERVOSO na prova por causa da viagem",
       ],
-      nota: "⚠️ QUEM NÃO CONFIRMA O LOCAL VAI PRA ONDE SOBRAR VAGA. NÃO TEM COMO RECLAMAR DEPOIS.",
+      nota: "⚠️ QUEM NÃO CONFIRMA O LOCAL PODE SER ALOCADO LONGE, GASTAR MAIS E CHEGAR EXAUSTO NO DIA DA PROVA.",
       botaoTexto: "CONFIRMAR MEU LOCAL AGORA",
     },
     {

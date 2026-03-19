@@ -4,13 +4,35 @@ import "./index.css";
 
 // Guard for external/injected scripts that reference this global symbol
 (() => {
+  const triggerName = "__LOVA_FIX_TRIGGER__";
   const globalRef = globalThis as Record<string, unknown>;
-  if (typeof globalRef.__LOVA_FIX_TRIGGER__ === "undefined") {
-    Object.defineProperty(globalRef, "__LOVA_FIX_TRIGGER__", {
+
+  if (typeof globalRef[triggerName] === "undefined") {
+    Object.defineProperty(globalRef, triggerName, {
       value: null,
       writable: true,
       configurable: true,
     });
+  }
+
+  if (typeof window !== "undefined") {
+    const windowRef = window as unknown as Record<string, unknown>;
+    if (typeof windowRef[triggerName] === "undefined") {
+      windowRef[triggerName] = globalRef[triggerName];
+    }
+  }
+
+  if (typeof self !== "undefined") {
+    const selfRef = self as unknown as Record<string, unknown>;
+    if (typeof selfRef[triggerName] === "undefined") {
+      selfRef[triggerName] = globalRef[triggerName];
+    }
+  }
+
+  try {
+    Function("var __LOVA_FIX_TRIGGER__ = globalThis.__LOVA_FIX_TRIGGER__;")();
+  } catch {
+    // no-op
   }
 
   const suppressTriggerError = (message: string) => {
