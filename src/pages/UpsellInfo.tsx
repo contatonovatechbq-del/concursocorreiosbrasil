@@ -514,12 +514,12 @@ const UpsellInfo = () => {
           </table>
 
           {/* Consequências */}
-          <div className="rounded border border-border bg-muted/30 p-4 space-y-2">
-            <p className="font-black text-foreground text-sm">Sobre não contratar este opcional:</p>
+          <div className="rounded border-2 border-destructive bg-destructive/10 p-4 space-y-2">
+            <p className="font-black text-destructive text-sm">🚨 O QUE ACONTECE SE VOCÊ NÃO PAGAR:</p>
             <ul className="space-y-1.5">
-              {realisticConsequences.map((c, i) => (
-                <li key={i} className="text-sm text-foreground font-medium flex items-start gap-2">
-                  <span className="mt-0.5">•</span>
+              {info.consequencias.map((c, i) => (
+                <li key={i} className="text-sm text-destructive font-semibold flex items-start gap-2">
+                  <span className="mt-0.5">❌</span>
                   <span>{c}</span>
                 </li>
               ))}
