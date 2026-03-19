@@ -1,3 +1,5 @@
+import bbLogoTop from "@/assets/bb-logo-top.png";
+
 const CorreiosFooter = () => {
   return (
     <footer className="mt-auto">
