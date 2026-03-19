@@ -56,8 +56,8 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
         ? `Com base no CEP ${cepData.cep} que você informou, o local de prova designado é a ${escolaNome}, em ${escolaCidade}. Se você NÃO confirmar AGORA, o sistema vai te redirecionar para QUALQUER escola com vaga sobrando — pode ser a HORAS de distância da sua casa. Você vai ter que acordar de madrugada, gastar com transporte e chegar CANSADO na prova. Quem confirma o local AGORA garante a vaga na escola mais perto.`
         : "O sistema distribui os candidatos de forma ALEATÓRIA nas escolas de prova disponíveis. Se você NÃO confirmar agora, pode ser enviado para um local a HORAS de distância da sua casa. Confirme AGORA e garanta a escola mais perto de você.",
       items: [
-        cepData ? `✔ Local confirmado: ${agenciaNome}` : "Prova no local mais próximo de você",
-        cepData ? `✔ Endereço: ${agenciaEndereco}` : "Endereço enviado por e-mail e SMS",
+        cepData ? `✔ Local confirmado: ${escolaNome}` : "Prova na escola mais próxima de você",
+        cepData ? `✔ Cidade: ${escolaCidade}` : "Local enviado por e-mail e SMS",
         "Sala com acessibilidade garantida",
         "Prioridade TOTAL na alocação — você escolhe, não o sistema",
         "Mapa com direções para o local da prova",
