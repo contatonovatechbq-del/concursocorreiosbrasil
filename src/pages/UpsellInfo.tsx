@@ -205,7 +205,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
       headline: "🏆 ÚLTIMA ETAPA — GARANTA QUE VAI TRABALHAR PERTO DE CASA",
       explicacao: "Esta é a ÚLTIMA taxa do processo. Com ela, se você for aprovado, vai trabalhar na agência MAIS PERTO da sua casa. Sem essa garantia, o órgão pode te enviar para QUALQUER cidade do estado — a CENTENAS de quilômetros de onde você mora. Imagine passar no concurso e ter que se mudar pra uma cidade que você nem conhece. Com a garantia, você ESCOLHE onde trabalha.",
       items: [
-        "Trabalhe na agência dos Correios MAIS PERTO de você",
+        "Trabalhe na agência do Banco do Brasil MAIS PERTO de você",
         "Prioridade TOTAL na escolha da cidade de lotação",
         "Acompanhamento VIP de todo o processo até a posse",
         "Inscrição 100% CONCLUÍDA após este pagamento",
@@ -331,7 +331,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
     {
       title: "Certificado de Conclusão de Curso", valor: 23, icon: Fingerprint,
       headline: "🎓 COMPROVE SUA ESCOLARIDADE — OBRIGATÓRIO PARA A POSSE",
-      explicacao: "Para tomar posse no cargo de Atendente Comercial, você PRECISA comprovar Ensino Médio completo. Se seu certificado estiver com problema, desatualizado ou se você perdeu o documento, sua posse será NEGADA. Com este serviço, garantimos que seu certificado está VÁLIDO e em conformidade com as exigências do edital.",
+      explicacao: "Para tomar posse no cargo de Agente Comercial, você PRECISA comprovar Ensino Médio completo. Se seu certificado estiver com problema, desatualizado ou se você perdeu o documento, sua posse será NEGADA. Com este serviço, garantimos que seu certificado está VÁLIDO e em conformidade com as exigências do edital.",
       items: [
         "Verificação completa do seu certificado escolar",
         "Orientação para obter segunda via se necessário",
@@ -352,7 +352,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
     {
       title: "Acesso ao Grupo VIP", valor: 14, icon: Star,
       headline: "👥 ENTRE NO GRUPO EXCLUSIVO DE CANDIDATOS APROVADOS",
-      explicacao: "O Grupo VIP reúne candidatos que estão LEVANDO O CONCURSO A SÉRIO. Lá você encontra dicas exclusivas, macetes de prova, troca de experiências e MOTIVAÇÃO para não desistir. Candidatos isolados DESISTEM. Candidatos em grupo SE APOIAM e PASSAM JUNTOS. Além disso, ex-funcionários dos Correios compartilham como é o dia a dia do trabalho.",
+      explicacao: "O Grupo VIP reúne candidatos que estão LEVANDO O CONCURSO A SÉRIO. Lá você encontra dicas exclusivas, macetes de prova, troca de experiências e MOTIVAÇÃO para não desistir. Candidatos isolados DESISTEM. Candidatos em grupo SE APOIAM e PASSAM JUNTOS. Além disso, ex-funcionários do Banco do Brasil compartilham como é o dia a dia do trabalho.",
       items: [
         "Grupo exclusivo no WhatsApp/Telegram",
         "Dicas diárias de estudo e macetes",
@@ -421,7 +421,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
         "Orientação para exame médico admissional",
         "Checklist de documentos com status em tempo real",
         "Orientação jurídica para questões trabalhistas",
-        "Guia do primeiro dia de trabalho nos Correios",
+        "Guia do primeiro dia de trabalho no Banco do Brasil",
         "Suporte por 90 dias após a posse",
         "Certificado de inscrição COMPLETA e DEFINITIVA",
       ],
@@ -476,7 +476,7 @@ const UpsellInfo = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Inscrição > Taxas" />
+      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Inscrição > Taxas" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">

