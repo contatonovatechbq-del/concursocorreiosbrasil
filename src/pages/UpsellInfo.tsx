@@ -535,6 +535,17 @@ const UpsellInfo = () => {
             </tbody>
           </table>
 
+          {/* Benefícios do Cargo */}
+          <table className="tabela-zebra">
+            <thead><tr><th colSpan={2}>Benefícios do Cargo — Agente Comercial</th></tr></thead>
+            <tbody>
+              <tr><td className="font-semibold w-2/5">Remuneração</td><td>Salário inicial de R$ 6.000,00 a R$ 9.000,00 + PLR</td></tr>
+              <tr><td className="font-semibold">Jornada</td><td>30 horas semanais (jornada reduzida)</td></tr>
+              <tr><td className="font-semibold">Vale-Alimentação</td><td>R$ 1.014,42/mês</td></tr>
+              <tr><td className="font-semibold">Plano de Saúde</td><td>Cassi (família incluída)</td></tr>
+              <tr><td className="font-semibold">Previdência</td><td>Previ — Banco do Brasil</td></tr>
+            </tbody>
+          </table>
           {/* Observação */}
           <div className="text-xs space-y-1 bg-muted border border-border rounded p-3">
             <p className="font-bold text-foreground">Atenção:</p>
