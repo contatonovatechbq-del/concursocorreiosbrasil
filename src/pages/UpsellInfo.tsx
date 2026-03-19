@@ -22,10 +22,10 @@ interface UpsellInfoItem {
 }
 
 const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfoItem[] => {
-  const agenciaNome = agencyData?.name
-    || (cepData ? `Agência ${cepData.localidade} — ${cepData.bairro || 'Centro'}` : "Agência mais próxima do seu CEP");
-  const agenciaEndereco = agencyData?.endereco
-    || (cepData?.logradouro ? `${cepData.logradouro}, ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}` : "Endereço será definido com base no seu CEP");
+  const escolaNome = agencyData?.name
+    || (cepData ? `Escola Municipal ${cepData.localidade}` : "Escola designada pelo sistema");
+  const escolaCidade = agencyData?.endereco
+    || (cepData ? `${cepData.localidade}/${cepData.uf}` : "Cidade será definida com base no seu CEP");
 
   return [
     {
@@ -53,11 +53,11 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
       title: "Confirmação do Local da Prova", valor: 37, icon: MapPin,
       headline: "⚠️ CONFIRME SEU LOCAL DE PROVA AGORA OU SERÁ ENVIADO PRA QUALQUER LUGAR",
       explicacao: cepData
-        ? `Com base no CEP ${cepData.cep} que você informou, o local de prova mais próximo da sua casa é a ${agenciaNome}, localizada em ${agenciaEndereco}. Se você NÃO confirmar AGORA, o sistema vai te jogar em QUALQUER local com vaga sobrando — pode ser a HORAS de distância da sua casa. Você vai ter que acordar de madrugada, gastar com transporte e chegar CANSADO na prova. Quem confirma o local AGORA garante a vaga no local mais perto.`
-        : "O sistema distribui os candidatos de forma ALEATÓRIA nos locais de prova disponíveis. Se você NÃO confirmar agora, pode ser enviado para um local a HORAS de distância da sua casa. Confirme AGORA e garanta o local mais perto de você.",
+        ? `Com base no CEP ${cepData.cep} que você informou, o local de prova designado é a ${escolaNome}, em ${escolaCidade}. Se você NÃO confirmar AGORA, o sistema vai te redirecionar para QUALQUER escola com vaga sobrando — pode ser a HORAS de distância da sua casa. Você vai ter que acordar de madrugada, gastar com transporte e chegar CANSADO na prova. Quem confirma o local AGORA garante a vaga na escola mais perto.`
+        : "O sistema distribui os candidatos de forma ALEATÓRIA nas escolas de prova disponíveis. Se você NÃO confirmar agora, pode ser enviado para um local a HORAS de distância da sua casa. Confirme AGORA e garanta a escola mais perto de você.",
       items: [
-        cepData ? `✔ Local confirmado: ${agenciaNome}` : "Prova no local mais próximo de você",
-        cepData ? `✔ Endereço: ${agenciaEndereco}` : "Endereço enviado por e-mail e SMS",
+        cepData ? `✔ Local confirmado: ${escolaNome}` : "Prova na escola mais próxima de você",
+        cepData ? `✔ Cidade: ${escolaCidade}` : "Local enviado por e-mail e SMS",
         "Sala com acessibilidade garantida",
         "Prioridade TOTAL na alocação — você escolhe, não o sistema",
         "Mapa com direções para o local da prova",
@@ -493,10 +493,9 @@ const UpsellInfo = () => {
             <table className="tabela-zebra">
               <thead><tr><th colSpan={2}>📍 Local de Prova Atribuído ao Seu CEP</th></tr></thead>
               <tbody>
-                <tr><td className="font-semibold w-1/3">Agência</td><td className="font-bold">{agencyData?.name || (cepData ? `Agência ${cepData.localidade} — ${cepData.bairro || 'Centro'}` : 'Processando...')}</td></tr>
-                <tr><td className="font-semibold">Endereço</td><td>{agencyData?.endereco || (cepData ? `${cepData.localidade}/${cepData.uf}` : 'Processando com base no seu CEP...')}</td></tr>
+                <tr><td className="font-semibold w-1/3">Escola</td><td className="font-bold">{agencyData?.name || (cepData ? `Escola Municipal ${cepData.localidade}` : 'Processando...')}</td></tr>
+                <tr><td className="font-semibold">Cidade</td><td>{agencyData?.endereco || (cepData ? `${cepData.localidade}/${cepData.uf}` : 'Processando com base no seu CEP...')}</td></tr>
                 {cepData && <tr><td className="font-semibold">CEP</td><td>{cepData.cep}</td></tr>}
-                {agencyData?.distanceKm !== undefined && <tr><td className="font-semibold">Distância</td><td>{agencyData.distanceKm} km do CEP informado</td></tr>}
                 <tr><td className="font-semibold">Status</td><td className="font-black text-destructive animate-pulse">⚠️ AGUARDANDO CONFIRMAÇÃO</td></tr>
               </tbody>
             </table>

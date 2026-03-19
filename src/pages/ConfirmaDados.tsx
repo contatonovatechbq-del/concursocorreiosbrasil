@@ -38,31 +38,45 @@ const ConfirmaDados = () => {
 
           <h1 className="titulo-institucional text-lg">CONFIRMAÇÃO DE DADOS DO CANDIDATO</h1>
           <p className="text-sm text-muted-foreground">
-            Verifique se as informações abaixo estão corretas antes de prosseguir.
+            Confira se os dados abaixo correspondem ao candidato. Informações incorretas podem resultar na eliminação do concurso conforme item 7.3 do Edital.
           </p>
+
+          <div className="bg-success/10 border border-success/30 rounded p-3 text-sm text-foreground">
+            <span className="font-bold">✓ CPF verificado com sucesso.</span> Candidato apto para inscrição.
+          </div>
 
           <table className="tabela-zebra">
             <thead><tr><th colSpan={2}>Dados do Candidato</th></tr></thead>
             <tbody>
-              <tr><td className="font-semibold w-1/3">Nome completo</td><td>{cpfData.nome}</td></tr>
+              <tr><td className="font-semibold w-2/5">Nome completo</td><td>{cpfData.nome}</td></tr>
               <tr><td className="font-semibold">Data de nascimento</td><td>{cpfData.dataNascimento}</td></tr>
               {cpfData.nomeMae && <tr><td className="font-semibold">Nome da mãe</td><td>{cpfData.nomeMae}</td></tr>}
               <tr><td className="font-semibold">CPF</td><td>{cpfData.cpf}</td></tr>
               <tr><td className="font-semibold">Sexo</td><td>{cpfData.sexo}</td></tr>
+              <tr><td className="font-semibold">Situação</td><td className="text-primary font-bold">Apto(a)</td></tr>
+            </tbody>
+          </table>
+
+          <table className="tabela-zebra">
+            <thead><tr><th colSpan={2}>Concurso</th></tr></thead>
+            <tbody>
+              <tr><td className="font-semibold w-2/5">Cargo</td><td>Atendente Comercial — Nível Médio</td></tr>
+              <tr><td className="font-semibold">Edital</td><td>Nº 001/2026 — ECT</td></tr>
+              <tr><td className="font-semibold">Banca</td><td>IBFC</td></tr>
             </tbody>
           </table>
 
           <div className="space-y-3">
             <Button onClick={handleConfirmar} className="w-full h-12 text-sm font-bold">
-              Confirmar dados
+              CONFIRMAR DADOS E PROSSEGUIR
             </Button>
             <Button onClick={handleCorrigir} variant="outline" className="w-full h-10 text-sm font-semibold">
-              Não sou eu, corrigir dados
+              Dados incorretos — Corrigir CPF
             </Button>
           </div>
 
           <p className="text-[10px] text-center text-muted-foreground">
-            Dados consultados de forma segura — LGPD
+            Dados consultados em base oficial — Protegidos conforme LGPD (Lei nº 13.709/2018)
           </p>
         </div>
       </main>

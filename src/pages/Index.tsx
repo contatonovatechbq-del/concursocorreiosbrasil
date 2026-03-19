@@ -172,7 +172,7 @@ const Index = () => {
             <div>
               <h2 className="titulo-institucional text-base">CONSULTAR LOCAL DE PROVA</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Digite seu CEP para encontrar a agência mais próxima e ver as vagas disponíveis na sua região.
+                Informe o CEP da sua residência para localizar a escola de aplicação de prova mais próxima e verificar a disponibilidade de vagas na sua região.
               </p>
             </div>
 

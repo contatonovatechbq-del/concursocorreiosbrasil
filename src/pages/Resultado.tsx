@@ -158,9 +158,11 @@ const Resultado = () => {
 
           <div className="text-xs text-muted-foreground space-y-1">
             <p className="font-semibold text-foreground">Observações:</p>
-            <p>• Prova aplicada na agência ou escola mais próxima do endereço informado.</p>
+            <p>• A prova será aplicada na escola designada acima, conforme disponibilidade de salas.</p>
             <p>• Duração: 4 horas. Portões abrem às 12h, fecham às 13h.</p>
-            <p>• Levar documento com foto e caneta esferográfica preta.</p>
+            <p>• Levar documento oficial com foto e caneta esferográfica de tinta preta em material transparente.</p>
+            <p>• Não será permitida a entrada de candidatos após o fechamento dos portões.</p>
+            <p>• Conforme Edital Nº 001/2026 — ECT/IBFC.</p>
           </div>
 
 

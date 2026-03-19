@@ -54,7 +54,7 @@ const Inscricao = () => {
 
           <h1 className="titulo-institucional text-lg">VERIFICAÇÃO DO CANDIDATO</h1>
           <p className="text-sm text-muted-foreground">
-            Informe seu CPF para verificar elegibilidade e prosseguir com a inscrição no concurso.
+            Para prosseguir com a inscrição no Concurso Público Correios 2026 (Edital Nº 001/2026), informe o CPF do candidato. A verificação de elegibilidade é obrigatória conforme normas do edital.
           </p>
 
           <div className="border border-border rounded bg-card p-4 sm:p-5 space-y-4">

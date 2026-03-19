@@ -139,7 +139,7 @@ const Pagamento = () => {
           {isLoadingPix ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <Loader2 className="w-12 h-12 animate-spin text-primary" />
-              <p className="text-muted-foreground font-medium"><p className="text-muted-foreground font-medium">Gerando PIX de inscrição...</p></p>
+              <p className="text-muted-foreground font-medium">Gerando PIX de inscrição...</p>
             </div>
           ) : pixError ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
