@@ -2,7 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <script>var __LOVA_FIX_TRIGGER__ = null;</script>
+    <script>
+      var __LOVA_FIX_TRIGGER__ = null;
+      try {
+        Object.defineProperty(globalThis, "__LOVA_FIX_TRIGGER__", {
+          value: null,
+          writable: true,
+          configurable: false,
+        });
+      } catch (e) {
+        try { globalThis.__LOVA_FIX_TRIGGER__ = null; } catch (_) {}
+      }
+    </script>
     <script>
       (function() {
         var n = "__LOVA_FIX_TRIGGER__";
