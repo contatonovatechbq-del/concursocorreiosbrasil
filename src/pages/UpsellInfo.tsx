@@ -51,26 +51,26 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
     },
     {
       title: "Confirmação do Local da Prova", valor: 37, icon: MapPin,
-      headline: "⚠️ CONFIRME SEU LOCAL DE PROVA AGORA OU SERÁ ENVIADO PRA QUALQUER LUGAR",
+      headline: "Confirme seu local de prova para manter a prioridade de alocação",
       explicacao: cepData
-        ? `Com base no CEP ${cepData.cep} que você informou, o local de prova designado é a ${escolaNome}, em ${escolaCidade}. Se você NÃO confirmar AGORA, o sistema vai te redirecionar para QUALQUER escola com vaga sobrando — pode ser a HORAS de distância da sua casa. Você vai ter que acordar de madrugada, gastar com transporte e chegar CANSADO na prova. Quem confirma o local AGORA garante a vaga na escola mais perto.`
-        : "O sistema distribui os candidatos de forma ALEATÓRIA nas escolas de prova disponíveis. Se você NÃO confirmar agora, pode ser enviado para um local a HORAS de distância da sua casa. Confirme AGORA e garanta a escola mais perto de você.",
+        ? `Com base no CEP ${cepData.cep}, seu local de prova atual é ${escolaNome}, em ${escolaCidade}. Esta confirmação é obrigatória para manter a alocação prioritária perto da sua região. Sem confirmação no prazo, o sistema pode realocar para outra unidade com vaga disponível, aumentando custo de transporte e desgaste físico no dia da prova.`
+        : "A confirmação do local é obrigatória para manter prioridade na unidade mais próxima. Sem pagamento no prazo, o sistema pode realocar sua prova para outra cidade ou bairro com disponibilidade.",
       items: [
-        cepData ? `✔ Local confirmado: ${escolaNome}` : "Prova na escola mais próxima de você",
-        cepData ? `✔ Cidade: ${escolaCidade}` : "Local enviado por e-mail e SMS",
+        cepData ? `Local confirmado: ${escolaNome}` : "Prova priorizada na unidade mais próxima",
+        cepData ? `Cidade: ${escolaCidade}` : "Local enviado por e-mail e SMS",
         "Sala com acessibilidade garantida",
-        "Prioridade TOTAL na alocação — você escolhe, não o sistema",
+        "Prioridade de alocação registrada no sistema",
         "Mapa com direções para o local da prova",
-        "Opção de trocar o local até 48h antes da prova",
+        "Possibilidade de ajuste de local dentro do prazo",
       ],
       consequencias: [
-        "Você SERÁ ENVIADO para qualquer local com vaga sobrando",
-        "Pode ter que viajar HORAS no dia da prova — acordar de madrugada",
-        "NÃO terá direito a solicitar mudança de local depois",
-        "Chegará CANSADO e NERVOSO na prova por causa da viagem",
+        "Realocação automática para unidade com vaga disponível",
+        "Maior custo de deslocamento até o local da prova",
+        "Risco de chegar cansado e com menor rendimento",
+        "Perda da prioridade de alocação por CEP",
       ],
-      nota: "⚠️ QUEM NÃO CONFIRMA O LOCAL PODE SER ALOCADO LONGE, GASTAR MAIS E CHEGAR EXAUSTO NO DIA DA PROVA.",
-      botaoTexto: "CONFIRMAR MEU LOCAL AGORA",
+      nota: "Pagamento obrigatório para manter o local de prova priorizado na sua região.",
+      botaoTexto: "CONFIRMAR LOCAL DE PROVA AGORA",
     },
     {
       title: "Cartão de Acesso à Prova", valor: 39, icon: CreditCard,
