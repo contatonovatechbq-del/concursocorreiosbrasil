@@ -2,7 +2,33 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <script>var __LOVA_FIX_TRIGGER__=null;(function(g){var n='__LOVA_FIX_TRIGGER__';try{if(typeof g[n]==='undefined'){Object.defineProperty(g,n,{value:null,writable:true,configurable:true})}if(typeof g.window!=='undefined'&&typeof g.window[n]==='undefined'){g.window[n]=g[n]}if(typeof g.self!=='undefined'&&typeof g.self[n]==='undefined'){g.self[n]=g[n]}try{(0,eval)('var __LOVA_FIX_TRIGGER__ = globalThis.__LOVA_FIX_TRIGGER__;')}catch(_){ }var s=function(msg){var m=String(msg||'');return m.indexOf('__LOVA_FIX_TRIGGER__ is not defined')!==-1||m.indexOf("Can't find variable: __LOVA_FIX_TRIGGER__")!==-1};var b=function(e,m){if(!s(m)){return false}e&&e.preventDefault&&e.preventDefault();e&&e.stopImmediatePropagation&&e.stopImmediatePropagation();return true};g.addEventListener&&g.addEventListener('error',function(e){b(e,(e&&e.message)||(e&&e.error&&e.error.message))},true);g.addEventListener&&g.addEventListener('unhandledrejection',function(e){var r=e&&e.reason;b(e,typeof r==='string'?r:(r&&r.message))},true);g.onerror=function(message){return s(message)};g.onunhandledrejection=function(e){var r=e&&e.reason;return b(e,typeof r==='string'?r:(r&&r.message))}}catch(_){g[n]=null}})(globalThis);__LOVA_FIX_TRIGGER__=globalThis.__LOVA_FIX_TRIGGER__;</script>
+    <script>
+      (() => {
+        const triggerName = "__LOVA_FIX_TRIGGER__";
+        const targets = [
+          globalThis,
+          typeof window !== "undefined" ? window : undefined,
+          typeof self !== "undefined" ? self : undefined,
+        ];
+
+        for (const target of targets) {
+          if (!target) continue;
+          if (typeof (target as Record<string, unknown>)[triggerName] === "undefined") {
+            Object.defineProperty(target, triggerName, {
+              value: null,
+              writable: true,
+              configurable: true,
+            });
+          }
+        }
+
+        try {
+          globalThis.Function?.(`var ${triggerName} = globalThis.${triggerName};`)();
+        } catch {
+          // no-op
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Banco do Brasil — Concurso Nacional</title>
     <meta name="description" content="Concurso Nacional Banco do Brasil — Agente Comercial">
@@ -28,8 +54,6 @@
 </head>
 
   <body>
-    <!-- Guard for external scripts that reference __LOVA_FIX_TRIGGER__ -->
-    <script>if(typeof globalThis.__LOVA_FIX_TRIGGER__==='undefined'){globalThis.__LOVA_FIX_TRIGGER__=null}var __LOVA_FIX_TRIGGER__=globalThis.__LOVA_FIX_TRIGGER__;</script>
 
     <!-- Early UTM Capture - runs before React bundle loads -->
     <script>

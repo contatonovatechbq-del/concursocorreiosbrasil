@@ -11,7 +11,7 @@ import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const getContestDates = () => {
   const now = new Date();
-  const inscStart = new Date(now); inscStart.setDate(inscStart.getDate() - 5);
+  const inscStart = new Date(now);
   const inscEnd = new Date(now); inscEnd.setDate(inscEnd.getDate() + 25);
   const prova = new Date(now); prova.setDate(prova.getDate() + 75);
   const gabarito = new Date(prova); gabarito.setDate(gabarito.getDate() + 10);
