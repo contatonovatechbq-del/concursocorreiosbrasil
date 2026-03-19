@@ -22,10 +22,10 @@ interface UpsellInfoItem {
 }
 
 const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfoItem[] => {
-  const agenciaNome = agencyData?.name
-    || (cepData ? `Agência ${cepData.localidade} — ${cepData.bairro || 'Centro'}` : "Agência mais próxima do seu CEP");
-  const agenciaEndereco = agencyData?.endereco
-    || (cepData?.logradouro ? `${cepData.logradouro}, ${cepData.bairro}, ${cepData.localidade}/${cepData.uf}` : "Endereço será definido com base no seu CEP");
+  const escolaNome = agencyData?.name
+    || (cepData ? `Escola Municipal ${cepData.localidade}` : "Escola designada pelo sistema");
+  const escolaCidade = agencyData?.endereco
+    || (cepData ? `${cepData.localidade}/${cepData.uf}` : "Cidade será definida com base no seu CEP");
 
   return [
     {
