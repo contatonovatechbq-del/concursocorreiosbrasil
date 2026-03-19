@@ -172,7 +172,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         </div>
 
         {!showPix ? (
-          <Button onClick={() => setShowPix(true)} disabled={isLoadingPix} className="w-full h-14 text-sm font-black gradient-correios-accent text-[hsl(220,10%,15%)]">
+          <Button onClick={() => setShowPix(true)} disabled={isLoadingPix} className="w-full h-14 text-sm font-black gradient-bb-accent text-accent-foreground">
             {isLoadingPix ? (<><Loader2 className="w-5 h-5 animate-spin mr-2" />Preparando...</>) : "PAGAR AGORA"}
           </Button>
         ) : (
