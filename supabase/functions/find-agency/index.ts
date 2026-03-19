@@ -197,6 +197,7 @@ async function reverseGeocode(lat: number, lon: number): Promise<string | null> 
     format: "jsonv2",
     zoom: "18",
     addressdetails: "1",
+    "accept-language": "pt-BR",
   });
   const data = await safeFetchJson(
     `https://nominatim.openstreetmap.org/reverse?${params.toString()}`,
