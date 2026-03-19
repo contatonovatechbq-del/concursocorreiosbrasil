@@ -1,4 +1,5 @@
 import { Menu } from "lucide-react";
+import bbLogoTop from "@/assets/bb-logo-top.png";
 
 interface CorreiosHeaderProps {
   breadcrumb?: string;
@@ -26,13 +27,8 @@ const CorreiosHeader = ({ breadcrumb = "Concursos > Agente Comercial > Inscri√ß√
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Logo text */}
-          <div className="flex items-center gap-2">
-            <div className="bg-primary rounded-full w-8 h-8 flex items-center justify-center">
-              <span className="text-accent font-black text-sm">BB</span>
-            </div>
-            <span className="font-black text-primary text-sm sm:text-base tracking-tight">BANCO DO BRASIL</span>
-          </div>
+          {/* Logo */}
+          <img src={bbLogoTop} alt="Banco do Brasil" className="h-9 sm:h-10 object-contain" loading="eager" />
         </div>
       </header>
 
