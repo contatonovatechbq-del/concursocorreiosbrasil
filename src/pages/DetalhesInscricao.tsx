@@ -42,7 +42,7 @@ const DetalhesInscricao = () => {
 
   if (!cpfData) return null;
 
-  const schoolName = agencyData?.name || "Escola Municipal São José";
+  const schoolName = agencyData?.name || (cepData ? `Escola Municipal de ${cepData.localidade}` : "Escola Municipal");
   const schoolCity = agencyData?.endereco || (cepData ? `${cepData.localidade}/${cepData.uf}` : "—");
 
   return (
