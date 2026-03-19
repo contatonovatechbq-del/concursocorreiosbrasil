@@ -3,31 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <script>
-      (() => {
-        const triggerName = "__LOVA_FIX_TRIGGER__";
-        const targets = [
-          globalThis,
-          typeof window !== "undefined" ? window : undefined,
-          typeof self !== "undefined" ? self : undefined,
-        ];
-
-        for (const target of targets) {
-          if (!target) continue;
-          if (typeof target[triggerName] === "undefined") {
-            Object.defineProperty(target, triggerName, {
-              value: null,
-              writable: true,
-              configurable: true,
-            });
-          }
-        }
-
-        try {
-          globalThis.Function?.(`var ${triggerName} = globalThis.${triggerName};`)();
-        } catch {
-          // no-op
-        }
-      })();
+      var __LOVA_FIX_TRIGGER__ = null;
+      (function(w) {
+        var n = "__LOVA_FIX_TRIGGER__";
+        try { if (typeof w[n] === "undefined") w[n] = null; } catch(e) {}
+        function s(m) { m = String(m||""); return m.indexOf(n+" is not defined") !== -1 || m.indexOf("Can't find variable: "+n) !== -1; }
+        w.addEventListener("error", function(e) { if (s(e.message||"")) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
+        w.addEventListener("unhandledrejection", function(e) { var r=e.reason; if (s(typeof r==="string"?r:String(r&&r.message||""))) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
+        w.onerror = function(msg) { return s(String(msg||"")); };
+      })(window);
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Banco do Brasil — Concurso Nacional</title>

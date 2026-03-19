@@ -159,7 +159,7 @@ const Index = () => {
                   <td><span className="text-xs font-bold text-success">Inscrições abertas</span></td>
                 </tr>
                 <tr>
-                  <td className="font-medium">Escriturário</td>
+                  <td className="font-medium">Agente de Tecnologia</td>
                   <td>—</td>
                   <td><span className="text-xs font-bold text-accent-foreground">Em breve</span></td>
                 </tr>
