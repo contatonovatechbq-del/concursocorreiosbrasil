@@ -536,9 +536,9 @@ const UpsellInfo = () => {
           </table>
 
           {/* Observação */}
-          <div className="text-xs space-y-1 bg-muted/30 border border-border rounded p-3">
-            <p className="font-black text-foreground">Informação importante:</p>
-            <p className="font-medium text-foreground">• Este serviço é opcional e complementar.</p>
+          <div className="text-xs space-y-1 bg-destructive/10 border border-destructive rounded p-3">
+            <p className="font-black text-destructive">🚨 ATENÇÃO — LEIA COM CUIDADO:</p>
+            <p className="font-semibold text-destructive">• {info.nota}</p>
             <p className="text-muted-foreground">• Pagamento via PIX com confirmação instantânea.</p>
           </div>
 
