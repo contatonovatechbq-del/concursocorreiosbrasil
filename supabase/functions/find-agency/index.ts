@@ -295,20 +295,18 @@ Deno.serve(async (req) => {
     const tags = nearest.school?.tags || {};
     const coords = getElementCoords(nearest.school);
 
-    // Build address from OSM tags, fallback to reverse geocoding
-    let street = tags["addr:street"] || tags["addr:full"] || "";
+    // Prefer reverse geocoded address (usually cleaner), fallback to OSM tags
+    const reverseAddr = coords ? await reverseGeocode(coords.lat, coords.lon) : null;
+    const tagStreet = tags["addr:street"] || tags["addr:full"] || "";
     const houseNumber = tags["addr:housenumber"] || "";
     const suburb = tags["addr:suburb"] || tags["addr:neighbourhood"] || "";
 
-    // If no street address in tags, try reverse geocoding
-    if (!street && coords) {
-      const reverseAddr = await reverseGeocode(coords.lat, coords.lon);
-      if (reverseAddr) street = reverseAddr;
-    }
+    const tagStreetLine = tagStreet && houseNumber ? `${tagStreet}, ${houseNumber}` : tagStreet;
+    const street = reverseAddr || tagStreetLine;
 
     const addressParts = [
-      street && houseNumber ? `${street}, ${houseNumber}` : street,
-      suburb,
+      street,
+      reverseAddr ? "" : suburb,
       cityDisplay,
     ].filter(Boolean);
     const fullAddress = addressParts.join(" — ") || cityDisplay;
