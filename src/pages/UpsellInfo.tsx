@@ -331,7 +331,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
     {
       title: "Certificado de Conclusão de Curso", valor: 23, icon: Fingerprint,
       headline: "🎓 COMPROVE SUA ESCOLARIDADE — OBRIGATÓRIO PARA A POSSE",
-      explicacao: "Para tomar posse no cargo de Atendente Comercial, você PRECISA comprovar Ensino Médio completo. Se seu certificado estiver com problema, desatualizado ou se você perdeu o documento, sua posse será NEGADA. Com este serviço, garantimos que seu certificado está VÁLIDO e em conformidade com as exigências do edital.",
+      explicacao: "Para tomar posse no cargo de Agente Comercial, você PRECISA comprovar Ensino Médio completo. Se seu certificado estiver com problema, desatualizado ou se você perdeu o documento, sua posse será NEGADA. Com este serviço, garantimos que seu certificado está VÁLIDO e em conformidade com as exigências do edital.",
       items: [
         "Verificação completa do seu certificado escolar",
         "Orientação para obter segunda via se necessário",
