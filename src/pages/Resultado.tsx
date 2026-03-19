@@ -68,6 +68,7 @@ const Resultado = () => {
           agencyResult = {
             name: data.agency.name,
             endereco: data.agency.endereco || `${cd.localidade}/${cd.uf}`,
+            cidade: data.agency.cidade || `${cd.localidade}/${cd.uf}`,
           };
         } else {
           agencyResult = generateFallbackAgency(cd);
