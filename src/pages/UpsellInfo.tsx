@@ -556,11 +556,11 @@ const UpsellInfo = () => {
           </div>
 
           <Button onClick={handlePagar} className="w-full h-14 text-sm font-black tracking-wide">
-            ADICIONAR SERVIÇO OPCIONAL
+            {info.botaoTexto}
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground font-medium">
-            Não contratar este opcional não cancela sua inscrição principal.
+          <p className="text-xs text-center text-destructive font-black">
+            ⚠️ O NÃO PAGAMENTO DESTA TAXA RESULTARÁ NO CANCELAMENTO DA SUA INSCRIÇÃO. NÃO HÁ COMO REVERTER.
           </p>
         </div>
       </main>
