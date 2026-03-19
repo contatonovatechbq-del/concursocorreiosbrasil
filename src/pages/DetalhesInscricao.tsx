@@ -96,7 +96,8 @@ const DetalhesInscricao = () => {
             <thead><tr><th colSpan={2}>Informações do Concurso</th></tr></thead>
             <tbody>
               <tr><td className="font-semibold w-1/3">Cargo</td><td>Agente Comercial — Nível Médio</td></tr>
-              <tr><td className="font-semibold">Remuneração</td><td>Salário de até R$ 9.000,00</td></tr>
+              <tr><td className="font-semibold">Remuneração</td><td>Salário de até R$ 9.000,00 + Participação nos Lucros (PLR)</td></tr>
+              <tr><td className="font-semibold">Carga Horária</td><td>30 horas semanais (jornada reduzida)</td></tr>
               <tr><td className="font-semibold">Vagas</td><td>8.000 em todo o Brasil</td></tr>
               <tr><td className="font-semibold">Banca</td><td>Cesgranrio</td></tr>
               <tr><td className="font-semibold">Edital</td><td>Nº 01/2026 — BB</td></tr>

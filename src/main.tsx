@@ -14,22 +14,18 @@ import "./index.css";
   for (const target of targets) {
     if (!target) continue;
     try {
-      if (typeof target[triggerName] === "undefined") target[triggerName] = null;
+      Object.defineProperty(target, triggerName, {
+        value: null,
+        writable: true,
+        configurable: false,
+      });
     } catch {
-      // no-op
+      try {
+        if (typeof target[triggerName] === "undefined") target[triggerName] = null;
+      } catch {
+        // no-op
+      }
     }
-  }
-
-  try {
-    globalThis.Function?.(`var ${triggerName} = null;`)();
-  } catch {
-    // no-op
-  }
-
-  try {
-    (0, eval)(`var ${triggerName} = null;`);
-  } catch {
-    // no-op
   }
 
   if (typeof window === "undefined") return;
