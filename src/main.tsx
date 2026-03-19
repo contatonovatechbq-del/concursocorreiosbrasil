@@ -6,9 +6,9 @@ import "./index.css";
 (() => {
   const triggerName = "__LOVA_FIX_TRIGGER__";
   const targets = [
-    globalThis as Record<string, unknown>,
-    typeof window !== "undefined" ? (window as Record<string, unknown>) : undefined,
-    typeof self !== "undefined" ? (self as Record<string, unknown>) : undefined,
+    globalThis as unknown as Record<string, unknown>,
+    typeof window !== "undefined" ? (window as unknown as Record<string, unknown>) : undefined,
+    typeof self !== "undefined" ? (self as unknown as Record<string, unknown>) : undefined,
   ];
 
   for (const target of targets) {
