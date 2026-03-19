@@ -77,7 +77,7 @@ const Upsell = () => {
           description={currentUpsell.description}
           valor={valorComCentavos}
           cpfData={cpfData}
-          protocolo={protocolo || `COR${Date.now()}`}
+          protocolo={protocolo || `BB${Date.now()}`}
           onPaymentConfirmed={handlePaymentConfirmed}
           stepNumber={stepNumber}
           totalSteps={9}
