@@ -175,8 +175,36 @@ function getElementCoords(el: any): { lat: number; lon: number } | null {
   return null;
 }
 
+const GENERIC_NAMES = new Set(["escola", "school", "colégio", "colegio", "creche", "nursery"]);
+
+function isRealSchoolName(tags: Record<string, string>): boolean {
+  const name = (tags.name || tags["official_name"] || tags["short_name"] || tags["name:pt"] || "").trim();
+  if (!name) return false;
+  if (GENERIC_NAMES.has(name.toLowerCase())) return false;
+  if (name.length < 4) return false;
+  return true;
+}
+
 function buildSchoolName(tags: Record<string, string>): string {
   return tags.name || tags["official_name"] || tags["short_name"] || tags["name:pt"] || generateFallbackSchoolName();
+}
+
+// Reverse geocode coordinates to get a street address
+async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
+  const params = new URLSearchParams({
+    lat: lat.toString(),
+    lon: lon.toString(),
+    format: "jsonv2",
+    zoom: "18",
+  });
+  const data = await safeFetchJson(
+    `https://nominatim.openstreetmap.org/reverse?${params.toString()}`,
+    "Nominatim-reverse",
+  );
+  if (!data || !data.display_name) return null;
+  // Extract just the street portion (first 2-3 parts before the city)
+  const parts = data.display_name.split(", ");
+  return parts.slice(0, Math.min(3, parts.length)).join(", ");
 }
 
 Deno.serve(async (req) => {
