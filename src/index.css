@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Correios Design System - Institutional Flat Theme */
+/* Banco do Brasil Design System - Institutional Theme */
 
 @layer base {
 :root {
@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 12%;
 
-    --primary: 220 10% 22%;
+    --primary: 214 100% 26%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 15% 96%;
@@ -24,7 +24,7 @@
     --muted: 215 15% 96%;
     --muted-foreground: 215 10% 45%;
 
-    --accent: 47 100% 50%;
+    --accent: 54 96% 52%;
     --accent-foreground: 215 25% 12%;
 
     --destructive: 0 80% 55%;
@@ -35,7 +35,7 @@
 
     --border: 215 15% 88%;
     --input: 215 15% 88%;
-    --ring: 220 10% 22%;
+    --ring: 214 100% 26%;
 
     --radius: 0.25rem;
 
@@ -59,7 +59,7 @@
     --popover: 215 25% 12%;
     --popover-foreground: 215 10% 95%;
 
-    --primary: 220 10% 22%;
+    --primary: 214 100% 26%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 15% 18%;
@@ -68,7 +68,7 @@
     --muted: 215 15% 18%;
     --muted-foreground: 215 10% 60%;
 
-    --accent: 47 100% 50%;
+    --accent: 54 96% 52%;
     --accent-foreground: 215 25% 12%;
 
     --destructive: 0 70% 45%;
@@ -76,7 +76,7 @@
 
     --border: 215 15% 20%;
     --input: 215 15% 20%;
-    --ring: 220 10% 22%;
+    --ring: 214 100% 26%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -105,15 +105,15 @@
     text-wrap: balance;
   }
   
-  .gradient-correios {
-    background: linear-gradient(135deg, hsl(220 10% 22%), hsl(220 10% 28%));
+  .gradient-bb {
+    background: linear-gradient(135deg, hsl(214 100% 26%), hsl(214 100% 32%));
   }
   
-  .gradient-correios-accent {
-    background: linear-gradient(135deg, hsl(47 100% 50%), hsl(40 100% 55%));
+  .gradient-bb-accent {
+    background: linear-gradient(135deg, hsl(54 96% 52%), hsl(48 100% 55%));
   }
   
-  .shadow-correios {
+  .shadow-bb {
     box-shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.06);
   }
   

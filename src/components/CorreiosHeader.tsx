@@ -1,15 +1,14 @@
 import { Menu } from "lucide-react";
-import logoEct from "@/assets/logo-ect.svg";
 
 interface CorreiosHeaderProps {
   breadcrumb?: string;
 }
 
-const CorreiosHeader = ({ breadcrumb = "Concursos > Atendente Comercial > Inscrição" }: CorreiosHeaderProps) => {
+const CorreiosHeader = ({ breadcrumb = "Concursos > Agente Comercial > Inscrição" }: CorreiosHeaderProps) => {
   return (
     <>
       {/* Top Bar */}
-      <div className="bg-[hsl(200,60%,28%)] text-white/90 text-[11px] py-1.5 px-4">
+      <div className="bg-primary text-primary-foreground/90 text-[11px] py-1.5 px-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <span className="flex items-center gap-1">Acessibilidade ▾</span>
           <span className="flex items-center gap-1.5">
@@ -20,15 +19,20 @@ const CorreiosHeader = ({ breadcrumb = "Concursos > Atendente Comercial > Inscri
       </div>
 
       {/* Main Header */}
-      <header className="bg-white border-b border-border px-4 py-2 sticky top-0 z-50 shadow-sm">
+      <header className="bg-accent border-b border-border px-4 py-2 sticky top-0 z-50 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-center relative">
           {/* Hamburger - left */}
-          <button className="absolute left-0 p-2 text-[hsl(200,60%,28%)] hover:bg-muted rounded-lg transition-colors">
+          <button className="absolute left-0 p-2 text-primary hover:bg-accent/80 rounded-lg transition-colors">
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Logo centered */}
-          <img src={logoEct} alt="Correios" className="h-7 sm:h-8" />
+          {/* Logo text */}
+          <div className="flex items-center gap-2">
+            <div className="bg-primary rounded-full w-8 h-8 flex items-center justify-center">
+              <span className="text-accent font-black text-sm">BB</span>
+            </div>
+            <span className="font-black text-primary text-sm sm:text-base tracking-tight">BANCO DO BRASIL</span>
+          </div>
         </div>
       </header>
 
