@@ -3,7 +3,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const PIXEL_ID = '1188132760156339';
+const PIXEL_ID = '1592881091824628';
 
 interface ConversionEvent {
   event_name: string;
