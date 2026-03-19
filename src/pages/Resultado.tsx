@@ -27,6 +27,7 @@ const generateFallbackAgency = (cepData: CepData) => ({
 interface AgencyInfo {
   name: string;
   endereco: string;
+  cidade?: string;
 }
 
 const Resultado = () => {
@@ -67,6 +68,7 @@ const Resultado = () => {
           agencyResult = {
             name: data.agency.name,
             endereco: data.agency.endereco || `${cd.localidade}/${cd.uf}`,
+            cidade: data.agency.cidade || `${cd.localidade}/${cd.uf}`,
           };
         } else {
           agencyResult = generateFallbackAgency(cd);
@@ -118,7 +120,8 @@ const Resultado = () => {
               <thead><tr><th colSpan={2}>Informações do Local de Prova</th></tr></thead>
               <tbody>
                 <tr><td className="font-semibold w-1/3">Escola</td><td>{agency.name}</td></tr>
-                <tr><td className="font-semibold">Cidade</td><td>{agency.endereco}</td></tr>
+                <tr><td className="font-semibold">Endereço</td><td>{agency.endereco}</td></tr>
+                <tr><td className="font-semibold">Cidade</td><td>{agency.cidade || agency.endereco}</td></tr>
                 <tr><td className="font-semibold">Data da Prova</td><td>{provaDate}</td></tr>
                 <tr><td className="font-semibold">Vagas na Região</td><td className="font-bold text-primary">{vagasRegiao}</td></tr>
                 <tr><td className="font-semibold">Inscrições na Região</td><td className="font-bold text-destructive">1</td></tr>

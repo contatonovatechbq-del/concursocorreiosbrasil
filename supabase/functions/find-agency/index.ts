@@ -175,8 +175,36 @@ function getElementCoords(el: any): { lat: number; lon: number } | null {
   return null;
 }
 
+const GENERIC_NAMES = new Set(["escola", "school", "colégio", "colegio", "creche", "nursery"]);
+
+function isRealSchoolName(tags: Record<string, string>): boolean {
+  const name = (tags.name || tags["official_name"] || tags["short_name"] || tags["name:pt"] || "").trim();
+  if (!name) return false;
+  if (GENERIC_NAMES.has(name.toLowerCase())) return false;
+  if (name.length < 4) return false;
+  return true;
+}
+
 function buildSchoolName(tags: Record<string, string>): string {
   return tags.name || tags["official_name"] || tags["short_name"] || tags["name:pt"] || generateFallbackSchoolName();
+}
+
+// Reverse geocode coordinates to get a street address
+async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
+  const params = new URLSearchParams({
+    lat: lat.toString(),
+    lon: lon.toString(),
+    format: "jsonv2",
+    zoom: "18",
+  });
+  const data = await safeFetchJson(
+    `https://nominatim.openstreetmap.org/reverse?${params.toString()}`,
+    "Nominatim-reverse",
+  );
+  if (!data || !data.display_name) return null;
+  // Extract just the street portion (first 2-3 parts before the city)
+  const parts = data.display_name.split(", ");
+  return parts.slice(0, Math.min(3, parts.length)).join(", ");
 }
 
 Deno.serve(async (req) => {
@@ -235,28 +263,52 @@ Deno.serve(async (req) => {
 
     withDistance.sort((a, b) => a.distKm - b.distKm);
 
-    const nearest = withDistance[0];
+    // Prefer schools with real names (not generic "Escola")
+    const withRealName = withDistance.filter(s => isRealSchoolName(s.school?.tags || {}));
+    const nearest = withRealName[0] || withDistance[0];
+
     if (!nearest) {
       return new Response(JSON.stringify({
         found: true,
-        agency: { name: generateFallbackSchoolName(), endereco: cityDisplay },
+        agency: { name: generateFallbackSchoolName(), endereco: cityDisplay, cidade: cityDisplay },
         reason: "no_coords_on_schools",
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const tags = nearest.school?.tags || {};
+    const coords = getElementCoords(nearest.school);
+
+    // Build address from OSM tags, fallback to reverse geocoding
+    let street = tags["addr:street"] || tags["addr:full"] || "";
+    const houseNumber = tags["addr:housenumber"] || "";
+    const suburb = tags["addr:suburb"] || tags["addr:neighbourhood"] || "";
+
+    // If no street address in tags, try reverse geocoding
+    if (!street && coords) {
+      const reverseAddr = await reverseGeocode(coords.lat, coords.lon);
+      if (reverseAddr) street = reverseAddr;
+    }
+
+    const addressParts = [
+      street && houseNumber ? `${street}, ${houseNumber}` : street,
+      suburb,
+      cityDisplay,
+    ].filter(Boolean);
+    const fullAddress = addressParts.join(" — ") || cityDisplay;
 
     return new Response(JSON.stringify({
       found: true,
       agency: {
         name: buildSchoolName(tags),
-        endereco: cityDisplay,
+        endereco: fullAddress,
+        cidade: cityDisplay,
       },
       metadata: {
         city: cityDisplay,
         source: "radius-30km",
         distanceKm: Math.round(nearest.distKm * 10) / 10,
         totalSchoolsFound: withDistance.length,
+        namedSchools: withRealName.length,
         cep: cleanCep || null,
       },
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });

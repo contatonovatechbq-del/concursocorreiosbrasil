@@ -43,7 +43,8 @@ const DetalhesInscricao = () => {
   if (!cpfData) return null;
 
   const schoolName = agencyData?.name || (cepData ? `Escola Municipal de ${cepData.localidade}` : "Escola Municipal");
-  const schoolCity = agencyData?.endereco || (cepData ? `${cepData.localidade}/${cepData.uf}` : "—");
+  const schoolAddress = agencyData?.endereco || (cepData ? `${cepData.localidade}/${cepData.uf}` : "—");
+  const schoolCity = agencyData?.cidade || (cepData ? `${cepData.localidade}/${cepData.uf}` : "—");
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -82,6 +83,7 @@ const DetalhesInscricao = () => {
             <thead><tr><th colSpan={2}>Local de Prova Designado</th></tr></thead>
             <tbody>
               <tr><td className="font-semibold w-1/3">Escola</td><td>{schoolName}</td></tr>
+              <tr><td className="font-semibold">Endereço</td><td>{schoolAddress}</td></tr>
               <tr><td className="font-semibold">Cidade</td><td>{schoolCity}</td></tr>
               <tr><td className="font-semibold">Data</td><td>{provaDate}</td></tr>
               <tr><td className="font-semibold">Horário</td><td>{getProvaHorario()}</td></tr>

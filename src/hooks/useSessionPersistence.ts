@@ -25,6 +25,7 @@ export interface CepData {
 export interface AgencyData {
   name: string;
   endereco: string;
+  cidade?: string;
   distanceKm?: number;
 }
 
