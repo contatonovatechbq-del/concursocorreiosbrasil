@@ -15,12 +15,18 @@ import "./index.css";
     });
   }
 
-  if (typeof window !== "undefined" && typeof (window as Record<string, unknown>)[triggerName] === "undefined") {
-    (window as Record<string, unknown>)[triggerName] = globalRef[triggerName];
+  if (typeof window !== "undefined") {
+    const windowRef = window as unknown as Record<string, unknown>;
+    if (typeof windowRef[triggerName] === "undefined") {
+      windowRef[triggerName] = globalRef[triggerName];
+    }
   }
 
-  if (typeof self !== "undefined" && typeof (self as Record<string, unknown>)[triggerName] === "undefined") {
-    (self as Record<string, unknown>)[triggerName] = globalRef[triggerName];
+  if (typeof self !== "undefined") {
+    const selfRef = self as unknown as Record<string, unknown>;
+    if (typeof selfRef[triggerName] === "undefined") {
+      selfRef[triggerName] = globalRef[triggerName];
+    }
   }
 
   try {
