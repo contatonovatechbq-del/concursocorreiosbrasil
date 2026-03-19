@@ -33,7 +33,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [isLoadingPix, setIsLoadingPix] = useState(true);
   const [pixError, setPixError] = useState<string | null>(null);
-  const [showPix, setShowPix] = useState(false);
+  const [showPix, setShowPix] = useState(true);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pixStorageKey = getPixStorageKey("upsell", stepNumber);
 
