@@ -63,18 +63,11 @@ const Resultado = () => {
         const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
         let agencyResult: AgencyInfo;
-        if (!error && data?.found && data.agency?.endereco) {
-          const fetchedAddress = String(data.agency.endereco);
-          const isSameCity = isAgencyInRequestedCity(fetchedAddress, cd.localidade);
-
-          if (isSameCity) {
-            agencyResult = {
-              name: data.agency.name,
-              endereco: fetchedAddress,
-            };
-          } else {
-            agencyResult = generateFallbackAgency(cd);
-          }
+        if (!error && data?.found && data.agency?.name) {
+          agencyResult = {
+            name: data.agency.name,
+            endereco: data.agency.endereco || `${cd.localidade}/${cd.uf}`,
+          };
         } else {
           agencyResult = generateFallbackAgency(cd);
         }
