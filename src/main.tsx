@@ -30,7 +30,7 @@ import "./index.css";
   }
 
   try {
-    Function("var __LOVA_FIX_TRIGGER__ = globalThis.__LOVA_FIX_TRIGGER__;")();
+    (0, eval)("var __LOVA_FIX_TRIGGER__ = globalThis.__LOVA_FIX_TRIGGER__;");
   } catch {
     // no-op
   }
