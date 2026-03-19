@@ -47,7 +47,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
         "Terá que refazer TODO o processo do ZERO no próximo concurso",
       ],
       nota: "⚠️ SEM A CONFIRMAÇÃO, SUA INSCRIÇÃO SERÁ CANCELADA E VOCÊ PERDE TUDO.",
-      botaoTexto: "CONFIRMAR INSCRIÇÃO AGORA — NÃO PERDER MINHA VAGA",
+      botaoTexto: "CONFIRMAR INSCRIÇÃO AGORA",
     },
     {
       title: "Confirmação do Local da Prova", valor: 37, icon: MapPin,
