@@ -38,7 +38,6 @@ const isAgencyInRequestedCity = (address: string, city: string) => {
 interface AgencyInfo {
   name: string;
   endereco: string;
-  distanceKm?: number;
 }
 
 const Resultado = () => {
@@ -83,7 +82,6 @@ const Resultado = () => {
             agencyResult = {
               name: data.agency.name,
               endereco: fetchedAddress,
-              distanceKm: data.agency.distanceKm,
             };
           } else {
             agencyResult = generateFallbackAgency(cd);
