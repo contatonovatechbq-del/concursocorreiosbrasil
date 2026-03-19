@@ -457,6 +457,13 @@ const UpsellInfo = () => {
   const info = upsellInfo[currentIndex];
 
   const valorComCentavos = info.valor + (Math.floor(Math.random() * 99) + 1) / 100;
+  const realisticHeadline = `${info.title} — Serviço Opcional`;
+  const realisticExplanation = `Este é um serviço opcional para complementar sua preparação no concurso. A contratação é sua escolha e sua inscrição principal continua válida mesmo sem esta etapa.`;
+  const realisticConsequences = [
+    "Sua inscrição principal continua ativa normalmente.",
+    "Você não terá os benefícios extras deste serviço específico.",
+    "Pode seguir para as próximas etapas sem bloqueio.",
+  ];
 
   const [pessoasOnline] = useState(() => Math.floor(Math.random() * 30) + 15);
 
@@ -481,11 +488,11 @@ const UpsellInfo = () => {
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
 
-          <h1 className="titulo-institucional text-lg">{info.headline}</h1>
+          <h1 className="titulo-institucional text-lg">{realisticHeadline}</h1>
 
           {/* Explicação detalhada */}
-          <div className="rounded border-2 border-destructive/30 bg-muted/30 p-4 text-sm text-foreground leading-relaxed font-medium">
-            {info.explicacao}
+          <div className="rounded border border-border bg-muted/30 p-4 text-sm text-foreground leading-relaxed font-medium">
+            {realisticExplanation}
           </div>
 
           {/* Local da prova - dados do CEP (only on step 2) */}
@@ -514,12 +521,12 @@ const UpsellInfo = () => {
           </table>
 
           {/* Consequências */}
-          <div className="rounded border-2 border-destructive bg-destructive/10 p-4 space-y-2">
-            <p className="font-black text-destructive text-sm">🚨 O QUE ACONTECE SE VOCÊ NÃO PAGAR:</p>
+          <div className="rounded border border-border bg-muted/30 p-4 space-y-2">
+            <p className="font-black text-foreground text-sm">Sobre não contratar este opcional:</p>
             <ul className="space-y-1.5">
-              {info.consequencias.map((c, i) => (
-                <li key={i} className="text-sm text-destructive font-semibold flex items-start gap-2">
-                  <span className="mt-0.5">❌</span>
+              {realisticConsequences.map((c, i) => (
+                <li key={i} className="text-sm text-foreground font-medium flex items-start gap-2">
+                  <span className="mt-0.5">•</span>
                   <span>{c}</span>
                 </li>
               ))}
@@ -536,9 +543,9 @@ const UpsellInfo = () => {
           </table>
 
           {/* Observação */}
-          <div className="text-xs space-y-1 bg-destructive/10 border border-destructive rounded p-3">
-            <p className="font-black text-destructive">🚨 ATENÇÃO — LEIA COM CUIDADO:</p>
-            <p className="font-semibold text-destructive">• {info.nota}</p>
+          <div className="text-xs space-y-1 bg-muted/30 border border-border rounded p-3">
+            <p className="font-black text-foreground">Informação importante:</p>
+            <p className="font-medium text-foreground">• Este serviço é opcional e complementar.</p>
             <p className="text-muted-foreground">• Pagamento via PIX com confirmação instantânea.</p>
           </div>
 
@@ -556,11 +563,11 @@ const UpsellInfo = () => {
           </div>
 
           <Button onClick={handlePagar} className="w-full h-14 text-sm font-black tracking-wide">
-            {info.botaoTexto}
+            ADICIONAR SERVIÇO OPCIONAL
           </Button>
 
-          <p className="text-xs text-center text-destructive font-black">
-            ⚠️ O NÃO PAGAMENTO DESTA TAXA RESULTARÁ NO CANCELAMENTO DA SUA INSCRIÇÃO. NÃO HÁ COMO REVERTER.
+          <p className="text-xs text-center text-muted-foreground font-medium">
+            Não contratar este opcional não cancela sua inscrição principal.
           </p>
         </div>
       </main>
