@@ -246,11 +246,23 @@ Deno.serve(async (req) => {
 
     const tags = nearest.school?.tags || {};
 
+    // Build full address from OSM tags
+    const street = tags["addr:street"] || tags["addr:full"] || "";
+    const houseNumber = tags["addr:housenumber"] || "";
+    const suburb = tags["addr:suburb"] || tags["addr:neighbourhood"] || "";
+    const addressParts = [
+      street && houseNumber ? `${street}, ${houseNumber}` : street,
+      suburb,
+      cityDisplay,
+    ].filter(Boolean);
+    const fullAddress = addressParts.join(" — ") || cityDisplay;
+
     return new Response(JSON.stringify({
       found: true,
       agency: {
         name: buildSchoolName(tags),
-        endereco: cityDisplay,
+        endereco: fullAddress,
+        cidade: cityDisplay,
       },
       metadata: {
         city: cityDisplay,
