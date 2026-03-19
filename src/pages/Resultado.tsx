@@ -131,7 +131,7 @@ const Resultado = () => {
           {loading ? (
             <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">Buscando agência mais próxima...</span>
+              <span className="text-sm">Buscando escola mais próxima...</span>
             </div>
           ) : agency && (
             <table className="tabela-zebra">
