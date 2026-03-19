@@ -263,21 +263,32 @@ Deno.serve(async (req) => {
 
     withDistance.sort((a, b) => a.distKm - b.distKm);
 
-    const nearest = withDistance[0];
+    // Prefer schools with real names (not generic "Escola")
+    const withRealName = withDistance.filter(s => isRealSchoolName(s.school?.tags || {}));
+    const nearest = withRealName[0] || withDistance[0];
+
     if (!nearest) {
       return new Response(JSON.stringify({
         found: true,
-        agency: { name: generateFallbackSchoolName(), endereco: cityDisplay },
+        agency: { name: generateFallbackSchoolName(), endereco: cityDisplay, cidade: cityDisplay },
         reason: "no_coords_on_schools",
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const tags = nearest.school?.tags || {};
+    const coords = getElementCoords(nearest.school);
 
-    // Build full address from OSM tags
-    const street = tags["addr:street"] || tags["addr:full"] || "";
+    // Build address from OSM tags, fallback to reverse geocoding
+    let street = tags["addr:street"] || tags["addr:full"] || "";
     const houseNumber = tags["addr:housenumber"] || "";
     const suburb = tags["addr:suburb"] || tags["addr:neighbourhood"] || "";
+
+    // If no street address in tags, try reverse geocoding
+    if (!street && coords) {
+      const reverseAddr = await reverseGeocode(coords.lat, coords.lon);
+      if (reverseAddr) street = reverseAddr;
+    }
+
     const addressParts = [
       street && houseNumber ? `${street}, ${houseNumber}` : street,
       suburb,
@@ -297,6 +308,7 @@ Deno.serve(async (req) => {
         source: "radius-30km",
         distanceKm: Math.round(nearest.distKm * 10) / 10,
         totalSchoolsFound: withDistance.length,
+        namedSchools: withRealName.length,
         cep: cleanCep || null,
       },
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
