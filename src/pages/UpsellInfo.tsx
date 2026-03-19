@@ -352,7 +352,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
     {
       title: "Acesso ao Grupo VIP", valor: 14, icon: Star,
       headline: "👥 ENTRE NO GRUPO EXCLUSIVO DE CANDIDATOS APROVADOS",
-      explicacao: "O Grupo VIP reúne candidatos que estão LEVANDO O CONCURSO A SÉRIO. Lá você encontra dicas exclusivas, macetes de prova, troca de experiências e MOTIVAÇÃO para não desistir. Candidatos isolados DESISTEM. Candidatos em grupo SE APOIAM e PASSAM JUNTOS. Além disso, ex-funcionários dos Correios compartilham como é o dia a dia do trabalho.",
+      explicacao: "O Grupo VIP reúne candidatos que estão LEVANDO O CONCURSO A SÉRIO. Lá você encontra dicas exclusivas, macetes de prova, troca de experiências e MOTIVAÇÃO para não desistir. Candidatos isolados DESISTEM. Candidatos em grupo SE APOIAM e PASSAM JUNTOS. Além disso, ex-funcionários do Banco do Brasil compartilham como é o dia a dia do trabalho.",
       items: [
         "Grupo exclusivo no WhatsApp/Telegram",
         "Dicas diárias de estudo e macetes",
