@@ -4,46 +4,44 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const apiKey = Deno.env.get('BUCKPAY_API_KEY');
-    const userAgent = Deno.env.get('BUCKPAY_USER_AGENT') || 'Lovable/1.0';
+    const apiToken = Deno.env.get('FRUITFY_API_TOKEN');
+    const storeId = Deno.env.get('FRUITFY_STORE_ID');
 
-    if (!apiKey) {
-      console.error('BUCKPAY_API_KEY not configured');
+    if (!apiToken || !storeId) {
+      console.error('FRUITFY credentials not configured');
       return new Response(
-        JSON.stringify({ error: 'API key not configured' }),
+        JSON.stringify({ error: 'API credentials not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const { external_id } = await req.json();
-    
-    if (!external_id) {
+    const { order_uuid } = await req.json();
+
+    if (!order_uuid) {
       return new Response(
-        JSON.stringify({ error: 'external_id is required' }),
+        JSON.stringify({ error: 'order_uuid is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Checking PIX status for external_id:', external_id);
+    console.log('Checking PIX status for order_uuid:', order_uuid);
 
-    // Add timeout to prevent edge function from hanging on slow API responses
-    // Reduced to 5 seconds to give margin before edge function timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     let response: Response;
     try {
-      response = await fetch(`https://api.realtechdev.com.br/v1/transactions/external_id/${external_id}`, {
+      response = await fetch(`https://api.fruitfy.io/api/order/${order_uuid}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'User-Agent': userAgent,
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${apiToken}`,
+          'Store-Id': storeId,
         },
         signal: controller.signal,
       });
@@ -52,19 +50,18 @@ Deno.serve(async (req) => {
       clearTimeout(timeoutId);
       const isTimeout = fetchError instanceof Error && fetchError.name === 'AbortError';
       console.error('Fetch error:', isTimeout ? 'Request timeout' : fetchError);
-      // Return 200 with pending status on timeout - lets frontend retry gracefully
       return new Response(
-        JSON.stringify({ data: { status: 'pending' }, timeout: true }),
+        JSON.stringify({ success: true, data: { status: 'waiting_payment' }, timeout: true }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
-    console.log('BuckPay status response:', JSON.stringify(data, null, 2));
+    console.log('Fruitfy order response:', JSON.stringify(data, null, 2));
 
     if (!response.ok) {
       return new Response(
-        JSON.stringify({ error: data.error || 'Failed to check status' }),
+        JSON.stringify({ error: data.message || 'Failed to check status' }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
