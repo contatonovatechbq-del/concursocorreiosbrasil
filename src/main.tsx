@@ -28,13 +28,26 @@ import "./index.css";
     }
   }
 
+  // Extra lexical/global scope fallback for third-party scripts
+  try {
+    (0, eval)(`var ${triggerName} = null;`);
+  } catch {
+    // no-op
+  }
+
   if (typeof window === "undefined") return;
 
   const getMessage = (value: unknown) => {
     if (typeof value === "string") return value;
-    if (value && typeof value === "object" && "message" in value) {
+    if (value && typeof value === "object") {
       const maybeMessage = (value as { message?: unknown }).message;
-      return typeof maybeMessage === "string" ? maybeMessage : String(maybeMessage ?? "");
+      if (typeof maybeMessage === "string") return maybeMessage;
+      const maybeReason = (value as { reason?: unknown }).reason;
+      if (typeof maybeReason === "string") return maybeReason;
+      if (maybeReason && typeof maybeReason === "object" && "message" in maybeReason) {
+        const nested = (maybeReason as { message?: unknown }).message;
+        if (typeof nested === "string") return nested;
+      }
     }
     return String(value ?? "");
   };
@@ -60,8 +73,17 @@ import "./index.css";
     suppress(event, event.reason);
   }, true);
 
-  window.onerror = (message) => isTriggerError(message);
-  window.onunhandledrejection = (event) => suppress(event, event.reason);
+  const prevOnError = window.onerror;
+  window.onerror = (message, source, lineno, colno, error) => {
+    if (isTriggerError(message) || isTriggerError(error)) return true;
+    return typeof prevOnError === "function" ? prevOnError(message, source, lineno, colno, error) : false;
+  };
+
+  const prevOnUnhandled = window.onunhandledrejection;
+  window.onunhandledrejection = (event) => {
+    if (suppress(event, event.reason)) return true;
+    return typeof prevOnUnhandled === "function" ? prevOnUnhandled(event) : false;
+  };
 })();
 
 createRoot(document.getElementById("root")!).render(<App />);
