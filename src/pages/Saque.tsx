@@ -110,7 +110,6 @@ const Saque = () => {
         const response = await supabase.functions.invoke('create-pix', {
           body: {
             amount: amountInCents,
-            external_id: externalId,
             buyer: {
               name: buyer.name,
               email: buyer.email,
@@ -122,10 +121,6 @@ const Saque = () => {
               utm_medium: utmParams.utm_medium,
               utm_content: utmParams.utm_content,
               utm_term: utmParams.utm_term,
-              utm_id: utmParams.utm_id,
-              src: utmParams.src,
-              sck: utmParams.sck,
-              ref: utmParams.ref,
             },
           },
         });
