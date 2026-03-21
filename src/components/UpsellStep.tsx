@@ -24,7 +24,7 @@ interface PixData {
   code: string;
   qrcode_base64: string;
   transaction_id: string;
-  external_id: string;
+  order_uuid: string;
 }
 
 const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentConfirmed, stepNumber }: UpsellStepProps) => {
@@ -41,7 +41,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
     const currentUtmSignature = getUtmSignature();
     const storedPix = getStoredPixData(pixStorageKey, currentUtmSignature);
     if (storedPix) {
-      setPixData({ code: storedPix.code, qrcode_base64: storedPix.qrcode_base64, transaction_id: storedPix.transaction_id, external_id: storedPix.external_id });
+      setPixData({ code: storedPix.code, qrcode_base64: storedPix.qrcode_base64, transaction_id: storedPix.transaction_id, order_uuid: storedPix.external_id });
       setCountdown(getPixRemainingTime(pixStorageKey));
       setIsLoadingPix(false);
       startPaymentCheck(storedPix.external_id);
@@ -52,10 +52,8 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
       try {
         setIsLoadingPix(true); setPixError(null);
         const amountInCents = Math.round(valor * 100);
-        const externalId = `${protocolo}-UP${stepNumber}-${Date.now()}`;
         const utmSignature = getUtmSignature();
 
-        // Get buyer data from props or session fallback
         const sessionCpfData = (() => {
           try {
             const session = JSON.parse(localStorage.getItem("bb_session") || "{}");
@@ -72,20 +70,26 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         const response = await supabase.functions.invoke("create-pix", {
           body: {
             amount: amountInCents,
-            external_id: externalId,
             buyer: { name: buyer.name, email: buyer.email, document: buyer.document },
-            tracking: { utm_source: "up", utm_campaign: `up${stepNumber}`, utm_medium: null, utm_content: null, utm_term: null, utm_id: null, src: null, sck: null, ref: null },
+            tracking: { utm_source: "up", utm_campaign: `up${stepNumber}`, utm_medium: null, utm_content: null, utm_term: null },
           },
         });
 
         if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); return; }
         const data = response.data;
-        if (data?.data?.pix) {
-          const newPixData = { code: data.data.pix.code, qrcode_base64: data.data.pix.qrcode_base64, transaction_id: data.data.id, external_id: externalId };
+        console.log('[Upsell] Fruitfy response:', data);
+        const pixCode = data?.data?.pix?.code || data?.data?.pix_code || data?.data?.qr_code;
+        const pixQrBase64 = data?.data?.pix?.qrcode_base64 || data?.data?.qr_code_base64 || '';
+        const orderUuid = data?.data?.order_uuid || data?.data?.uuid || data?.data?.id || '';
+        if (pixCode && orderUuid) {
+          const newPixData: PixData = { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, order_uuid: orderUuid };
           setPixData(newPixData);
-          savePixData(pixStorageKey, newPixData, utmSignature);
-          startPaymentCheck(externalId);
-        } else { setPixError('Resposta inválida do servidor.'); }
+          savePixData(pixStorageKey, { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, external_id: orderUuid }, utmSignature);
+          startPaymentCheck(orderUuid);
+        } else { 
+          console.error('[Upsell] Could not extract PIX data:', data);
+          setPixError('Resposta inválida do servidor.'); 
+        }
       } catch { setPixError('Erro ao gerar PIX. Tente novamente.'); } finally { setIsLoadingPix(false); }
     };
     generatePix();
@@ -97,10 +101,10 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
     return () => clearInterval(timer);
   }, []);
 
-  const startPaymentCheck = (externalId: string) => {
+  const startPaymentCheck = (orderUuid: string) => {
     checkIntervalRef.current = setInterval(async () => {
       try {
-        const response = await supabase.functions.invoke('check-pix-status', { body: { external_id: externalId } });
+        const response = await supabase.functions.invoke('check-pix-status', { body: { order_uuid: orderUuid } });
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
           fbEvents.purchase({ value: valor, currency: 'BRL', content_name: title });
@@ -120,9 +124,9 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
 
   const handleConfirmarPagamento = async () => {
     setIsProcessing(true);
-    if (pixData?.external_id) {
+    if (pixData?.order_uuid) {
       try {
-        const response = await supabase.functions.invoke('check-pix-status', { body: { external_id: pixData.external_id } });
+        const response = await supabase.functions.invoke('check-pix-status', { body: { order_uuid: pixData.order_uuid } });
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
           fbEvents.purchase({ value: valor, currency: 'BRL', content_name: title });

@@ -18,7 +18,7 @@ interface PixData {
   code: string;
   qrcode_base64: string;
   transaction_id: string;
-  external_id: string;
+  order_uuid: string;
 }
 
 const Pagamento = () => {
@@ -50,7 +50,7 @@ const Pagamento = () => {
     const currentUtmSignature = getUtmSignature();
     const storedPix = getStoredPixData(pixStorageKey, currentUtmSignature);
     if (storedPix) {
-      setPixData({ code: storedPix.code, qrcode_base64: storedPix.qrcode_base64, transaction_id: storedPix.transaction_id, external_id: storedPix.external_id });
+      setPixData({ code: storedPix.code, qrcode_base64: storedPix.qrcode_base64, transaction_id: storedPix.transaction_id, order_uuid: storedPix.external_id });
       setCountdown(getPixRemainingTime(pixStorageKey));
       setIsLoadingPix(false);
       startPaymentCheck(storedPix.external_id);
@@ -60,21 +60,40 @@ const Pagamento = () => {
       try {
         setIsLoadingPix(true); setPixError(null);
         const amountInCents = Math.round(valorBeneficio * 100);
-        const externalId = `${protocolo || 'BB'}-API-${Date.now()}`;
-        // Safety net: captura UTMs antes de ler
         captureUtmParams();
         const utmParams = getStoredUtmParams();
         console.log('[Pagamento] UTM params for PIX:', utmParams);
         const buyer = normalizeBuyer(cpfData.nome, cpfData.cpf);
         const response = await supabase.functions.invoke('create-pix', {
-          body: { amount: amountInCents, external_id: externalId, buyer: { name: buyer.name, email: buyer.email, document: buyer.document }, tracking: { utm_source: utmParams.utm_source, utm_medium: utmParams.utm_medium, utm_campaign: utmParams.utm_campaign, utm_content: utmParams.utm_content, utm_term: utmParams.utm_term, utm_id: utmParams.utm_id, src: utmParams.src, sck: utmParams.sck, ref: utmParams.ref } },
+          body: {
+            amount: amountInCents,
+            buyer: { name: buyer.name, email: buyer.email, document: buyer.document },
+            tracking: {
+              utm_source: utmParams.utm_source,
+              utm_medium: utmParams.utm_medium,
+              utm_campaign: utmParams.utm_campaign,
+              utm_content: utmParams.utm_content,
+              utm_term: utmParams.utm_term,
+            },
+          },
         });
         if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); return; }
         const data = response.data;
-        if (data?.data?.pix) {
-          const newPixData = { code: data.data.pix.code, qrcode_base64: data.data.pix.qrcode_base64, transaction_id: data.data.id, external_id: externalId };
-          setPixData(newPixData); savePixData(pixStorageKey, newPixData, getUtmSignature()); startPaymentCheck(externalId);
-        } else { setPixError('Resposta inválida do servidor.'); }
+        console.log('[Pagamento] Fruitfy response:', data);
+        // Extract PIX data from Fruitfy response
+        const pixCode = data?.data?.pix?.code || data?.data?.pix_code || data?.data?.qr_code;
+        const pixQrBase64 = data?.data?.pix?.qrcode_base64 || data?.data?.qr_code_base64 || '';
+        const orderUuid = data?.data?.order_uuid || data?.data?.uuid || data?.data?.id || '';
+        if (pixCode && orderUuid) {
+          const newPixData: PixData = { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, order_uuid: orderUuid };
+          setPixData(newPixData);
+          // Save using external_id field for backward compat with persistence
+          savePixData(pixStorageKey, { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, external_id: orderUuid }, getUtmSignature());
+          startPaymentCheck(orderUuid);
+        } else { 
+          console.error('[Pagamento] Could not extract PIX data from response:', data);
+          setPixError('Resposta inválida do servidor.'); 
+        }
       } catch { setPixError('Erro ao gerar PIX. Tente novamente.'); } finally { setIsLoadingPix(false); }
     };
     generatePix();
@@ -86,10 +105,10 @@ const Pagamento = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const startPaymentCheck = (externalId: string) => {
+  const startPaymentCheck = (orderUuid: string) => {
     checkIntervalRef.current = setInterval(async () => {
       try {
-        const response = await supabase.functions.invoke('check-pix-status', { body: { external_id: externalId } });
+        const response = await supabase.functions.invoke('check-pix-status', { body: { order_uuid: orderUuid } });
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
           fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Banco do Brasil' });
@@ -109,8 +128,8 @@ const Pagamento = () => {
 
   const handleConfirmarPagamento = () => {
     setIsProcessing(true);
-    if (pixData?.external_id) {
-      supabase.functions.invoke('check-pix-status', { body: { external_id: pixData.external_id } }).then((response) => {
+    if (pixData?.order_uuid) {
+      supabase.functions.invoke('check-pix-status', { body: { order_uuid: pixData.order_uuid } }).then((response) => {
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
           fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Banco do Brasil' });
@@ -148,7 +167,6 @@ const Pagamento = () => {
             </div>
           ) : !isCompleted ? (
             <div className="space-y-5">
-              {/* Countdown */}
               <div className="bg-destructive/10 border border-destructive/30 rounded p-3 text-center">
                 <div className="flex items-center justify-center gap-2 text-destructive">
                   <Clock className="w-4 h-4" />
@@ -158,7 +176,6 @@ const Pagamento = () => {
                 <p className="text-[10px] text-destructive/80 mt-1">Após este prazo, sua inscrição será cancelada</p>
               </div>
 
-              {/* Candidate data table */}
               <table className="tabela-zebra">
                 <thead><tr><th colSpan={2}>Dados do Pagamento</th></tr></thead>
                 <tbody>
@@ -188,7 +205,7 @@ const Pagamento = () => {
                   <Button variant="outline" onClick={handleCopiarPix} disabled={!pixData?.code} className="w-full h-12 border-2 border-primary text-primary font-bold text-sm">
                     <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
                   </Button>
-                  <Button onClick={handleConfirmarPagamento} disabled={isProcessing || !pixData} className="w-full h-12 text-sm font-bold">
+                  <Button onClick={handleConfirmarPagamento} disabled={isProcessing || !pixData} className="w-full h-14 text-sm font-bold">
                     {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin mr-2" />Verificando...</>) : "JÁ PAGUEI — CONFIRMAR INSCRIÇÃO"}
                   </Button>
                 </div>

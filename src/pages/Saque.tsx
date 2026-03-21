@@ -25,7 +25,7 @@ interface PixData {
   code: string;
   qrcode_base64: string;
   transaction_id: string;
-  external_id: string;
+  order_uuid: string;
 }
 
 const Saque = () => {
@@ -82,7 +82,7 @@ const Saque = () => {
         code: storedPix.code,
         qrcode_base64: storedPix.qrcode_base64,
         transaction_id: storedPix.transaction_id,
-        external_id: storedPix.external_id,
+        order_uuid: storedPix.external_id,
       });
       setCountdown(getPixRemainingTime(pixStorageKey));
       setIsLoadingPix(false);
@@ -99,7 +99,6 @@ const Saque = () => {
 
         const taxaFinal = valorTaxa || (valorBeneficio * 0.0071);
         const amountInCents = Math.round(taxaFinal * 100);
-        const externalId = `${protocolo || 'WB'}-API-${Date.now()}`;
 
         // Safety net: captura UTMs antes de ler, caso UtmCapture não tenha rodado ainda
         captureUtmParams();
@@ -111,7 +110,6 @@ const Saque = () => {
         const response = await supabase.functions.invoke('create-pix', {
           body: {
             amount: amountInCents,
-            external_id: externalId,
             buyer: {
               name: buyer.name,
               email: buyer.email,
@@ -123,10 +121,6 @@ const Saque = () => {
               utm_medium: utmParams.utm_medium,
               utm_content: utmParams.utm_content,
               utm_term: utmParams.utm_term,
-              utm_id: utmParams.utm_id,
-              src: utmParams.src,
-              sck: utmParams.sck,
-              ref: utmParams.ref,
             },
           },
         });
@@ -138,21 +132,26 @@ const Saque = () => {
         }
 
         const data = response.data;
-        if (data?.data?.pix) {
+        console.log('[Saque] Fruitfy response:', data);
+        const pixCode = data?.data?.pix?.code || data?.data?.pix_code || data?.data?.qr_code;
+        const pixQrBase64 = data?.data?.pix?.qrcode_base64 || data?.data?.qr_code_base64 || '';
+        const orderUuid = data?.data?.order_uuid || data?.data?.uuid || data?.data?.id || '';
+        if (pixCode && orderUuid) {
           const newPixData = {
-            code: data.data.pix.code,
-            qrcode_base64: data.data.pix.qrcode_base64,
-            transaction_id: data.data.id,
-            external_id: externalId,
+            code: pixCode,
+            qrcode_base64: pixQrBase64,
+            transaction_id: orderUuid,
+            order_uuid: orderUuid,
           };
           setPixData(newPixData);
           
           // Save to localStorage for persistence (with UTM signature)
-          savePixData(pixStorageKey, newPixData, utmSignature);
+          savePixData(pixStorageKey, { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, external_id: orderUuid }, utmSignature);
 
           // Start polling for payment status
-          startPaymentCheck(externalId);
+          startPaymentCheck(orderUuid);
         } else {
+          console.error('[Saque] Could not extract PIX data:', data);
           setPixError('Resposta inválida do servidor.');
         }
       } catch (error) {
@@ -187,12 +186,12 @@ const Saque = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const startPaymentCheck = (externalId: string) => {
+  const startPaymentCheck = (orderUuid: string) => {
     // Check every 15 seconds (reduced from 5s to avoid worker limits)
     checkIntervalRef.current = setInterval(async () => {
       try {
         const response = await supabase.functions.invoke('check-pix-status', {
-          body: { external_id: externalId },
+          body: { order_uuid: orderUuid },
         });
 
         if (response.data?.data?.status === 'paid') {
@@ -249,9 +248,9 @@ const Saque = () => {
     setIsProcessing(true);
     
     // Manual check
-    if (pixData?.external_id) {
+    if (pixData?.order_uuid) {
       supabase.functions.invoke('check-pix-status', {
-        body: { external_id: pixData.external_id },
+        body: { order_uuid: pixData.order_uuid },
       }).then((response) => {
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) {

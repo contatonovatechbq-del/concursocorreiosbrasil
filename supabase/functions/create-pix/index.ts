@@ -11,51 +11,39 @@ interface CreatePixRequest {
     document?: string;
     phone?: string;
   };
-  external_id: string;
-  product?: {
-    id: string | null;
-    name: string | null;
-  };
-  offer?: {
-    id: string | null;
-    name: string | null;
-  };
+  product_id?: string;
   tracking?: {
     utm_source?: string | null;
     utm_medium?: string | null;
     utm_campaign?: string | null;
     utm_content?: string | null;
     utm_term?: string | null;
-    utm_id?: string | null;
-    src?: string | null;
-    sck?: string | null;
-    ref?: string | null;
   };
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const apiKey = Deno.env.get('BUCKPAY_API_KEY');
-    const userAgent = Deno.env.get('BUCKPAY_USER_AGENT') || 'Lovable/1.0';
+    const apiToken = Deno.env.get('FRUITFY_API_TOKEN');
+    const storeId = Deno.env.get('FRUITFY_STORE_ID');
+    const defaultProductId = Deno.env.get('FRUITFY_PRODUCT_ID');
 
-    if (!apiKey) {
-      console.error('BUCKPAY_API_KEY not configured');
+    if (!apiToken || !storeId) {
+      console.error('FRUITFY_API_TOKEN or FRUITFY_STORE_ID not configured');
       return new Response(
-        JSON.stringify({ error: 'API key not configured' }),
+        JSON.stringify({ error: 'API credentials not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const body: CreatePixRequest = await req.json();
-    console.log('=== CREATE PIX REQUEST ===');
+    console.log('=== CREATE PIX (Fruitfy) ===');
     console.log('Received body:', JSON.stringify(body, null, 2));
 
-    // --- Buyer sanitization (server-side fallback) ---
+    // --- Buyer sanitization ---
     const generateFallbackCpf = (): string => {
       const rnd = () => Math.floor(Math.random() * 9) + 1;
       const d = Array.from({ length: 9 }, rnd);
@@ -71,7 +59,7 @@ Deno.serve(async (req) => {
     };
 
     const rawDoc = (body.buyer?.document ?? '').replace(/\D/g, '');
-    const buyerDocument = /^\d{11,14}$/.test(rawDoc) ? rawDoc : generateFallbackCpf();
+    const buyerCpf = /^\d{11}$/.test(rawDoc) ? rawDoc : generateFallbackCpf();
 
     const rawName = (body.buyer?.name ?? '')
       .replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'-]/g, '')
@@ -90,66 +78,59 @@ Deno.serve(async (req) => {
       ? body.buyer.email
       : `${emailBase}@api.com`;
 
-    console.log('Sanitized buyer:', JSON.stringify({ name: buyerName, email: buyerEmail, document: buyerDocument }));
-    console.log('Tracking received:', JSON.stringify(body.tracking, null, 2));
+    const buyerPhone = (body.buyer?.phone ?? '').replace(/\D/g, '') || '5500000000000';
 
-    // Build tracking payload - log what we're sending
-    const trackingPayload = {
-      utm_source: body.tracking?.utm_source || '',
-      utm_medium: body.tracking?.utm_medium || '',
-      utm_campaign: body.tracking?.utm_campaign || '',
-      utm_content: body.tracking?.utm_content || '',
-      utm_term: body.tracking?.utm_term || '',
-      utm_id: body.tracking?.utm_id || '',
-      src: body.tracking?.src || '',
-      sck: body.tracking?.sck || '',
-      ref: body.tracking?.ref || '',
-    };
-    
-    console.log('=== TRACKING PAYLOAD TO BUCKPAY ===');
-    console.log('Tracking being sent:', JSON.stringify(trackingPayload, null, 2));
+    const productId = body.product_id || defaultProductId || '';
 
-    // NOTE: product/offer fields are intentionally NOT sent to the payment provider
-    // The BuckPay API rejects these fields with 400 error (offer: Required)
-    // Differentiation is done via external_id instead (contains -API- or -UP1- etc.)
-    console.log('=== PRODUCT/OFFER STATUS ===');
-    console.log('product/offer ignored (provider validation rejects these fields)');
-    console.log('Differentiation via external_id:', body.external_id);
+    console.log('Sanitized buyer:', JSON.stringify({ name: buyerName, email: buyerEmail, cpf: buyerCpf, phone: buyerPhone }));
 
-    // Build request body - WITHOUT product/offer
-    const requestBody: Record<string, unknown> = {
-      external_id: body.external_id,
-      payment_method: 'pix',
-      amount: body.amount,
-      buyer: {
-        name: buyerName,
-        email: buyerEmail,
-        document: buyerDocument,
-        phone: body.buyer?.phone,
-      },
-      tracking: trackingPayload,
+    // Build UTM object
+    const utm: Record<string, string> = {};
+    if (body.tracking?.utm_source) utm.utm_source = body.tracking.utm_source;
+    if (body.tracking?.utm_medium) utm.utm_medium = body.tracking.utm_medium;
+    if (body.tracking?.utm_campaign) utm.utm_campaign = body.tracking.utm_campaign;
+    if (body.tracking?.utm_content) utm.utm_content = body.tracking.utm_content;
+    if (body.tracking?.utm_term) utm.utm_term = body.tracking.utm_term;
+
+    console.log('UTM to Fruitfy:', JSON.stringify(utm));
+
+    // Build Fruitfy request body
+    const requestBody = {
+      name: buyerName,
+      email: buyerEmail,
+      phone: buyerPhone,
+      cpf: buyerCpf,
+      items: [
+        {
+          id: productId,
+          value: body.amount, // already in cents
+          quantity: 1,
+        },
+      ],
+      ...(Object.keys(utm).length > 0 ? { utm } : {}),
     };
 
-    console.log('=== FULL REQUEST TO BUCKPAY ===');
+    console.log('=== FULL REQUEST TO FRUITFY ===');
     console.log('Request body:', JSON.stringify(requestBody, null, 2));
 
-    const response = await fetch('https://api.realtechdev.com.br/v1/transactions', {
+    const response = await fetch('https://api.fruitfy.io/api/pix/charge', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'User-Agent': userAgent,
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${apiToken}`,
+        'Store-Id': storeId,
       },
       body: JSON.stringify(requestBody),
     });
 
     const data = await response.json();
-    console.log('BuckPay response status:', response.status);
-    console.log('BuckPay response:', JSON.stringify(data, null, 2));
+    console.log('Fruitfy response status:', response.status);
+    console.log('Fruitfy response:', JSON.stringify(data, null, 2));
 
     if (!response.ok) {
       return new Response(
-        JSON.stringify({ error: data.error || 'Failed to create PIX' }),
+        JSON.stringify({ error: data.message || 'Failed to create PIX', details: data }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
