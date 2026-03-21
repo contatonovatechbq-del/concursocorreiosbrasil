@@ -248,9 +248,9 @@ const Saque = () => {
     setIsProcessing(true);
     
     // Manual check
-    if (pixData?.external_id) {
+    if (pixData?.order_uuid) {
       supabase.functions.invoke('check-pix-status', {
-        body: { external_id: pixData.external_id },
+        body: { order_uuid: pixData.order_uuid },
       }).then((response) => {
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) {
