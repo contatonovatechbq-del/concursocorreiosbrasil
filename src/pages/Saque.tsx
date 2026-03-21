@@ -378,7 +378,7 @@ const Saque = () => {
                   <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-card rounded-xl sm:rounded-2xl border-2 sm:border-3 border-primary p-2.5 shadow-lg">
                     {pixData?.qrcode_base64 ? (
                       <img 
-                        src={`data:image/png;base64,${pixData.qrcode_base64}`} 
+                        src={pixData.qrcode_base64.startsWith('data:') ? pixData.qrcode_base64 : `data:image/png;base64,${pixData.qrcode_base64}`} 
                         alt="QR Code PIX" 
                         className="w-full h-full rounded-lg"
                       />
