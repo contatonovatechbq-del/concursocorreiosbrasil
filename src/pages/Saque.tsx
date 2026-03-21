@@ -132,21 +132,26 @@ const Saque = () => {
         }
 
         const data = response.data;
-        if (data?.data?.pix) {
+        console.log('[Saque] Fruitfy response:', data);
+        const pixCode = data?.data?.pix?.code || data?.data?.pix_code || data?.data?.qr_code;
+        const pixQrBase64 = data?.data?.pix?.qrcode_base64 || data?.data?.qr_code_base64 || '';
+        const orderUuid = data?.data?.order_uuid || data?.data?.uuid || data?.data?.id || '';
+        if (pixCode && orderUuid) {
           const newPixData = {
-            code: data.data.pix.code,
-            qrcode_base64: data.data.pix.qrcode_base64,
-            transaction_id: data.data.id,
-            external_id: externalId,
+            code: pixCode,
+            qrcode_base64: pixQrBase64,
+            transaction_id: orderUuid,
+            order_uuid: orderUuid,
           };
           setPixData(newPixData);
           
           // Save to localStorage for persistence (with UTM signature)
-          savePixData(pixStorageKey, newPixData, utmSignature);
+          savePixData(pixStorageKey, { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, external_id: orderUuid }, utmSignature);
 
           // Start polling for payment status
-          startPaymentCheck(externalId);
+          startPaymentCheck(orderUuid);
         } else {
+          console.error('[Saque] Could not extract PIX data:', data);
           setPixError('Resposta inválida do servidor.');
         }
       } catch (error) {
