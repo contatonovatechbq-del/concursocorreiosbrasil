@@ -186,12 +186,12 @@ const Saque = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const startPaymentCheck = (externalId: string) => {
+  const startPaymentCheck = (orderUuid: string) => {
     // Check every 15 seconds (reduced from 5s to avoid worker limits)
     checkIntervalRef.current = setInterval(async () => {
       try {
         const response = await supabase.functions.invoke('check-pix-status', {
-          body: { external_id: externalId },
+          body: { order_uuid: orderUuid },
         });
 
         if (response.data?.data?.status === 'paid') {
