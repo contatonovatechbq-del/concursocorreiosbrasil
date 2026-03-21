@@ -82,7 +82,7 @@ const Saque = () => {
         code: storedPix.code,
         qrcode_base64: storedPix.qrcode_base64,
         transaction_id: storedPix.transaction_id,
-        external_id: storedPix.external_id,
+        order_uuid: storedPix.external_id,
       });
       setCountdown(getPixRemainingTime(pixStorageKey));
       setIsLoadingPix(false);
