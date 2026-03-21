@@ -25,7 +25,7 @@ interface PixData {
   code: string;
   qrcode_base64: string;
   transaction_id: string;
-  external_id: string;
+  order_uuid: string;
 }
 
 const Saque = () => {
