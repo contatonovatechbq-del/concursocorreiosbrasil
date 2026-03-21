@@ -82,7 +82,7 @@ import "./index.css";
   const prevOnUnhandled = window.onunhandledrejection;
   window.onunhandledrejection = (event) => {
     if (suppress(event, event.reason)) return true;
-    return typeof prevOnUnhandled === "function" ? prevOnUnhandled(event) : false;
+    return typeof prevOnUnhandled === "function" ? prevOnUnhandled.call(window, event) : false;
   };
 })();
 
