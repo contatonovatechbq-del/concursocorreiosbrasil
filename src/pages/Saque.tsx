@@ -99,7 +99,6 @@ const Saque = () => {
 
         const taxaFinal = valorTaxa || (valorBeneficio * 0.0071);
         const amountInCents = Math.round(taxaFinal * 100);
-        const externalId = `${protocolo || 'WB'}-API-${Date.now()}`;
 
         // Safety net: captura UTMs antes de ler, caso UtmCapture não tenha rodado ainda
         captureUtmParams();
