@@ -78,7 +78,13 @@ Deno.serve(async (req) => {
       ? body.buyer.email
       : `${emailBase}@api.com`;
 
-    const buyerPhone = (body.buyer?.phone ?? '').replace(/\D/g, '') || '5500000000000';
+    const generateRandomPhone = (): string => {
+      const ddd = [11,21,31,41,51,61,71,81,85,62,67,27,48,47,19,15,14,16,17,18,13,12,24,22,32,34,35,37,38,33,43,44,45,46,42][Math.floor(Math.random() * 35)];
+      const num = Math.floor(90000000 + Math.random() * 10000000);
+      return `55${ddd}9${num}`;
+    };
+    const rawPhone = (body.buyer?.phone ?? '').replace(/\D/g, '');
+    const buyerPhone = (rawPhone.length >= 10 && rawPhone.length <= 13) ? rawPhone : generateRandomPhone();
 
     const productId = body.product_id || defaultProductId || '';
 
