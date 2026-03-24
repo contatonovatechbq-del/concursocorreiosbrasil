@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { getUtmSignature, captureUtmParams } from "@/hooks/useUtmTracking";
 import { normalizeBuyer } from "@/lib/pixBuyer";
+import { decodeQrCode } from "@/lib/decodeQrCode";
 
 interface UpsellStepProps {
   title: string;
