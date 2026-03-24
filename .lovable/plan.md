@@ -1,31 +1,42 @@
 
 
-## Plano: Corrigir "Resposta inválida" + preços variados nos upsells + UTM up1/up2/up3
+## Problema
 
-### Problema 1: "Resposta inválida do servidor"
+A resposta da API Fruitfy retorna os campos com nomes diferentes do que o frontend espera:
 
-A API Fruitfy retorna `pix.code` como string vazia `""`. O código faz `if (pixCode && orderUuid)` — como `""` e falsy, a condição falha. O PIX foi criado com sucesso (aparece no gateway), mas o frontend rejeita a resposta.
+- API retorna `order_id` → código procura `order_uuid` (não encontra)
+- API retorna `qr_code_base64` → código procura `qrcode_base64` (não encontra)
+- Como `orderUuid` fica vazio, a condição `pixCode && orderUuid` falha → "Resposta inválida do servidor"
 
-**Correção**: Mudar a condição para checar apenas `orderUuid` (o QR code base64 ja basta para mostrar o PIX). A condição passa a ser `if (orderUuid)`. Aplicar em 3 arquivos: `Pagamento.tsx`, `UpsellStep.tsx`, `Saque.tsx`.
+Resposta real da Fruitfy:
+```json
+{
+  "data": {
+    "order_id": "a159d397-...",
+    "pix": {
+      "code": "000201...",
+      "qr_code_base64": "data:image/svg+xml;base64,..."
+    }
+  }
+}
+```
 
-### Problema 2: Preços iguais em todos os upsells
+## Correção
 
-O `valorComCentavos` usa `useState(() => ...)` que so executa na primeira montagem. Como o componente `Upsell` nao remonta ao trocar de step (so muda o param), o preco fica travado no primeiro valor.
+Adicionar `order_id` e `qr_code_base64` aos fallbacks de parsing em 3 arquivos:
 
-**Correção**: Usar `useMemo` com `stepNumber` como dependencia em `Upsell.tsx`.
+### 1. `src/pages/Pagamento.tsx` (linhas 84-86)
+```typescript
+const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
+const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
+const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
+```
 
-### Problema 3: Remover fbEvents dos upsells (gateway ja faz)
+### 2. `src/components/UpsellStep.tsx` (linhas 81-83)
+Mesma correção.
 
-Remover `fbEvents.purchase()` e `fbEvents.serverPurchase()` de `UpsellStep.tsx` (linhas 110-111 e 132-133). O gateway Fruitfy ja dispara os eventos.
+### 3. `src/pages/Saque.tsx` (linhas 136-138)
+Mesma correção.
 
-### Problema 4: Guard contra PIX duplicado
-
-Adicionar `useRef` guard no `useEffect` de geracao do PIX no `UpsellStep.tsx` para evitar chamadas multiplas.
-
-### Arquivos alterados
-
-1. **`src/pages/Upsell.tsx`** — `useMemo` para `valorComCentavos`
-2. **`src/components/UpsellStep.tsx`** — Condição `orderUuid` apenas, guard ref, remover fbEvents
-3. **`src/pages/Pagamento.tsx`** — Condição `orderUuid` apenas
-4. **`src/pages/Saque.tsx`** — Condição `orderUuid` apenas
+Mudança mínima: apenas ajustar os nomes dos campos para bater com a resposta real da Fruitfy.
 

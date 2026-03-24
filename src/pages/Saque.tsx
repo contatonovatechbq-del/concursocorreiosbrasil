@@ -20,7 +20,6 @@ import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } 
 import { fbEvents } from "@/lib/fbPixel";
 import { getUtmSignature, getStoredUtmParams, captureUtmParams } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
-import { decodeQrCode } from "@/lib/decodeQrCode";
 
 interface PixData {
   code: string;
@@ -134,14 +133,10 @@ const Saque = () => {
 
         const data = response.data;
         console.log('[Saque] Fruitfy response:', data);
-        let pixCode = data?.data?.pix?.code || data?.data?.pix_code || '';
+        const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
-        if (!pixCode && pixQrBase64) {
-          const decoded = await decodeQrCode(pixQrBase64);
-          if (decoded) pixCode = decoded;
-        }
-        if (orderUuid) {
+        if (pixCode && orderUuid) {
           const newPixData = {
             code: pixCode,
             qrcode_base64: pixQrBase64,
@@ -150,8 +145,10 @@ const Saque = () => {
           };
           setPixData(newPixData);
           
+          // Save to localStorage for persistence (with UTM signature)
           savePixData(pixStorageKey, { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, external_id: orderUuid }, utmSignature);
 
+          // Start polling for payment status
           startPaymentCheck(orderUuid);
         } else {
           console.error('[Saque] Could not extract PIX data:', data);
@@ -202,6 +199,16 @@ const Saque = () => {
             clearInterval(checkIntervalRef.current);
           }
           
+          // Fire Facebook Pixel Purchase event (client + server)
+          const taxaFinal = valorTaxa || (valorBeneficio * 0.0071);
+          fbEvents.purchase({ value: taxaFinal, currency: 'BRL', content_name: 'Taxa de Transferência' });
+          fbEvents.serverPurchase({ 
+            first_name: cpfData.nome.split(' ')[0], 
+            cpf: cpfData.cpf, 
+            value: taxaFinal, 
+            content_name: 'Taxa de Transferência' 
+          });
+          
           toast({
             title: "Pagamento confirmado!",
             description: "Processando próxima etapa...",
@@ -249,6 +256,16 @@ const Saque = () => {
           if (checkIntervalRef.current) {
             clearInterval(checkIntervalRef.current);
           }
+          
+          // Fire Facebook Pixel Purchase event (client + server)
+          const taxaFinal = valorTaxa || (valorBeneficio * 0.0071);
+          fbEvents.purchase({ value: taxaFinal, currency: 'BRL', content_name: 'Taxa de Transferência' });
+          fbEvents.serverPurchase({ 
+            first_name: cpfData.nome.split(' ')[0], 
+            cpf: cpfData.cpf, 
+            value: taxaFinal, 
+            content_name: 'Taxa de Transferência' 
+          });
           
           toast({
             title: "Pagamento confirmado!",
