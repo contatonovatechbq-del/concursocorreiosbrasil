@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { getUtmSignature, captureUtmParams } from "@/hooks/useUtmTracking";
 import { normalizeBuyer } from "@/lib/pixBuyer";
+import { decodeQrCode } from "@/lib/decodeQrCode";
 
 interface UpsellStepProps {
   title: string;
@@ -87,9 +88,14 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); return; }
         const data = response.data;
         console.log('[Upsell] Fruitfy response:', data);
-        const pixCode = data?.data?.pix?.code || data?.data?.pix_code || '';
+        let pixCode = data?.data?.pix?.code || data?.data?.pix_code || '';
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
+        // If code is empty, decode QR to extract PIX EMV payload
+        if (!pixCode && pixQrBase64) {
+          const decoded = await decodeQrCode(pixQrBase64);
+          if (decoded) pixCode = decoded;
+        }
         if (orderUuid) {
           const newPixData: PixData = { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, order_uuid: orderUuid };
           setPixData(newPixData);
@@ -186,7 +192,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
           </Button>
         ) : (
           <div className="space-y-4 animate-fade-in">
-            <p className="text-xs text-muted-foreground font-medium text-center">Escaneie o QR Code{pixData?.code ? ' ou copie o código PIX' : ' para pagar'}:</p>
+            <p className="text-xs text-muted-foreground font-medium text-center">Escaneie o QR Code ou copie o código PIX:</p>
             <div className="w-44 h-44 mx-auto bg-card rounded-lg border-2 border-primary p-2">
               {pixData?.qrcode_base64 ? (
                 <img src={pixData.qrcode_base64.startsWith('data:') ? pixData.qrcode_base64 : `data:image/png;base64,${pixData.qrcode_base64}`} alt="QR Code PIX" className="w-full h-full rounded" />
@@ -196,11 +202,9 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
                 </div>
               )}
             </div>
-            {pixData?.code && (
-              <Button variant="outline" onClick={handleCopiarPix} className="w-full h-12 border-2 border-primary text-primary font-bold text-sm">
-                <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
-              </Button>
-            )}
+            <Button variant="outline" onClick={handleCopiarPix} disabled={!pixData?.code} className="w-full h-12 border-2 border-primary text-primary font-bold text-sm">
+              <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
+            </Button>
             <Button onClick={handleConfirmarPagamento} disabled={isProcessing || !pixData} className="w-full h-14 text-sm font-black gradient-bb-accent text-accent-foreground">
               {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin mr-2" />Verificando...</>) : "JÁ PAGUEI — PRÓXIMA ETAPA"}
             </Button>

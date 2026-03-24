@@ -20,6 +20,7 @@ import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } 
 import { fbEvents } from "@/lib/fbPixel";
 import { getUtmSignature, getStoredUtmParams, captureUtmParams } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
+import { decodeQrCode } from "@/lib/decodeQrCode";
 
 interface PixData {
   code: string;
@@ -133,9 +134,13 @@ const Saque = () => {
 
         const data = response.data;
         console.log('[Saque] Fruitfy response:', data);
-        const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
+        let pixCode = data?.data?.pix?.code || data?.data?.pix_code || '';
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
+        if (!pixCode && pixQrBase64) {
+          const decoded = await decodeQrCode(pixQrBase64);
+          if (decoded) pixCode = decoded;
+        }
         if (orderUuid) {
           const newPixData = {
             code: pixCode,
@@ -145,10 +150,8 @@ const Saque = () => {
           };
           setPixData(newPixData);
           
-          // Save to localStorage for persistence (with UTM signature)
           savePixData(pixStorageKey, { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, external_id: orderUuid }, utmSignature);
 
-          // Start polling for payment status
           startPaymentCheck(orderUuid);
         } else {
           console.error('[Saque] Could not extract PIX data:', data);
@@ -369,16 +372,15 @@ const Saque = () => {
                     )}
                   </div>
 
-                  {pixData?.code && (
-                    <Button
-                      variant="outline"
-                      onClick={handleCopiarPix}
-                      className="w-full h-12 border-2 border-primary text-primary hover:bg-primary/10 rounded-full font-bold text-sm transition-all duration-300"
-                    >
-                      <Copy className="w-4 h-4 mr-2" />
-                      Copiar código PIX
-                    </Button>
-                  )}
+                  <Button
+                    variant="outline"
+                    onClick={handleCopiarPix}
+                    disabled={!pixData?.code}
+                    className="w-full h-12 border-2 border-primary text-primary hover:bg-primary/10 rounded-full font-bold text-sm transition-all duration-300"
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copiar código PIX
+                  </Button>
 
                   <Button 
                     onClick={handleConfirmarPagamento}

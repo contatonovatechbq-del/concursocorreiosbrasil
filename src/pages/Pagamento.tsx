@@ -13,6 +13,7 @@ import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } 
 import { fbEvents } from "@/lib/fbPixel";
 import { getStoredUtmParams, getUtmSignature, captureUtmParams } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
+import { decodeQrCode } from "@/lib/decodeQrCode";
 
 interface PixData {
   code: string;
@@ -81,13 +82,16 @@ const Pagamento = () => {
         const data = response.data;
         console.log('[Pagamento] Fruitfy response:', data);
         // Extract PIX data from Fruitfy response
-        const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
+        let pixCode = data?.data?.pix?.code || data?.data?.pix_code || '';
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
+        if (!pixCode && pixQrBase64) {
+          const decoded = await decodeQrCode(pixQrBase64);
+          if (decoded) pixCode = decoded;
+        }
         if (orderUuid) {
           const newPixData: PixData = { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, order_uuid: orderUuid };
           setPixData(newPixData);
-          // Save using external_id field for backward compat with persistence
           savePixData(pixStorageKey, { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, external_id: orderUuid }, getUtmSignature());
           startPaymentCheck(orderUuid);
         } else { 
@@ -188,21 +192,19 @@ const Pagamento = () => {
                 </Button>
               ) : (
                 <div className="space-y-4 animate-fade-in">
-                  <p className="text-xs text-muted-foreground font-medium text-center">Escaneie o QR Code{pixData?.code ? ' ou copie o código PIX' : ' para pagar'}:</p>
-                  <div className="w-44 h-44 mx-auto bg-card rounded border-2 border-primary p-2">
-                    {pixData?.qrcode_base64 ? (
-                      <img src={pixData.qrcode_base64.startsWith('data:') ? pixData.qrcode_base64 : `data:image/png;base64,${pixData.qrcode_base64}`} alt="QR Code PIX" className="w-full h-full rounded" />
-                    ) : (
-                      <div className="w-full h-full bg-muted/30 rounded flex items-center justify-center">
-                        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  {pixData?.code && (
-                    <Button variant="outline" onClick={handleCopiarPix} className="w-full h-12 border-2 border-primary text-primary font-bold text-sm">
-                      <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
-                    </Button>
-                  )}
+            <p className="text-xs text-muted-foreground font-medium text-center">Escaneie o QR Code ou copie o código PIX:</p>
+                   <div className="w-44 h-44 mx-auto bg-card rounded border-2 border-primary p-2">
+                     {pixData?.qrcode_base64 ? (
+                       <img src={pixData.qrcode_base64.startsWith('data:') ? pixData.qrcode_base64 : `data:image/png;base64,${pixData.qrcode_base64}`} alt="QR Code PIX" className="w-full h-full rounded" />
+                     ) : (
+                       <div className="w-full h-full bg-muted/30 rounded flex items-center justify-center">
+                         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                       </div>
+                     )}
+                   </div>
+                  <Button variant="outline" onClick={handleCopiarPix} disabled={!pixData?.code} className="w-full h-12 border-2 border-primary text-primary font-bold text-sm">
+                    <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
+                  </Button>
                   <Button onClick={handleConfirmarPagamento} disabled={isProcessing || !pixData} className="w-full h-14 text-sm font-bold">
                     {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin mr-2" />Verificando...</>) : "JÁ PAGUEI — CONFIRMAR INSCRIÇÃO"}
                   </Button>
