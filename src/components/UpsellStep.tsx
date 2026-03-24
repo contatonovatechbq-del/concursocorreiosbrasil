@@ -196,9 +196,11 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
                 </div>
               )}
             </div>
-            <Button variant="outline" onClick={handleCopiarPix} disabled={!pixData?.code} className="w-full h-12 border-2 border-primary text-primary font-bold text-sm">
-              <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
-            </Button>
+            {pixData?.code && (
+              <Button variant="outline" onClick={handleCopiarPix} className="w-full h-12 border-2 border-primary text-primary font-bold text-sm">
+                <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
+              </Button>
+            )}
             <Button onClick={handleConfirmarPagamento} disabled={isProcessing || !pixData} className="w-full h-14 text-sm font-black gradient-bb-accent text-accent-foreground">
               {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin mr-2" />Verificando...</>) : "JÁ PAGUEI — PRÓXIMA ETAPA"}
             </Button>

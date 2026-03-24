@@ -369,15 +369,16 @@ const Saque = () => {
                     )}
                   </div>
 
-                  <Button
-                    variant="outline"
-                    onClick={handleCopiarPix}
-                    disabled={!pixData?.code}
-                    className="w-full h-12 border-2 border-primary text-primary hover:bg-primary/10 rounded-full font-bold text-sm transition-all duration-300"
-                  >
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copiar código PIX
-                  </Button>
+                  {pixData?.code && (
+                    <Button
+                      variant="outline"
+                      onClick={handleCopiarPix}
+                      className="w-full h-12 border-2 border-primary text-primary hover:bg-primary/10 rounded-full font-bold text-sm transition-all duration-300"
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copiar código PIX
+                    </Button>
+                  )}
 
                   <Button 
                     onClick={handleConfirmarPagamento}
