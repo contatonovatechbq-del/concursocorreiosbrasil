@@ -13,6 +13,7 @@ import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } 
 import { fbEvents } from "@/lib/fbPixel";
 import { getStoredUtmParams, getUtmSignature, captureUtmParams } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
+import { decodeQrCode } from "@/lib/decodeQrCode";
 
 interface PixData {
   code: string;
