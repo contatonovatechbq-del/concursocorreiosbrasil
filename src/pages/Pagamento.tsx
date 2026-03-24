@@ -130,8 +130,6 @@ const Pagamento = () => {
       supabase.functions.invoke('check-pix-status', { body: { order_uuid: pixData.order_uuid } }).then((response) => {
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Banco do Brasil' });
-          fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Banco do Brasil' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
           navigate("/upsell/1", { state: { cpfData, valorBeneficio, protocolo } });
         } else {

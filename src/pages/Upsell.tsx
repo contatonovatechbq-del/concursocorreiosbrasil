@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";

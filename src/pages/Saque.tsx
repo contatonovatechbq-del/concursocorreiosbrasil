@@ -247,16 +247,6 @@ const Saque = () => {
             clearInterval(checkIntervalRef.current);
           }
           
-          // Fire Facebook Pixel Purchase event (client + server)
-          const taxaFinal = valorTaxa || (valorBeneficio * 0.0071);
-          fbEvents.purchase({ value: taxaFinal, currency: 'BRL', content_name: 'Taxa de Transferência' });
-          fbEvents.serverPurchase({ 
-            first_name: cpfData.nome.split(' ')[0], 
-            cpf: cpfData.cpf, 
-            value: taxaFinal, 
-            content_name: 'Taxa de Transferência' 
-          });
-          
           toast({
             title: "Pagamento confirmado!",
             description: "Processando próxima etapa...",
