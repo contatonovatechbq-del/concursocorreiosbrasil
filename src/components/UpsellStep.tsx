@@ -88,9 +88,14 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); return; }
         const data = response.data;
         console.log('[Upsell] Fruitfy response:', data);
-        const pixCode = data?.data?.pix?.code || data?.data?.pix_code || '';
+        let pixCode = data?.data?.pix?.code || data?.data?.pix_code || '';
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
+        // If code is empty, decode QR to extract PIX EMV payload
+        if (!pixCode && pixQrBase64) {
+          const decoded = await decodeQrCode(pixQrBase64);
+          if (decoded) pixCode = decoded;
+        }
         if (orderUuid) {
           const newPixData: PixData = { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, order_uuid: orderUuid };
           setPixData(newPixData);
