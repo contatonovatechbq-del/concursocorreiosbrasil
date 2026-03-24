@@ -66,6 +66,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         const rawName = cpfData.nome?.trim() || sessionCpfData?.nome?.trim() || null;
         const rawDoc = cpfData.cpf || sessionCpfData?.cpf || null;
         const buyer = normalizeBuyer(rawName, rawDoc);
+        const storedUtms = getStoredUtmParams();
 
         const response = await supabase.functions.invoke("create-pix", {
           body: {
