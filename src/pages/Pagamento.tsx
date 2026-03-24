@@ -69,11 +69,11 @@ const Pagamento = () => {
             amount: amountInCents,
             buyer: { name: buyer.name, email: buyer.email, document: buyer.document },
             tracking: {
-              utm_source: utmParams.utm_source,
-              utm_medium: utmParams.utm_medium,
-              utm_campaign: utmParams.utm_campaign,
-              utm_content: utmParams.utm_content,
-              utm_term: utmParams.utm_term,
+              utm_source: utmParams.utm_source || 'direct',
+              utm_medium: utmParams.utm_medium || null,
+              utm_campaign: utmParams.utm_campaign || 'front',
+              utm_content: utmParams.utm_content || null,
+              utm_term: utmParams.utm_term || null,
             },
           },
         });
