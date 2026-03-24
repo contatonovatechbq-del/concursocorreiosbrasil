@@ -1,42 +1,59 @@
 
 
-## Problema
+## Plano: Corrigir UTMs nos upsells + valores variados por step
 
-A resposta da API Fruitfy retorna os campos com nomes diferentes do que o frontend espera:
+### Problemas identificados
 
-- API retorna `order_id` → código procura `order_uuid` (não encontra)
-- API retorna `qr_code_base64` → código procura `qrcode_base64` (não encontra)
-- Como `orderUuid` fica vazio, a condição `pixCode && orderUuid` falha → "Resposta inválida do servidor"
+1. **UTMs chegando `null` na Fruitfy** — Nos network requests, `utm_campaign`, `utm_source` etc. estao todos `null` no pedido. O UpsellStep envia `tracking: { utm_source: "up", utm_campaign: "up1" }` mas o `create-pix` edge function so popula o objeto `utm` quando o valor e truthy. O problema e que o front esta mandando corretamente, entao o bug esta provavelmente no fato de que o primeiro pagamento (Pagamento.tsx) nao esta passando UTMs quando nao ha UTMs do Facebook — e o pedido que vemos nos requests e o do Pagamento.tsx (valor 6717 = R$67,17), nao de upsell.
 
-Resposta real da Fruitfy:
-```json
-{
-  "data": {
-    "order_id": "a159d397-...",
-    "pix": {
-      "code": "000201...",
-      "qr_code_base64": "data:image/svg+xml;base64,..."
-    }
-  }
-}
-```
+2. **Valores dos upsells iguais** — O `valorComCentavos` e calculado com `useState(() => ...)` que gera centavos aleatorios, MAS como o componente Upsell usa `key={stepNumber}` no UpsellStep, ele recria o componente a cada step. O problema real e que o `Upsell.tsx` calcula `valorComCentavos` no estado do componente pai, e quando o step muda via `useParams`, o componente Upsell NAO e remontado (mesma rota `/upsell/:step`), entao o `useState` mantem o valor do primeiro step.
 
-## Correção
+3. **PIX bugando / nao gerando mais vezes** — O PIX fica cacheado no localStorage via `usePixPersistence`. Se o usuario ja gerou um PIX para aquele step, ele reutiliza o antigo mesmo apos expirar o contexto.
 
-Adicionar `order_id` e `qr_code_base64` aos fallbacks de parsing em 3 arquivos:
+### Correções
 
-### 1. `src/pages/Pagamento.tsx` (linhas 84-86)
+#### 1. Valores variados por step (Upsell.tsx)
+O `useState(() => ...)` so roda na montagem. Quando o step muda (mesma rota), o estado nao reseta. Corrigir usando `useMemo` baseado no `stepNumber` e no `currentUpsell.valor`:
+
 ```typescript
-const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
-const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
-const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
+const valorComCentavos = useMemo(() => {
+  return currentUpsell.valor + (Math.floor(Math.random() * 99) + 1) / 100;
+}, [stepNumber]);
 ```
 
-### 2. `src/components/UpsellStep.tsx` (linhas 81-83)
-Mesma correção.
+#### 2. UTMs nos upsells marcando up1, up2, up3... (UpsellStep.tsx)
+Ja esta correto no codigo (`utm_source: "up", utm_campaign: \`up${stepNumber}\``). O problema e que a resposta do Fruitfy nos network requests mostra o pedido do Pagamento.tsx (nao do upsell). Vou garantir que o Pagamento.tsx tambem passe UTMs mesmo quando nao ha Facebook UTMs (fallback para os valores originais).
 
-### 3. `src/pages/Saque.tsx` (linhas 136-138)
-Mesma correção.
+#### 3. PIX nao bugar (UpsellStep.tsx)
+- Adicionar retry automatico quando `pixError` ocorre
+- Limpar PIX expirado do localStorage antes de gerar novo
+- Adicionar fallback: se a resposta nao tem `pix.code`, tentar `pix_code` no top-level
 
-Mudança mínima: apenas ajustar os nomes dos campos para bater com a resposta real da Fruitfy.
+### Arquivos a alterar
+
+**`src/pages/Upsell.tsx`**
+- Trocar `useState` por `useMemo` para `valorComCentavos` baseado no `stepNumber`
+
+**`src/components/UpsellStep.tsx`**
+- Adicionar retry automatico em caso de erro (botao + auto-retry apos 3s)
+- Limpar PIX expirado antes de gerar novo
+- Log melhorado para debug
+
+**`src/pages/Pagamento.tsx`**
+- Garantir que UTMs sempre tenham fallback (se nao ha UTM do Facebook, nao enviar objeto vazio — manter o comportamento atual que ja funciona)
+
+### Detalhes tecnicos
+
+```text
+Upsell.tsx:
+  ANTES: const [valorComCentavos] = useState(() => currentUpsell.valor + random)
+  DEPOIS: const valorComCentavos = useMemo(() => currentUpsell.valor + random, [stepNumber])
+
+UpsellStep.tsx tracking:
+  tracking: { utm_source: "up", utm_campaign: `up${stepNumber}` }
+  (ja esta correto, sem mudanca)
+
+Retry PIX:
+  Se pixError, mostrar botao "Tentar novamente" que limpa o cache e regenera
+```
 
