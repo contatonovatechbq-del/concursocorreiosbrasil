@@ -136,7 +136,7 @@ const Saque = () => {
         const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
-        if (pixCode && orderUuid) {
+        if ((pixCode || pixQrBase64) && orderUuid) {
           const newPixData = {
             code: pixCode,
             qrcode_base64: pixQrBase64,
