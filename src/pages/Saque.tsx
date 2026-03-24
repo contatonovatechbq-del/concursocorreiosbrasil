@@ -134,9 +134,13 @@ const Saque = () => {
 
         const data = response.data;
         console.log('[Saque] Fruitfy response:', data);
-        const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
+        let pixCode = data?.data?.pix?.code || data?.data?.pix_code || '';
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
+        if (!pixCode && pixQrBase64) {
+          const decoded = await decodeQrCode(pixQrBase64);
+          if (decoded) pixCode = decoded;
+        }
         if (orderUuid) {
           const newPixData = {
             code: pixCode,
@@ -146,10 +150,8 @@ const Saque = () => {
           };
           setPixData(newPixData);
           
-          // Save to localStorage for persistence (with UTM signature)
           savePixData(pixStorageKey, { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, external_id: orderUuid }, utmSignature);
 
-          // Start polling for payment status
           startPaymentCheck(orderUuid);
         } else {
           console.error('[Saque] Could not extract PIX data:', data);
