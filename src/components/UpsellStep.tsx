@@ -5,8 +5,7 @@ import CorreiosCard from "@/components/CorreiosCard";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
-import { fbEvents } from "@/lib/fbPixel";
-import { getUtmSignature } from "@/hooks/useUtmTracking";
+import { getUtmSignature, captureUtmParams } from "@/hooks/useUtmTracking";
 import { normalizeBuyer } from "@/lib/pixBuyer";
 
 interface UpsellStepProps {
@@ -35,9 +34,18 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
   const [pixError, setPixError] = useState<string | null>(null);
   const [showPix, setShowPix] = useState(true);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hasGeneratedRef = useRef(false);
   const pixStorageKey = getPixStorageKey("upsell", stepNumber);
 
   useEffect(() => {
+    // Reset guard when step changes (key prop handles remount, but just in case)
+    hasGeneratedRef.current = false;
+  }, [stepNumber]);
+
+  useEffect(() => {
+    if (hasGeneratedRef.current) return;
+    hasGeneratedRef.current = true;
+
     const currentUtmSignature = getUtmSignature();
     const storedPix = getStoredPixData(pixStorageKey, currentUtmSignature);
     if (storedPix) {
@@ -52,6 +60,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
       try {
         setIsLoadingPix(true); setPixError(null);
         const amountInCents = Math.round(valor * 100);
+        captureUtmParams();
         const utmSignature = getUtmSignature();
 
         const sessionCpfData = (() => {
@@ -78,10 +87,10 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); return; }
         const data = response.data;
         console.log('[Upsell] Fruitfy response:', data);
-        const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
+        const pixCode = data?.data?.pix?.code || data?.data?.pix_code || '';
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
-        if (pixCode && orderUuid) {
+        if (orderUuid) {
           const newPixData: PixData = { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, order_uuid: orderUuid };
           setPixData(newPixData);
           savePixData(pixStorageKey, { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, external_id: orderUuid }, utmSignature);
@@ -107,8 +116,6 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         const response = await supabase.functions.invoke('check-pix-status', { body: { order_uuid: orderUuid } });
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          fbEvents.purchase({ value: valor, currency: 'BRL', content_name: title });
-          fbEvents.serverPurchase({ first_name: cpfData.nome.split(' ')[0], cpf: cpfData.cpf, value: valor, content_name: title });
           toast({ title: "Pagamento confirmado!", description: "Processando próxima etapa..." });
           onPaymentConfirmed();
         }
@@ -129,8 +136,6 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         const response = await supabase.functions.invoke('check-pix-status', { body: { order_uuid: pixData.order_uuid } });
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          fbEvents.purchase({ value: valor, currency: 'BRL', content_name: title });
-          fbEvents.serverPurchase({ first_name: cpfData.nome.split(' ')[0], cpf: cpfData.cpf, value: valor, content_name: title });
           toast({ title: "Pagamento confirmado!", description: "Processando próxima etapa..." });
           onPaymentConfirmed();
         } else {
