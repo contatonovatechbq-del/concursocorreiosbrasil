@@ -40,7 +40,7 @@ const Upsell = () => {
   const currentIndex = stepNumber - 1;
   const currentUpsell = UPSELLS[currentIndex];
 
-  const [valorComCentavos] = useState(() => currentUpsell.valor + (Math.floor(Math.random() * 99) + 1) / 100);
+  const valorComCentavos = useMemo(() => currentUpsell.valor + (Math.floor(Math.random() * 99) + 1) / 100, [stepNumber, currentUpsell.valor]);
 
   const session = getSession();
   const cpfData: CPFData | undefined = location.state?.cpfData || session?.cpfData;

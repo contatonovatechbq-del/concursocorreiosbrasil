@@ -81,7 +81,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
-        if (pixCode && orderUuid) {
+        if ((pixCode || pixQrBase64) && orderUuid) {
           const newPixData: PixData = { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, order_uuid: orderUuid };
           setPixData(newPixData);
           savePixData(pixStorageKey, { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, external_id: orderUuid }, utmSignature);
