@@ -11,6 +11,7 @@ import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 const ConfirmaDados = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  useFunnelGuard("/confirma-dados");
   const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
   const cepData = location.state?.cepData;
 

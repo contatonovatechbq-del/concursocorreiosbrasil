@@ -24,6 +24,7 @@ interface PixData {
 const Pagamento = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  useFunnelGuard("/pagamento");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [countdown, setCountdown] = useState(600);

@@ -14,6 +14,7 @@ import { getSession, saveSession, CepData, useFunnelGuard } from "@/hooks/useSes
 const Inscricao = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  useFunnelGuard("/inscricao");
   const [cpf, setCpf] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

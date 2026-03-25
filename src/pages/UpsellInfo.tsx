@@ -443,6 +443,7 @@ const UpsellInfo = () => {
 
   const parsedStep = parseInt(step || "1", 10);
   const stepNumber = isNaN(parsedStep) ? 1 : Math.min(Math.max(parsedStep, 1), 19);
+  useFunnelGuard(`/upsell-info/${stepNumber}`);
   const currentIndex = stepNumber - 1;
 
   const session = getSession();

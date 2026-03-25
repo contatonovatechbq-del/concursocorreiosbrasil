@@ -19,6 +19,7 @@ const getProvaHorario = () => "Portões: 12h00 — Início: 13h00 — Término: 
 const DetalhesInscricao = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  useFunnelGuard("/detalhes-inscricao");
   const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
   const cepData = location.state?.cepData || getSession()?.cepData;
   const agencyData = getSession()?.agencyData;
