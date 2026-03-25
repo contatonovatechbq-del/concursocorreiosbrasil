@@ -6,7 +6,7 @@ import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
-import { saveSession, getSession, CepData } from "@/hooks/useSessionPersistence";
+import { saveSession, getSession, CepData, useFunnelGuard } from "@/hooks/useSessionPersistence";
 import { supabase } from "@/integrations/supabase/client";
 
 const getProvaDate = () => {

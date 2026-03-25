@@ -9,7 +9,7 @@ import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
-import { getSession, saveSession, CepData } from "@/hooks/useSessionPersistence";
+import { getSession, saveSession, CepData, useFunnelGuard } from "@/hooks/useSessionPersistence";
 
 const Inscricao = () => {
   const navigate = useNavigate();

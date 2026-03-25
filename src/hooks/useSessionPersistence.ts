@@ -118,6 +118,22 @@ export const useSessionRestore = () => {
   }, [location.pathname, navigate]);
 };
 
+export const useFunnelGuard = (currentPath: string) => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const session = getSession();
+    if (!session?.cpfData || !session?.currentStep) return;
+    const savedIndex = getStepIndex(session.currentStep);
+    const currentIndex = getStepIndex(currentPath);
+    if (savedIndex > currentIndex) {
+      navigate(session.currentStep, {
+        state: { cpfData: session.cpfData, valorBeneficio: session.valorBeneficio, protocolo: session.protocolo },
+        replace: true,
+      });
+    }
+  }, [currentPath, navigate]);
+};
+
 export const useSaveStep = (currentStep: string, cpfData?: CPFData, extraData?: { valorBeneficio?: number; protocolo?: string }) => {
   useEffect(() => {
     if (cpfData) { saveSession({ cpfData, currentStep, ...extraData }); }
