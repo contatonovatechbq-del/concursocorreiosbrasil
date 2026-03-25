@@ -18,16 +18,16 @@ const UPSELLS = [
   { valor: 19, title: "Certificado de Pré-Aprovação", description: "Taxa obrigatória. Documento que comprova que você cumpriu todos os requisitos do edital." },
   { valor: 15, title: "Acompanhamento por SMS e E-mail", description: "Taxa obrigatória. Receba todas as atualizações sobre datas, locais e resultados do concurso." },
   { valor: 24, title: "Garantia de Vaga na Região", description: "Taxa obrigatória. Garante que se aprovado, você trabalha na agência mais perto da sua casa." },
-  { valor: 29, title: "Kit Documentos para Posse", description: "Taxa obrigatória. Todos os documentos necessários para tomar posse. Sem eles, você perde a vaga." },
-  { valor: 57, title: "Curso Preparatório Express", description: "Taxa obrigatória. Curso intensivo de 7 dias focado no que cai na prova." },
+  { valor: 19, title: "Kit Documentos para Posse", description: "Taxa obrigatória. Todos os documentos necessários para tomar posse. Sem eles, você perde a vaga." },
+  { valor: 27, title: "Curso Preparatório Express", description: "Taxa obrigatória. Curso intensivo de 7 dias focado no que cai na prova." },
   { valor: 22, title: "Recurso Administrativo", description: "Taxa obrigatória. Modelos de recurso prontos e orientação jurídica para contestar irregularidades." },
   { valor: 17, title: "Atualização do Edital", description: "Taxa obrigatória. Receba imediatamente qualquer mudança no edital — datas, conteúdos e vagas." },
-  { valor: 31, title: "Prioridade na Correção", description: "Taxa obrigatória. Sua prova corrigida em até 48h — resultado antes de todo mundo." },
-  { valor: 23, title: "Certificado de Conclusão de Curso", description: "Taxa obrigatória. Validação do certificado escolar, exigido para a posse no cargo." },
+  { valor: 24, title: "Prioridade na Correção", description: "Taxa obrigatória. Sua prova corrigida em até 48h — resultado antes de todo mundo." },
+  { valor: 15, title: "Certificado de Conclusão de Curso", description: "Taxa obrigatória. Validação do certificado escolar, exigido para a posse no cargo." },
   { valor: 14, title: "Acesso ao Grupo VIP", description: "Taxa obrigatória. Grupo exclusivo com dicas, macetes e troca de experiências entre candidatos." },
   { valor: 18, title: "Seguro Contra Atraso", description: "Taxa obrigatória. Se não conseguir chegar na prova por imprevisto, recebe reembolso integral." },
-  { valor: 43, title: "Consultoria Individual", description: "Taxa obrigatória. Orientação personalizada de um especialista com plano de estudo sob medida." },
-  { valor: 67, title: "Pacote de Posse Garantida", description: "Taxa obrigatória — última. Pacote completo: documentação, exames e orientação jurídica para a posse." },
+  { valor: 28, title: "Consultoria Individual", description: "Taxa obrigatória. Orientação personalizada de um especialista com plano de estudo sob medida." },
+  { valor: 21, title: "Pacote de Posse Garantida", description: "Taxa obrigatória — última. Pacote completo: documentação, exames e orientação jurídica para a posse." },
 ];
 
 const Upsell = () => {
