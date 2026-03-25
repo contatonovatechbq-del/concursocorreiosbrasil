@@ -101,7 +101,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
     };
     generatePix();
     return () => { if (checkIntervalRef.current) clearInterval(checkIntervalRef.current); };
-  }, [valor, cpfData, protocolo, stepNumber, title, pixStorageKey]);
+  }, [stepNumber, pixStorageKey]);
 
   useEffect(() => {
     const timer = setInterval(() => { setCountdown(prev => { if (prev <= 0) { clearInterval(timer); return 0; } return prev - 1; }); }, 1000);
