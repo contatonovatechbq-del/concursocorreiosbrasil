@@ -1,47 +1,33 @@
 
 
-## Plano: Corrigir passagem de UTMs do Facebook no pagamento inicial
+## Plano: Ajustar fallback de endereço e esconder conteúdo enquanto carrega
 
-### Situação atual
+### Problema 1: Endereço no fallback
+Quando a busca de escola falha, o fallback mostra `localidade/uf` no campo "Endereço". O pedido é: quando falhar, mostrar só a cidade e remover a linha de endereço.
 
-O código já está correto em termos de estrutura:
+### Problema 2: Conteúdo aparece antes de carregar
+O "Resumo do Cargo", "Observações" e o botão "REALIZAR INSCRIÇÃO" aparecem mesmo enquanto a escola ainda está carregando. Devem ficar ocultos até o loading terminar.
 
-- **Pagamento.tsx** (linha 71-77): Passa `utmParams.utm_source`, `utmParams.utm_campaign`, etc. do Facebook para o `create-pix`
-- **UpsellStep.tsx** (linha 75-81): Passa `utm_source: storedUtms.utm_source || "up"` e `utm_campaign: "up{stepNumber}"`
-- **create-pix edge function** (linha 94-99): Só inclui campos UTM se forem truthy (`if (body.tracking?.utm_source)`)
+### Alterações em `src/pages/Resultado.tsx`
 
-### Problema real
-
-No **Pagamento.tsx**, os UTMs do Facebook podem estar chegando como `null` do `getStoredUtmParams()` se o `captureUtmParams()` na linha 63 não encontrou parâmetros na URL naquele momento (o usuário já navegou internamente e a URL não tem mais os query params). O `captureUtmParams` só salva se encontrar UTMs na URL atual — se já foram salvos antes (pelo `UtmCapture` component no App), eles já estão no localStorage e o `getStoredUtmParams` deveria retorná-los.
-
-O fluxo parece correto. O problema pode ser que o `captureUtmParams()` está sendo chamado **depois** da navegação interna, quando a URL já não tem os params, e como ele só faz merge quando encontra params na URL, ele não apaga os existentes — então `getStoredUtmParams` deveria funcionar.
-
-### Verificação necessária
-
-Preciso confirmar se há um bug real ou se é apenas questão de os UTMs não estarem sendo passados na URL inicial. Vou fazer uma mudança defensiva:
-
-### Alteração
-
-**`src/pages/Pagamento.tsx`** — Adicionar fallback no tracking para garantir que se não há UTMs do Facebook, pelo menos passe `utm_source: "direct"` e `utm_campaign: "front"` para que nunca vá `null`:
+#### 1. Fallback sem endereço
+No `generateFallbackAgency`, remover o campo `endereco` (ou deixar vazio) para que no render a linha de endereço não apareça quando for fallback:
 
 ```typescript
-tracking: {
-  utm_source: utmParams.utm_source || 'direct',
-  utm_medium: utmParams.utm_medium || null,
-  utm_campaign: utmParams.utm_campaign || 'front',
-  utm_content: utmParams.utm_content || null,
-  utm_term: utmParams.utm_term || null,
-},
+const generateFallbackAgency = (cepData: CepData) => ({
+  name: `${SCHOOL_PREFIXES[...]} ${SCHOOL_SUFFIXES[...]}`,
+  endereco: '', // vazio = não mostrar linha de endereço
+  cidade: `${cepData.localidade}/${cepData.uf}`,
+});
 ```
 
-**`src/components/UpsellStep.tsx`** — Já está correto com `utm_source: storedUtms.utm_source || "up"` e `utm_campaign: "up${stepNumber}"`. Sem alteração.
+Na tabela, condicionar a linha de endereço:
+```typescript
+{agency.endereco && (
+  <tr><td className="font-semibold">Endereço</td><td>{agency.endereco}</td></tr>
+)}
+```
 
-### Resumo do fluxo final
-
-| Etapa | utm_source | utm_campaign |
-|-------|-----------|-------------|
-| Pagamento (R$67) | Do Facebook (ex: `fb_ads`) ou `direct` | Do Facebook (ex: `campanha_bb`) ou `front` |
-| Upsell 1 | Do Facebook ou `up` | `up1` |
-| Upsell 2 | Do Facebook ou `up` | `up2` |
-| Upsell N | Do Facebook ou `up` | `upN` |
+#### 2. Esconder conteúdo durante loading
+Envolver o "Resumo do Cargo", "Observações" e o botão dentro de `{!loading && (...)}` para que só apareçam depois que a escola carregou.
 
