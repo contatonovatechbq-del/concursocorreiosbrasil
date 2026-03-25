@@ -20,7 +20,8 @@ const SCHOOL_SUFFIXES = ["São José", "Dom Pedro II", "Tiradentes", "Castro Alv
 
 const generateFallbackAgency = (cepData: CepData) => ({
   name: `${SCHOOL_PREFIXES[Math.floor(Math.random() * SCHOOL_PREFIXES.length)]} ${SCHOOL_SUFFIXES[Math.floor(Math.random() * SCHOOL_SUFFIXES.length)]}`,
-  endereco: `${cepData.localidade}/${cepData.uf}`,
+  endereco: '',
+  cidade: `${cepData.localidade}/${cepData.uf}`,
 });
 
 
