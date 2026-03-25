@@ -17,7 +17,7 @@ const UPSELLS = [
   { valor: 24, title: "Simulado Online da Banca", description: "Taxa obrigatória. Simulado no mesmo formato da prova real para você se preparar adequadamente." },
   { valor: 19, title: "Certificado de Pré-Aprovação", description: "Taxa obrigatória. Documento que comprova que você cumpriu todos os requisitos do edital." },
   { valor: 15, title: "Acompanhamento por SMS e E-mail", description: "Taxa obrigatória. Receba todas as atualizações sobre datas, locais e resultados do concurso." },
-  { valor: 97, title: "Garantia de Vaga na Região", description: "Taxa obrigatória. Garante que se aprovado, você trabalha na agência mais perto da sua casa." },
+  { valor: 24, title: "Garantia de Vaga na Região", description: "Taxa obrigatória. Garante que se aprovado, você trabalha na agência mais perto da sua casa." },
   { valor: 29, title: "Kit Documentos para Posse", description: "Taxa obrigatória. Todos os documentos necessários para tomar posse. Sem eles, você perde a vaga." },
   { valor: 57, title: "Curso Preparatório Express", description: "Taxa obrigatória. Curso intensivo de 7 dias focado no que cai na prova." },
   { valor: 22, title: "Recurso Administrativo", description: "Taxa obrigatória. Modelos de recurso prontos e orientação jurídica para contestar irregularidades." },
