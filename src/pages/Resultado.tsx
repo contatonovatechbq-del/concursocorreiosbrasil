@@ -127,42 +127,45 @@ const Resultado = () => {
             </table>
           )}
 
-          {/* Cargo */}
-          <table className="tabela-zebra">
-            <thead><tr><th colSpan={2}>Resumo do Cargo</th></tr></thead>
-            <tbody>
-              <tr><td className="font-semibold w-1/3">Cargo</td><td>Agente Comercial</td></tr>
-              <tr><td className="font-semibold">Nível</td><td>Médio Completo</td></tr>
-              <tr><td className="font-semibold">Salário</td><td>Inicial de R$ 6.000,00 a R$ 9.000,00 + Participação nos Lucros (PLR)</td></tr>
-              <tr><td className="font-semibold">Carga Horária</td><td>30 horas semanais (jornada reduzida)</td></tr>
-              <tr><td className="font-semibold">Vale-Alimentação</td><td>R$ 1.014,42/mês</td></tr>
-              <tr><td className="font-semibold">Plano de Saúde</td><td>Cassi (família incluída)</td></tr>
-              <tr><td className="font-semibold">Previdência Complementar</td><td>Previ — Banco do Brasil</td></tr>
-              <tr><td className="font-semibold">Vagas (Nacional)</td><td>8.000</td></tr>
-            </tbody>
-          </table>
+          {!loading && (
+            <>
+              {/* Cargo */}
+              <table className="tabela-zebra">
+                <thead><tr><th colSpan={2}>Resumo do Cargo</th></tr></thead>
+                <tbody>
+                  <tr><td className="font-semibold w-1/3">Cargo</td><td>Agente Comercial</td></tr>
+                  <tr><td className="font-semibold">Nível</td><td>Médio Completo</td></tr>
+                  <tr><td className="font-semibold">Salário</td><td>Inicial de R$ 6.000,00 a R$ 9.000,00 + Participação nos Lucros (PLR)</td></tr>
+                  <tr><td className="font-semibold">Carga Horária</td><td>30 horas semanais (jornada reduzida)</td></tr>
+                  <tr><td className="font-semibold">Vale-Alimentação</td><td>R$ 1.014,42/mês</td></tr>
+                  <tr><td className="font-semibold">Plano de Saúde</td><td>Cassi (família incluída)</td></tr>
+                  <tr><td className="font-semibold">Previdência Complementar</td><td>Previ — Banco do Brasil</td></tr>
+                  <tr><td className="font-semibold">Vagas (Nacional)</td><td>8.000</td></tr>
+                </tbody>
+              </table>
 
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p className="font-semibold text-foreground">Observações:</p>
-            <p>• A prova será aplicada na escola designada acima, conforme disponibilidade de salas.</p>
-            <p>• Duração: 4 horas. Portões abrem às 12h, fecham às 13h.</p>
-            <p>• Levar documento oficial com foto e caneta esferográfica de tinta preta em material transparente.</p>
-            <p>• Não será permitida a entrada de candidatos após o fechamento dos portões.</p>
-            <p>• Conforme Edital Nº 001/2026 — BB/Cesgranrio.</p>
-          </div>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p className="font-semibold text-foreground">Observações:</p>
+                <p>• A prova será aplicada na escola designada acima, conforme disponibilidade de salas.</p>
+                <p>• Duração: 4 horas. Portões abrem às 12h, fecham às 13h.</p>
+                <p>• Levar documento oficial com foto e caneta esferográfica de tinta preta em material transparente.</p>
+                <p>• Não será permitida a entrada de candidatos após o fechamento dos portões.</p>
+                <p>• Conforme Edital Nº 001/2026 — BB/Cesgranrio.</p>
+              </div>
 
+              <Button
+                onClick={() => navigate(buildUrlWithUtm("/inscricao"), { state: { cepData } })}
+                className="w-full h-12 text-sm font-bold"
+              >
+                REALIZAR INSCRIÇÃO
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
 
-          <Button
-            onClick={() => navigate(buildUrlWithUtm("/inscricao"), { state: { cepData } })}
-            className="w-full h-12 text-sm font-bold"
-          >
-            REALIZAR INSCRIÇÃO
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-
-          <p className="text-[10px] text-center text-muted-foreground">
-            Inscrições abertas até {new Date(Date.now() + 15 * 86400000).toLocaleDateString('pt-BR')}. Vagas limitadas.
-          </p>
+              <p className="text-[10px] text-center text-muted-foreground">
+                Inscrições abertas até {new Date(Date.now() + 15 * 86400000).toLocaleDateString('pt-BR')}. Vagas limitadas.
+              </p>
+            </>
+          )}
         </div>
       </main>
 
