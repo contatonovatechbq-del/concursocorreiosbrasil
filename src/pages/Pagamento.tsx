@@ -8,7 +8,7 @@ import { CPFData } from "@/lib/cpf";
 import { normalizeBuyer } from "@/lib/pixBuyer";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
+import { saveSession, getSession, clearSession, useFunnelGuard } from "@/hooks/useSessionPersistence";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
 import { getStoredUtmParams, getUtmSignature, captureUtmParams } from "@/hooks/useUtmTracking";
@@ -24,6 +24,7 @@ interface PixData {
 const Pagamento = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  useFunnelGuard("/pagamento");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [countdown, setCountdown] = useState(600);

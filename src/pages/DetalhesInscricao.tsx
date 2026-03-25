@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { CPFData } from "@/lib/cpf";
-import { saveSession, getSession } from "@/hooks/useSessionPersistence";
+import { saveSession, getSession, useFunnelGuard } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
@@ -19,6 +19,7 @@ const getProvaHorario = () => "Portões: 12h00 — Início: 13h00 — Término: 
 const DetalhesInscricao = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  useFunnelGuard("/detalhes-inscricao");
   const cpfData: CPFData | undefined = location.state?.cpfData || getSession()?.cpfData;
   const cepData = location.state?.cepData || getSession()?.cepData;
   const agencyData = getSession()?.agencyData;

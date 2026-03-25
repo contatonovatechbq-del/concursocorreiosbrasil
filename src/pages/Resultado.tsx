@@ -6,7 +6,7 @@ import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
-import { saveSession, getSession, CepData } from "@/hooks/useSessionPersistence";
+import { saveSession, getSession, CepData, useFunnelGuard } from "@/hooks/useSessionPersistence";
 import { supabase } from "@/integrations/supabase/client";
 
 const getProvaDate = () => {
@@ -34,6 +34,7 @@ interface AgencyInfo {
 const Resultado = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  useFunnelGuard("/resultado");
   const cepData: CepData | undefined = location.state?.cepData || getSession()?.cepData;
   const cepDataRef = useRef(cepData);
   const hasFetched = useRef(false);

@@ -9,11 +9,12 @@ import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
-import { getSession, saveSession, CepData } from "@/hooks/useSessionPersistence";
+import { getSession, saveSession, CepData, useFunnelGuard } from "@/hooks/useSessionPersistence";
 
 const Inscricao = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  useFunnelGuard("/inscricao");
   const [cpf, setCpf] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

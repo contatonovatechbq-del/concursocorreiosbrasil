@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { CPFData } from "@/lib/cpf";
-import { getSession, saveSession, CepData, AgencyData } from "@/hooks/useSessionPersistence";
+import { getSession, saveSession, CepData, AgencyData, useFunnelGuard } from "@/hooks/useSessionPersistence";
 
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
@@ -443,6 +443,7 @@ const UpsellInfo = () => {
 
   const parsedStep = parseInt(step || "1", 10);
   const stepNumber = isNaN(parsedStep) ? 1 : Math.min(Math.max(parsedStep, 1), 19);
+  useFunnelGuard(`/upsell-info/${stepNumber}`);
   const currentIndex = stepNumber - 1;
 
   const session = getSession();
