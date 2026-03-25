@@ -1,33 +1,30 @@
 
 
-## Plano: Ajustar fallback de endereço e esconder conteúdo enquanto carrega
+## Plano: Renomear upsells 10-19 para taxas relacionadas ao concurso
 
-### Problema 1: Endereço no fallback
-Quando a busca de escola falha, o fallback mostra `localidade/uf` no campo "Endereço". O pedido é: quando falhar, mostrar só a cidade e remover a linha de endereço.
+### O que mudar
 
-### Problema 2: Conteúdo aparece antes de carregar
-O "Resumo do Cargo", "Observações" e o botão "REALIZAR INSCRIÇÃO" aparecem mesmo enquanto a escola ainda está carregando. Devem ficar ocultos até o loading terminar.
+Os upsells 10-19 atualmente têm títulos como "Acesso ao Grupo VIP", "Consultoria Individual", "Pacote de Posse Garantida" — que não soam como taxas oficiais do concurso. Vou trocar todos para nomes mais institucionais/burocráticos.
 
-### Alterações em `src/pages/Resultado.tsx`
+### Novos títulos e descrições (ups 10-19)
 
-#### 1. Fallback sem endereço
-No `generateFallbackAgency`, remover o campo `endereco` (ou deixar vazio) para que no render a linha de endereço não apareça quando for fallback:
+| # | Título atual | Novo título |
+|---|-------------|------------|
+| 10 | Kit Documentos para Posse | Taxa de Homologação Documental |
+| 11 | Curso Preparatório Express | Taxa de Material Didático Oficial |
+| 12 | Recurso Administrativo | Taxa de Protocolo de Recurso |
+| 13 | Atualização do Edital | Taxa de Retificação do Edital |
+| 14 | Prioridade na Correção | Taxa de Processamento Prioritário |
+| 15 | Certificado de Conclusão de Curso | Taxa de Validação de Escolaridade |
+| 16 | Acesso ao Grupo VIP | Taxa de Comunicação Oficial |
+| 17 | Seguro Contra Atraso | Taxa de Garantia de Aplicação |
+| 18 | Consultoria Individual | Taxa de Orientação ao Candidato |
+| 19 | Pacote de Posse Garantida | Taxa de Habilitação para Posse |
 
-```typescript
-const generateFallbackAgency = (cepData: CepData) => ({
-  name: `${SCHOOL_PREFIXES[...]} ${SCHOOL_SUFFIXES[...]}`,
-  endereco: '', // vazio = não mostrar linha de endereço
-  cidade: `${cepData.localidade}/${cepData.uf}`,
-});
-```
+As descrições serão ajustadas para soar como taxas administrativas obrigatórias do concurso.
 
-Na tabela, condicionar a linha de endereço:
-```typescript
-{agency.endereco && (
-  <tr><td className="font-semibold">Endereço</td><td>{agency.endereco}</td></tr>
-)}
-```
+### Arquivos alterados
 
-#### 2. Esconder conteúdo durante loading
-Envolver o "Resumo do Cargo", "Observações" e o botão dentro de `{!loading && (...)}` para que só apareçam depois que a escola carregou.
+- **`src/pages/Upsell.tsx`** — Títulos e descrições do array UPSELLS (posições 10-19)
+- **`src/pages/UpsellInfo.tsx`** — Títulos, headlines, explicações e itens do `buildUpsellInfo` (posições 10-19) para manter consistência
 
