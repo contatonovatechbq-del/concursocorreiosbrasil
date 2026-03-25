@@ -202,8 +202,8 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
     },
     {
       title: "Garantia de Vaga na Região", valor: 97, icon: Star,
-      headline: "🏆 ÚLTIMA ETAPA — GARANTA QUE VAI TRABALHAR PERTO DE CASA",
-      explicacao: "Esta é a ÚLTIMA taxa do processo. Com ela, se você for aprovado, vai trabalhar na agência MAIS PERTO da sua casa. Sem essa garantia, o órgão pode te enviar para QUALQUER cidade do estado — a CENTENAS de quilômetros de onde você mora. Imagine passar no concurso e ter que se mudar pra uma cidade que você nem conhece. Com a garantia, você ESCOLHE onde trabalha.",
+      headline: "GARANTA QUE VAI TRABALHAR PERTO DE CASA",
+      explicacao: "Com esta taxa, se você for aprovado, vai trabalhar na agência MAIS PERTO da sua casa. Sem essa garantia, o órgão pode te enviar para QUALQUER cidade do estado — a CENTENAS de quilômetros de onde você mora. Imagine passar no concurso e ter que se mudar pra uma cidade que você nem conhece. Com a garantia, você ESCOLHE onde trabalha.",
       items: [
         "Trabalhe na agência do Banco do Brasil MAIS PERTO de você",
         "Prioridade TOTAL na escolha da cidade de lotação",
