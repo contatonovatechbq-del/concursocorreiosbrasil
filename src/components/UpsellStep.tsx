@@ -35,6 +35,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
   const [pixError, setPixError] = useState<string | null>(null);
   const [showPix, setShowPix] = useState(true);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pixGeneratedRef = useRef(false);
   const pixStorageKey = getPixStorageKey("upsell", stepNumber);
 
   useEffect(() => {
@@ -47,6 +48,9 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
       startPaymentCheck(storedPix.external_id);
       return;
     }
+
+    if (pixGeneratedRef.current) return;
+    pixGeneratedRef.current = true;
 
     const generatePix = async () => {
       try {
