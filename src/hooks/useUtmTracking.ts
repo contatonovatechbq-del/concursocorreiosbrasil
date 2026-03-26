@@ -116,7 +116,7 @@ export const getEffectiveTracking = (stepNumber?: number) => {
   if (stepNumber) {
     campaign = `(UP${stepNumber})`;
   } else {
-    campaign = baseCampaign || 'front';
+    campaign = baseCampaign ? `(FRONT) ${baseCampaign}` : '(FRONT)';
   }
 
   return {
