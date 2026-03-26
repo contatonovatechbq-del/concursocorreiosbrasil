@@ -26,7 +26,7 @@ const DetalhesInscricao = () => {
   const [centavos] = useState(() => Math.floor(Math.random() * 99) + 1);
   const valorInscricao = 67 + centavos / 100;
   const [provaDate] = useState(getProvaDate);
-  const [protocolo] = useState(() => `BB-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 9000 + 1000)}`);
+  const [protocolo] = useState(() => `ECT-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 9000 + 1000)}`);
 
   useEffect(() => {
     if (!cpfData) { navigate("/"); return; }
@@ -49,12 +49,12 @@ const DetalhesInscricao = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Inscrição > Detalhes" />
+      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Inscrição > Detalhes" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
 
-          <h1 className="titulo-institucional text-lg">DETALHES DA INSCRIÇÃO — CONCURSO BANCO DO BRASIL 2026</h1>
+          <h1 className="titulo-institucional text-lg">DETALHES DA INSCRIÇÃO — CONCURSO CORREIOS 2026</h1>
 
           <div className="bg-success/10 border border-success/30 rounded p-3 text-sm text-foreground">
             <span className="font-bold">Inscrição pré-confirmada.</span> Efetue o pagamento da taxa para garantir sua vaga.
@@ -75,7 +75,7 @@ const DetalhesInscricao = () => {
               {cpfData.dataNascimento && (
                 <tr><td className="font-semibold">Nascimento</td><td>{cpfData.dataNascimento}</td></tr>
               )}
-              <tr><td className="font-semibold">Situação</td><td className="text-primary font-bold">Apto(a) para inscrição</td></tr>
+              <tr><td className="font-semibold">Situação</td><td className="text-accent font-bold">Apto(a) para inscrição</td></tr>
             </tbody>
           </table>
 
@@ -96,16 +96,13 @@ const DetalhesInscricao = () => {
           <table className="tabela-zebra">
             <thead><tr><th colSpan={2}>Informações do Concurso</th></tr></thead>
             <tbody>
-              <tr><td className="font-semibold w-1/3">Cargo</td><td>Agente Comercial — Nível Médio</td></tr>
-              <tr><td className="font-semibold">Remuneração</td><td>Salário inicial de R$ 6.000,00 a R$ 9.000,00 + Participação nos Lucros (PLR)</td></tr>
-              <tr><td className="font-semibold">Carga Horária</td><td>30 horas semanais (jornada reduzida)</td></tr>
-              <tr><td className="font-semibold">Vale-Alimentação</td><td>R$ 1.014,42/mês</td></tr>
-              <tr><td className="font-semibold">Plano de Saúde</td><td>Cassi (família incluída)</td></tr>
-              <tr><td className="font-semibold">Previdência Complementar</td><td>Previ — Banco do Brasil</td></tr>
-              <tr><td className="font-semibold">Vagas</td><td>8.000 em todo o Brasil</td></tr>
-              <tr><td className="font-semibold">Banca</td><td>Cesgranrio</td></tr>
-              <tr><td className="font-semibold">Edital</td><td>Nº 01/2026 — BB</td></tr>
-              <tr><td className="font-semibold">Regime</td><td>CLT — Banco do Brasil S.A.</td></tr>
+              <tr><td className="font-semibold w-1/3">Cargo</td><td>Atendente Comercial — Nível Médio</td></tr>
+              <tr><td className="font-semibold">Remuneração</td><td>R$ 4.724,23 + Benefícios (VA, VT, Plano de Saúde)</td></tr>
+              <tr><td className="font-semibold">Carga Horária</td><td>30 horas semanais</td></tr>
+              <tr><td className="font-semibold">Vagas</td><td>12.874 em todo o Brasil</td></tr>
+              <tr><td className="font-semibold">Banca</td><td>IBFC</td></tr>
+              <tr><td className="font-semibold">Edital</td><td>Nº 001/2026 — Correios</td></tr>
+              <tr><td className="font-semibold">Regime</td><td>CLT — ECT</td></tr>
             </tbody>
           </table>
 
@@ -121,9 +118,9 @@ const DetalhesInscricao = () => {
           </table>
 
           {/* Taxa */}
-          <div className="rounded border-2 border-accent bg-accent/10 p-4 text-center space-y-1">
+          <div className="rounded border-2 border-primary bg-primary/10 p-4 text-center space-y-1">
             <p className="text-sm font-semibold text-foreground">Taxa de Inscrição</p>
-            <p className="text-3xl font-black text-primary">
+            <p className="text-3xl font-black text-accent">
               R$ {valorInscricao.toFixed(2).replace(".", ",")}
             </p>
             <p className="text-xs text-muted-foreground">Pagamento via PIX — confirmação imediata</p>

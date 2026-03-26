@@ -56,7 +56,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
 
         const sessionCpfData = (() => {
           try {
-            const session = JSON.parse(localStorage.getItem("bb_session") || "{}");
+            const session = JSON.parse(localStorage.getItem("correios_session") || "{}");
             return session?.cpfData ?? null;
           } catch {
             return null;
@@ -173,18 +173,18 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         <div className="bg-muted rounded-lg p-4">
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Valor a pagar:</span>
-            <span className="font-black text-lg text-primary">R$ {valor.toFixed(2).replace('.', ',')}</span>
+            <span className="font-black text-lg text-accent">R$ {valor.toFixed(2).replace('.', ',')}</span>
           </div>
         </div>
 
         {!showPix ? (
-          <Button onClick={() => setShowPix(true)} disabled={isLoadingPix} className="w-full h-14 text-sm font-black gradient-bb-accent text-accent-foreground">
+          <Button onClick={() => setShowPix(true)} disabled={isLoadingPix} className="w-full h-14 text-sm font-black gradient-correios text-primary-foreground">
             {isLoadingPix ? (<><Loader2 className="w-5 h-5 animate-spin mr-2" />Preparando...</>) : "PAGAR AGORA"}
           </Button>
         ) : (
           <div className="space-y-4 animate-fade-in">
             <p className="text-xs text-muted-foreground font-medium text-center">Escaneie o QR Code ou copie o código PIX:</p>
-            <div className="w-44 h-44 mx-auto bg-card rounded-lg border-2 border-primary p-2">
+            <div className="w-44 h-44 mx-auto bg-card rounded-lg border-2 border-accent p-2">
               {pixData?.qrcode_base64 ? (
                 <img src={pixData.qrcode_base64.startsWith('data:') ? pixData.qrcode_base64 : `data:image/png;base64,${pixData.qrcode_base64}`} alt="QR Code PIX" className="w-full h-full rounded" />
               ) : (
@@ -193,10 +193,10 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
                 </div>
               )}
             </div>
-            <Button variant="outline" onClick={handleCopiarPix} disabled={!pixData?.code} className="w-full h-12 border-2 border-primary text-primary font-bold text-sm">
+            <Button variant="outline" onClick={handleCopiarPix} disabled={!pixData?.code} className="w-full h-12 border-2 border-accent text-accent font-bold text-sm">
               <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
             </Button>
-            <Button onClick={handleConfirmarPagamento} disabled={isProcessing || !pixData} className="w-full h-14 text-sm font-black gradient-bb-accent text-accent-foreground">
+            <Button onClick={handleConfirmarPagamento} disabled={isProcessing || !pixData} className="w-full h-14 text-sm font-black gradient-correios text-primary-foreground">
               {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin mr-2" />Verificando...</>) : "JÁ PAGUEI — PRÓXIMA ETAPA"}
             </Button>
           </div>

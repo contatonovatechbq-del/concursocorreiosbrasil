@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Banco do Brasil Design System - Institutional Theme */
+/* Correios Design System - Institutional Theme */
 
 @layer base {
 :root {
@@ -15,8 +15,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 12%;
 
-    --primary: 214 100% 26%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 48 100% 50%;
+    --primary-foreground: 215 25% 12%;
 
     --secondary: 215 15% 96%;
     --secondary-foreground: 215 25% 20%;
@@ -24,8 +24,8 @@
     --muted: 215 15% 96%;
     --muted-foreground: 215 10% 45%;
 
-    --accent: 54 96% 52%;
-    --accent-foreground: 215 25% 12%;
+    --accent: 220 80% 35%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 80% 55%;
     --destructive-foreground: 0 0% 100%;
@@ -35,7 +35,7 @@
 
     --border: 215 15% 88%;
     --input: 215 15% 88%;
-    --ring: 214 100% 26%;
+    --ring: 220 80% 35%;
 
     --radius: 0.25rem;
 
@@ -59,8 +59,8 @@
     --popover: 215 25% 12%;
     --popover-foreground: 215 10% 95%;
 
-    --primary: 214 100% 26%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 48 100% 50%;
+    --primary-foreground: 215 25% 12%;
 
     --secondary: 215 15% 18%;
     --secondary-foreground: 215 10% 90%;
@@ -68,15 +68,15 @@
     --muted: 215 15% 18%;
     --muted-foreground: 215 10% 60%;
 
-    --accent: 54 96% 52%;
-    --accent-foreground: 215 25% 12%;
+    --accent: 220 80% 35%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 45%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 215 15% 20%;
     --input: 215 15% 20%;
-    --ring: 214 100% 26%;
+    --ring: 220 80% 35%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -105,15 +105,15 @@
     text-wrap: balance;
   }
   
-  .gradient-bb {
-    background: linear-gradient(135deg, hsl(214 100% 26%), hsl(214 100% 32%));
+  .gradient-correios {
+    background: linear-gradient(135deg, hsl(48 100% 50%), hsl(48 100% 55%));
   }
   
-  .gradient-bb-accent {
-    background: linear-gradient(135deg, hsl(54 96% 52%), hsl(48 100% 55%));
+  .gradient-correios-accent {
+    background: linear-gradient(135deg, hsl(220 80% 35%), hsl(220 80% 42%));
   }
   
-  .shadow-bb {
+  .shadow-correios {
     box-shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.06);
   }
   
@@ -127,7 +127,7 @@
 
   /* Institutional title style */
   .titulo-institucional {
-    @apply font-black uppercase tracking-tight text-primary;
+    @apply font-black uppercase tracking-tight text-accent;
   }
 
   /* Institutional tab */
@@ -135,7 +135,7 @@
     @apply text-sm font-semibold py-2.5 px-4 border-b-2 transition-colors cursor-pointer;
   }
   .tab-institucional-active {
-    @apply border-accent text-foreground;
+    @apply border-primary text-foreground;
   }
   .tab-institucional-inactive {
     @apply border-transparent text-muted-foreground hover:text-foreground;
@@ -160,7 +160,7 @@
   @apply px-3 py-2.5 text-left;
 }
 .tabela-zebra th {
-  @apply font-bold text-foreground bg-primary text-primary-foreground text-xs uppercase tracking-wide;
+  @apply font-bold text-accent-foreground bg-accent text-xs uppercase tracking-wide;
 }
 
 /* Mobile-first touch optimizations */

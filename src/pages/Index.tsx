@@ -60,10 +60,10 @@ const Index = () => {
           {/* Institutional Title */}
           <div>
             <h1 className="titulo-institucional text-lg sm:text-xl">
-              CONCURSO NACIONAL — BANCO DO BRASIL 2026
+              CONCURSO NACIONAL — CORREIOS 2026
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Edital Nº 001/2026 — Agente Comercial | Nível Médio
+              Edital Nº 001/2026 — Atendente Comercial | Nível Médio
             </p>
           </div>
 
@@ -85,24 +85,21 @@ const Index = () => {
             <div className="space-y-4">
               <table className="tabela-zebra">
                 <tbody>
-                  <tr><td className="font-semibold text-foreground w-2/5">Instituição</td><td>Banco do Brasil S.A.</td></tr>
-                  <tr><td className="font-semibold text-foreground">Cargo</td><td>Agente Comercial</td></tr>
+                  <tr><td className="font-semibold text-foreground w-2/5">Instituição</td><td>Empresa Brasileira de Correios e Telégrafos</td></tr>
+                  <tr><td className="font-semibold text-foreground">Cargo</td><td>Atendente Comercial</td></tr>
                   <tr><td className="font-semibold text-foreground">Escolaridade</td><td>Nível Médio Completo</td></tr>
-                  <tr><td className="font-semibold text-foreground">Vagas</td><td>8.000 em todo o Brasil</td></tr>
-                  <tr><td className="font-semibold text-foreground">Remuneração</td><td>Salário inicial de R$ 6.000,00 a R$ 9.000,00 + Participação nos Lucros (PLR)</td></tr>
-                  <tr><td className="font-semibold text-foreground">Carga Horária</td><td>30 horas semanais (jornada reduzida)</td></tr>
-                  <tr><td className="font-semibold text-foreground">Vale-Alimentação</td><td>R$ 1.014,42/mês</td></tr>
-                  <tr><td className="font-semibold text-foreground">Plano de Saúde</td><td>Cassi (família incluída)</td></tr>
-                  <tr><td className="font-semibold text-foreground">Previdência Complementar</td><td>Previ — Banco do Brasil</td></tr>
-                  <tr><td className="font-semibold text-foreground">Banca</td><td>Cesgranrio</td></tr>
+                  <tr><td className="font-semibold text-foreground">Vagas</td><td>12.874 em todo o Brasil</td></tr>
+                  <tr><td className="font-semibold text-foreground">Remuneração</td><td>R$ 4.724,23 + Benefícios (VA, VT, Plano de Saúde)</td></tr>
+                  <tr><td className="font-semibold text-foreground">Carga Horária</td><td>30 horas semanais</td></tr>
+                  <tr><td className="font-semibold text-foreground">Banca</td><td>IBFC — Instituto Brasileiro de Formação e Capacitação</td></tr>
                 </tbody>
               </table>
 
               <div className="text-xs text-muted-foreground space-y-1 mt-3">
                 <p className="font-semibold text-foreground">Observações:</p>
                 <p>• As inscrições estão abertas até {dates.inscEnd}.</p>
-                <p>• Para mais informações, consulte o <span className="text-primary underline cursor-pointer">edital completo</span>.</p>
-                <p>• Dúvidas podem ser enviadas pelo <span className="text-primary underline cursor-pointer">Fale Conosco</span>.</p>
+                <p>• Para mais informações, consulte o <span className="text-accent underline cursor-pointer">edital completo</span>.</p>
+                <p>• Dúvidas podem ser enviadas pelo <span className="text-accent underline cursor-pointer">Fale Conosco</span>.</p>
               </div>
             </div>
           )}
@@ -157,14 +154,14 @@ const Index = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td className="font-medium">Agente Comercial</td>
-                  <td>8.000</td>
+                  <td className="font-medium">Atendente Comercial</td>
+                  <td>12.874</td>
                   <td><span className="text-xs font-bold text-success">Inscrições abertas</span></td>
                 </tr>
                 <tr>
-                  <td className="font-medium">Agente de Tecnologia</td>
+                  <td className="font-medium">Carteiro</td>
                   <td>—</td>
-                  <td><span className="text-xs font-bold text-accent-foreground">Em breve</span></td>
+                  <td><span className="text-xs font-bold text-primary-foreground">Em breve</span></td>
                 </tr>
               </tbody>
             </table>

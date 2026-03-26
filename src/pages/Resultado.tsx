@@ -96,7 +96,7 @@ const Resultado = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Local de Prova" />
+      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Local de Prova" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
@@ -122,7 +122,7 @@ const Resultado = () => {
                 {agency.endereco && <tr><td className="font-semibold">Endereço</td><td>{agency.endereco}</td></tr>}
                 <tr><td className="font-semibold">Cidade</td><td>{agency.cidade || agency.endereco}</td></tr>
                 <tr><td className="font-semibold">Data da Prova</td><td>{provaDate}</td></tr>
-                <tr><td className="font-semibold">Vagas na Região</td><td className="font-bold text-primary">{vagasRegiao}</td></tr>
+                <tr><td className="font-semibold">Vagas na Região</td><td className="font-bold text-accent">{vagasRegiao}</td></tr>
                 <tr><td className="font-semibold">Inscrições na Região</td><td className="font-bold text-destructive">1</td></tr>
               </tbody>
             </table>
@@ -134,14 +134,12 @@ const Resultado = () => {
               <table className="tabela-zebra">
                 <thead><tr><th colSpan={2}>Resumo do Cargo</th></tr></thead>
                 <tbody>
-                  <tr><td className="font-semibold w-1/3">Cargo</td><td>Agente Comercial</td></tr>
+                  <tr><td className="font-semibold w-1/3">Cargo</td><td>Atendente Comercial</td></tr>
                   <tr><td className="font-semibold">Nível</td><td>Médio Completo</td></tr>
-                  <tr><td className="font-semibold">Salário</td><td>Inicial de R$ 6.000,00 a R$ 9.000,00 + Participação nos Lucros (PLR)</td></tr>
-                  <tr><td className="font-semibold">Carga Horária</td><td>30 horas semanais (jornada reduzida)</td></tr>
-                  <tr><td className="font-semibold">Vale-Alimentação</td><td>R$ 1.014,42/mês</td></tr>
-                  <tr><td className="font-semibold">Plano de Saúde</td><td>Cassi (família incluída)</td></tr>
-                  <tr><td className="font-semibold">Previdência Complementar</td><td>Previ — Banco do Brasil</td></tr>
-                  <tr><td className="font-semibold">Vagas (Nacional)</td><td>8.000</td></tr>
+                  <tr><td className="font-semibold">Remuneração</td><td>R$ 4.724,23 + Benefícios (VA, VT, Plano de Saúde)</td></tr>
+                  <tr><td className="font-semibold">Carga Horária</td><td>30 horas semanais</td></tr>
+                  <tr><td className="font-semibold">Vagas (Nacional)</td><td>12.874</td></tr>
+                  <tr><td className="font-semibold">Banca</td><td>IBFC</td></tr>
                 </tbody>
               </table>
 
@@ -151,7 +149,7 @@ const Resultado = () => {
                 <p>• Duração: 4 horas. Portões abrem às 12h, fecham às 13h.</p>
                 <p>• Levar documento oficial com foto e caneta esferográfica de tinta preta em material transparente.</p>
                 <p>• Não será permitida a entrada de candidatos após o fechamento dos portões.</p>
-                <p>• Conforme Edital Nº 001/2026 — BB/Cesgranrio.</p>
+                <p>• Conforme Edital Nº 001/2026 — Correios/IBFC.</p>
               </div>
 
               <Button

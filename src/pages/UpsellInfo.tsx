@@ -204,9 +204,9 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
     {
       title: "Garantia de Vaga na Região", valor: 24, icon: Star,
       headline: "GARANTA QUE VAI TRABALHAR PERTO DE CASA",
-      explicacao: "Com esta taxa, se você for aprovado, vai trabalhar na agência MAIS PERTO da sua casa. Sem essa garantia, o órgão pode te enviar para QUALQUER cidade do estado — a CENTENAS de quilômetros de onde você mora. Imagine passar no concurso e ter que se mudar pra uma cidade que você nem conhece. Com a garantia, você ESCOLHE onde trabalha.",
+      explicacao: "Com esta taxa, se você for aprovado, vai trabalhar na unidade dos Correios MAIS PERTO da sua casa. Sem essa garantia, a ECT pode te enviar para QUALQUER cidade do estado — a CENTENAS de quilômetros de onde você mora. Imagine passar no concurso e ter que se mudar pra uma cidade que você nem conhece. Com a garantia, você ESCOLHE onde trabalha.",
       items: [
-        "Trabalhe na agência do Banco do Brasil MAIS PERTO de você",
+        "Trabalhe na unidade dos Correios MAIS PERTO de você",
         "Prioridade TOTAL na escolha da cidade de lotação",
         "Acompanhamento VIP de todo o processo até a posse",
         "Inscrição 100% CONCLUÍDA após este pagamento",
@@ -331,7 +331,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
     {
       title: "Taxa de Validação de Escolaridade", valor: 15, icon: Fingerprint,
       headline: "🎓 VALIDAÇÃO DE ESCOLARIDADE — EXIGÊNCIA PARA A POSSE",
-      explicacao: "Para tomar posse no cargo de Agente Comercial, é obrigatória a comprovação de Ensino Médio completo. A taxa de validação garante a verificação e conformidade do seu certificado escolar com as exigências do edital. Certificados com pendências ou irregularidades resultam em NEGATIVA de posse.",
+      explicacao: "Para tomar posse no cargo de Atendente Comercial, é obrigatória a comprovação de Ensino Médio completo. A taxa de validação garante a verificação e conformidade do seu certificado escolar com as exigências do edital. Certificados com pendências ou irregularidades resultam em NEGATIVA de posse.",
       items: [
         "Verificação completa do certificado escolar",
         "Orientação para obtenção de segunda via",
@@ -421,7 +421,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
         "Orientação para exame médico admissional",
         "Checklist de documentos com acompanhamento",
         "Orientação jurídica sobre questões trabalhistas",
-        "Guia do processo de posse no órgão",
+        "Guia do processo de posse na ECT",
         "Suporte administrativo por 90 dias",
         "Certificado de habilitação emitido",
       ],
@@ -477,7 +477,7 @@ const UpsellInfo = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Confirmações de Etapa" />
+      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Confirmações de Etapa" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
@@ -538,13 +538,13 @@ const UpsellInfo = () => {
 
           {/* Benefícios do Cargo */}
           <table className="tabela-zebra">
-            <thead><tr><th colSpan={2}>Benefícios do Cargo — Agente Comercial</th></tr></thead>
+            <thead><tr><th colSpan={2}>Benefícios do Cargo — Atendente Comercial</th></tr></thead>
             <tbody>
-              <tr><td className="font-semibold w-2/5">Remuneração</td><td>Salário inicial de R$ 6.000,00 a R$ 9.000,00 + PLR</td></tr>
-              <tr><td className="font-semibold">Jornada</td><td>30 horas semanais (jornada reduzida)</td></tr>
-              <tr><td className="font-semibold">Vale-Alimentação</td><td>R$ 1.014,42/mês</td></tr>
-              <tr><td className="font-semibold">Plano de Saúde</td><td>Cassi (família incluída)</td></tr>
-              <tr><td className="font-semibold">Previdência</td><td>Previ — Banco do Brasil</td></tr>
+              <tr><td className="font-semibold w-2/5">Remuneração</td><td>R$ 4.724,23 + Benefícios</td></tr>
+              <tr><td className="font-semibold">Jornada</td><td>30 horas semanais</td></tr>
+              <tr><td className="font-semibold">Vale-Alimentação</td><td>Incluso nos benefícios</td></tr>
+              <tr><td className="font-semibold">Vale-Transporte</td><td>Incluso nos benefícios</td></tr>
+              <tr><td className="font-semibold">Plano de Saúde</td><td>Incluso nos benefícios</td></tr>
             </tbody>
           </table>
           {/* Observação */}
@@ -557,7 +557,7 @@ const UpsellInfo = () => {
           {/* Valor */}
           <div className="rounded border-2 border-destructive bg-destructive/10 p-4 text-center space-y-1">
             <p className="text-sm font-bold text-foreground">VALOR DA TAXA — PAGAMENTO ÚNICO</p>
-            <p className="text-4xl font-black text-primary">
+            <p className="text-4xl font-black text-accent">
               R$ {valorComCentavos.toFixed(2).replace('.', ',')}
             </p>
           </div>
