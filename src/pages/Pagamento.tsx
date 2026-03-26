@@ -34,6 +34,7 @@ const Pagamento = () => {
   const [showPix, setShowPix] = useState(true);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasTrackedRef = useRef(false);
+  const pixGeneratedRef = useRef(false);
   const pixStorageKey = getPixStorageKey("pagamento");
 
   const session = getSession();
@@ -45,23 +46,35 @@ const Pagamento = () => {
 
   useEffect(() => {
     if (!cpfData || !valorBeneficio) { navigate("/"); return; }
+
+    // Captura UTMs da URL ANTES de qualquer outra coisa
+    captureUtmParams();
+
     const cepData = location.state?.cepData || session?.cepData;
     saveSession({ cpfData, currentStep: "/pagamento", valorBeneficio, protocolo, cepData });
     if (!hasTrackedRef.current) { hasTrackedRef.current = true; trackFunnelEvent('pagamento', { cpf: cpfData.cpf }); }
+
+    // Se já gerou PIX neste mount, não gerar novamente
+    if (pixGeneratedRef.current) return;
+
     const currentUtmSignature = getUtmSignature();
     const storedPix = getStoredPixData(pixStorageKey, currentUtmSignature);
     if (storedPix) {
+      pixGeneratedRef.current = true;
       setPixData({ code: storedPix.code, qrcode_base64: storedPix.qrcode_base64, transaction_id: storedPix.transaction_id, order_uuid: storedPix.external_id });
       setCountdown(getPixRemainingTime(pixStorageKey));
       setIsLoadingPix(false);
       startPaymentCheck(storedPix.external_id);
       return;
     }
+
+    // Marca ANTES de chamar a API para evitar chamadas duplicadas
+    pixGeneratedRef.current = true;
+
     const generatePix = async () => {
       try {
         setIsLoadingPix(true); setPixError(null);
         const amountInCents = Math.round(valorBeneficio * 100);
-        captureUtmParams();
         const tracking = getEffectiveTracking();
         console.log('[Pagamento] Tracking for PIX:', tracking);
         const buyer = normalizeBuyer(cpfData.nome, cpfData.cpf);
@@ -72,7 +85,7 @@ const Pagamento = () => {
             tracking,
           },
         });
-        if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); return; }
+        if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); pixGeneratedRef.current = false; return; }
         const data = response.data;
         console.log('[Pagamento] Fruitfy response:', data);
         const pixCode = data?.data?.pix?.code || data?.data?.pix_code;
@@ -85,13 +98,15 @@ const Pagamento = () => {
           startPaymentCheck(orderUuid);
         } else { 
           console.error('[Pagamento] Could not extract PIX data from response:', data);
-          setPixError('Resposta inválida do servidor.'); 
+          setPixError('Resposta inválida do servidor.');
+          pixGeneratedRef.current = false;
         }
-      } catch { setPixError('Erro ao gerar PIX. Tente novamente.'); } finally { setIsLoadingPix(false); }
+      } catch { setPixError('Erro ao gerar PIX. Tente novamente.'); pixGeneratedRef.current = false; } finally { setIsLoadingPix(false); }
     };
     generatePix();
     return () => { if (checkIntervalRef.current) clearInterval(checkIntervalRef.current); };
-  }, [cpfData, valorBeneficio, protocolo, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => { setCountdown(prev => { if (prev <= 0) { clearInterval(timer); return 0; } return prev - 1; }); }, 1000);
