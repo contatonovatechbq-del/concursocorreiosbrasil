@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const getProvaDate = () => {
   const d = new Date();
-  d.setDate(d.getDate() + 45);
+  d.setDate(d.getDate() + 10);
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
