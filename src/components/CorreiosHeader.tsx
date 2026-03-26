@@ -1,15 +1,15 @@
 import { Menu } from "lucide-react";
-import bbLogoTop from "@/assets/bb-logo-top.png";
+import logoEct from "@/assets/logo-ect.svg";
 
 interface CorreiosHeaderProps {
   breadcrumb?: string;
 }
 
-const CorreiosHeader = ({ breadcrumb = "Concursos > Agente Comercial > Inscrição" }: CorreiosHeaderProps) => {
+const CorreiosHeader = ({ breadcrumb = "Concursos > Atendente Comercial > Inscrição" }: CorreiosHeaderProps) => {
   return (
     <>
       {/* Top Bar */}
-      <div className="bg-primary text-primary-foreground/90 text-[11px] py-1.5 px-4">
+      <div className="bg-accent text-accent-foreground/90 text-[11px] py-1.5 px-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <span className="flex items-center gap-1">Acessibilidade ▾</span>
           <span className="flex items-center gap-1.5">
@@ -20,15 +20,15 @@ const CorreiosHeader = ({ breadcrumb = "Concursos > Agente Comercial > Inscriç�
       </div>
 
       {/* Main Header */}
-      <header className="bg-accent border-b border-border px-4 py-2 sticky top-0 z-50 shadow-sm">
+      <header className="bg-primary border-b border-border px-4 py-2 sticky top-0 z-50 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-center relative">
           {/* Hamburger - left */}
-          <button className="absolute left-0 p-2 text-primary hover:bg-accent/80 rounded-lg transition-colors">
+          <button className="absolute left-0 p-2 text-primary-foreground hover:bg-primary/80 rounded-lg transition-colors">
             <Menu className="w-5 h-5" />
           </button>
 
           {/* Logo */}
-          <img src={bbLogoTop} alt="Banco do Brasil" className="h-9 sm:h-10 object-contain" loading="eager" />
+          <img src={logoEct} alt="Correios" className="h-9 sm:h-10 object-contain" loading="eager" />
         </div>
       </header>
 

@@ -32,7 +32,7 @@ const ConfirmaDados = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Inscrição > Confirmação" />
+      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Inscrição > Confirmação" />
 
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
@@ -54,16 +54,16 @@ const ConfirmaDados = () => {
               {cpfData.nomeMae && <tr><td className="font-semibold">Nome da mãe</td><td>{cpfData.nomeMae}</td></tr>}
               <tr><td className="font-semibold">CPF</td><td>{cpfData.cpf}</td></tr>
               <tr><td className="font-semibold">Sexo</td><td>{cpfData.sexo}</td></tr>
-              <tr><td className="font-semibold">Situação</td><td className="text-primary font-bold">Apto(a)</td></tr>
+              <tr><td className="font-semibold">Situação</td><td className="text-accent font-bold">Apto(a)</td></tr>
             </tbody>
           </table>
 
           <table className="tabela-zebra">
             <thead><tr><th colSpan={2}>Concurso</th></tr></thead>
             <tbody>
-              <tr><td className="font-semibold w-2/5">Cargo</td><td>Agente Comercial — Nível Médio</td></tr>
-              <tr><td className="font-semibold">Edital</td><td>Nº 001/2026 — BB</td></tr>
-              <tr><td className="font-semibold">Banca</td><td>Cesgranrio</td></tr>
+              <tr><td className="font-semibold w-2/5">Cargo</td><td>Atendente Comercial — Nível Médio</td></tr>
+              <tr><td className="font-semibold">Edital</td><td>Nº 001/2026 — Correios</td></tr>
+              <tr><td className="font-semibold">Banca</td><td>IBFC</td></tr>
             </tbody>
           </table>
 

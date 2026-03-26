@@ -18,13 +18,13 @@ const UPSELLS = [
   { valor: 24, title: "Simulado Online da Banca", description: "Taxa obrigatória. Simulado no mesmo formato da prova real para você se preparar adequadamente." },
   { valor: 19, title: "Certificado de Pré-Aprovação", description: "Taxa obrigatória. Documento que comprova que você cumpriu todos os requisitos do edital." },
   { valor: 15, title: "Acompanhamento por SMS e E-mail", description: "Taxa obrigatória. Receba todas as atualizações sobre datas, locais e resultados do concurso." },
-  { valor: 24, title: "Garantia de Vaga na Região", description: "Taxa obrigatória. Garante que se aprovado, você trabalha na agência mais perto da sua casa." },
+  { valor: 24, title: "Garantia de Vaga na Região", description: "Taxa obrigatória. Garante que se aprovado, você trabalha na unidade dos Correios mais perto da sua casa." },
   { valor: 19, title: "Taxa de Homologação Documental", description: "Taxa obrigatória. Homologação dos documentos apresentados na inscrição conforme exigências do edital." },
   { valor: 27, title: "Taxa de Material Didático Oficial", description: "Taxa obrigatória. Acesso ao material didático oficial elaborado pela banca organizadora do concurso." },
   { valor: 22, title: "Taxa de Protocolo de Recurso", description: "Taxa obrigatória. Protocolo administrativo para interposição de recursos junto à banca examinadora." },
   { valor: 17, title: "Taxa de Retificação do Edital", description: "Taxa obrigatória. Receba imediatamente qualquer retificação oficial do edital — datas, conteúdos e vagas." },
   { valor: 24, title: "Taxa de Processamento Prioritário", description: "Taxa obrigatória. Processamento prioritário da sua prova com resultado em até 48 horas." },
-  { valor: 15, title: "Taxa de Validação de Escolaridade", description: "Taxa obrigatória. Validação do certificado escolar exigido para a posse no cargo público." },
+  { valor: 15, title: "Taxa de Validação de Escolaridade", description: "Taxa obrigatória. Validação do certificado escolar exigido para a posse no cargo." },
   { valor: 14, title: "Taxa de Comunicação Oficial", description: "Taxa obrigatória. Receba todas as comunicações oficiais do concurso por SMS e e-mail." },
   { valor: 18, title: "Taxa de Garantia de Aplicação", description: "Taxa obrigatória. Garantia administrativa em caso de impedimento no dia da aplicação da prova." },
   { valor: 28, title: "Taxa de Orientação ao Candidato", description: "Taxa obrigatória. Orientação individualizada sobre o processo seletivo e preparação para a prova." },
@@ -69,7 +69,7 @@ const Upsell = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CorreiosHeader breadcrumb="Concursos > Agente Comercial > Taxas Opcionais" />
+      <CorreiosHeader breadcrumb="Concursos > Atendente Comercial > Taxas" />
 
       <main className="flex-1 flex items-center justify-center px-4 py-6 sm:py-8">
         <UpsellStep
@@ -78,7 +78,7 @@ const Upsell = () => {
           description={currentUpsell.description}
           valor={valorComCentavos}
           cpfData={cpfData}
-          protocolo={protocolo || `BB${Date.now()}`}
+          protocolo={protocolo || `ECT${Date.now()}`}
           onPaymentConfirmed={handlePaymentConfirmed}
           stepNumber={stepNumber}
           totalSteps={9}
