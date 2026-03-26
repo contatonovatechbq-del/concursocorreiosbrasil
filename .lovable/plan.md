@@ -1,34 +1,41 @@
 
 
-## Plano: Corrigir geração múltipla de PIX e passagem correta de UTM
+## Plano: Corrigir geração múltipla de PIX nos Upsells + Verificar fluxo de UTM
 
-### Problema 1: 3 PIX gerados ao invés de 1
-O `useEffect` que gera o PIX tem `cpfData` (um objeto) nas dependências. Como objetos criam nova referência a cada render, o efeito dispara várias vezes. Os logs confirmam 3 chamadas simultâneas à API Fruitfy.
+### Diagnóstico
 
-### Problema 2: UTM da campanha não está chegando
-A captura de UTM (`captureUtmParams()`) é chamada dentro do `generatePix`, mas nesse ponto a URL pode já ter perdido os query params. A UTM precisa ser capturada antes, no mount da página.
+O fluxo de UTM no código está correto:
+- **Front**: `getEffectiveTracking()` → manda a campanha do Facebook (ex: `C1`) como `utm_campaign`
+- **Upsells**: `getEffectiveTracking(stepNumber)` → manda `C1 UP1`, `C1 UP2`, etc.
+- **Centavos aleatórios**: já funcionam no front (`valorBeneficio`) e nos upsells (`valorComCentavos`)
+- **Navegação com UTMs**: `buildUrlWithUtm()` é usado em todas as navegações
 
-### Correções
+O log mostrando `utm_campaign: "front"` é porque o teste foi feito sem UTMs na URL (acesso direto). Quando vier do Facebook com `?utm_campaign=C1`, vai funcionar.
 
-**Arquivo: `src/pages/Pagamento.tsx`**
+### Problema encontrado: UpsellStep gera PIX múltiplos
 
-1. Adicionar um `useRef` (`pixGeneratedRef`) para garantir que `generatePix` só execute **uma única vez**, mesmo que o useEffect re-execute.
-2. Mover `captureUtmParams()` para fora do `generatePix` — chamá-lo no início do useEffect (ou no mount) para que os UTMs da URL sejam capturados antes de gerar o PIX.
-3. Trocar as dependências do useEffect principal para evitar re-execuções desnecessárias (usar refs para cpfData/valorBeneficio ao invés de valores diretos).
+O mesmo bug que corrigimos no `Pagamento.tsx` existe no `UpsellStep.tsx` — não tem guarda `pixGeneratedRef`. O `useEffect` pode disparar mais de uma vez e gerar PIX duplicados nos upsells.
 
-### Detalhes técnicos
+### Correção
 
-```typescript
-// Adicionar ref de controle
-const pixGeneratedRef = useRef(false);
+**Arquivo: `src/components/UpsellStep.tsx`**
 
-// No useEffect principal, antes de tudo:
-captureUtmParams(); // captura UTMs da URL atual
+1. Adicionar `useRef` (`pixGeneratedRef`) para garantir que `generatePix` só execute **uma vez** por step
+2. Marcar `pixGeneratedRef.current = true` antes de chamar a API
+3. Resetar o ref quando `stepNumber` muda (já que o componente usa `key={stepNumber}`, o ref reseta naturalmente no remount)
 
-// Antes de chamar generatePix:
-if (pixGeneratedRef.current) return;
-pixGeneratedRef.current = true;
+### Resumo do fluxo completo (já funcionando)
+
+```text
+Facebook (utm_campaign=C1) → Landing → ... → Pagamento
+  → PIX com utm_campaign="C1" ✓
+  → Paga → navega /upsell/1 com UTMs na URL
+
+Upsell 1 → PIX com utm_campaign="C1 UP1" ✓
+Upsell 2 → PIX com utm_campaign="C1 UP2" ✓
+...
+Upsell 19 → PIX com utm_campaign="C1 UP19" ✓
 ```
 
-Isso garante exatamente 1 chamada à API e que os UTMs da URL (utm_campaign, etc.) sejam capturados e passados corretamente ao Fruitfy.
+Cada PIX tem centavos aleatórios (ex: R$ 47,73, R$ 37,42).
 
