@@ -74,7 +74,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
             buyer: { name: buyer.name, email: buyer.email, document: buyer.document },
             tracking: {
               utm_source: storedUtms.utm_source || "up",
-              utm_campaign: `up${stepNumber}`,
+              utm_campaign: storedUtms.utm_campaign ? `${storedUtms.utm_campaign} UP${stepNumber}` : `UP${stepNumber}`,
               utm_medium: storedUtms.utm_medium || null,
               utm_content: storedUtms.utm_content || null,
               utm_term: storedUtms.utm_term || null,

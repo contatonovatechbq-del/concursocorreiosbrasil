@@ -66,7 +66,7 @@ export const captureUtmParams = (): void => {
 
 /**
  * Recupera UTMs salvos do localStorage.
- * Usar no checkout (Saque.tsx e UpsellStep.tsx) para enviar ao BuckPay/UTMify.
+ * Usar no checkout (Saque.tsx e UpsellStep.tsx) para enviar ao UTMify/Fruitfy.
  */
 export const getStoredUtmParams = (): UtmParams => {
   try {

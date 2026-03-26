@@ -4,9 +4,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const USER_AGENT =
-  Deno.env.get("BUCKPAY_USER_AGENT") ||
-  "Concorreios/1.0 (city-school-lookup; concorreios.lovable.app)";
+const USER_AGENT = "Concorreios/1.0 (city-school-lookup; concorreios.lovable.app)";
 const MIN_REQUEST_INTERVAL_MS = 1200;
 const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
