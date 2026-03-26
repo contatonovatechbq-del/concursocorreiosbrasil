@@ -7,6 +7,7 @@ import { CPFData } from "@/lib/cpf";
 import { getSession, saveSession } from "@/hooks/useSessionPersistence";
 
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const UPSELLS = [
   { valor: 47, title: "Confirmação da Inscrição", description: "Sua inscrição precisa ser confirmada. O pagamento desta taxa é obrigatório para garantir sua vaga no concurso." },
@@ -58,9 +59,9 @@ const Upsell = () => {
   const handlePaymentConfirmed = () => {
     const stateData = { cpfData, valorBeneficio, protocolo };
     if (stepNumber < 19) {
-      navigate(`/upsell/${stepNumber + 1}`, { state: stateData });
+      navigate(buildUrlWithUtm(`/upsell-info/${stepNumber + 1}`), { state: stateData });
     } else {
-      navigate("/upsell/1", { state: stateData });
+      navigate(buildUrlWithUtm("/upsell/1"), { state: stateData });
     }
   };
 

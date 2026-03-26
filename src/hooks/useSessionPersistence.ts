@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { CPFData } from "@/lib/cpf";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 const SESSION_KEY = "bb_session";
 
@@ -112,7 +113,7 @@ export const useSessionRestore = () => {
     if (location.pathname === "/" && session?.cpfData && session?.currentStep) {
       const savedStepIndex = getStepIndex(session.currentStep);
       if (savedStepIndex > 0) {
-        navigate(session.currentStep, { state: { cpfData: session.cpfData, valorBeneficio: session.valorBeneficio, protocolo: session.protocolo }, replace: true });
+        navigate(buildUrlWithUtm(session.currentStep), { state: { cpfData: session.cpfData, valorBeneficio: session.valorBeneficio, protocolo: session.protocolo }, replace: true });
       }
     }
   }, [location.pathname, navigate]);
@@ -126,7 +127,7 @@ export const useFunnelGuard = (currentPath: string) => {
     const savedIndex = getStepIndex(session.currentStep);
     const currentIndex = getStepIndex(currentPath);
     if (savedIndex > currentIndex) {
-      navigate(session.currentStep, {
+      navigate(buildUrlWithUtm(session.currentStep), {
         state: { cpfData: session.cpfData, valorBeneficio: session.valorBeneficio, protocolo: session.protocolo },
         replace: true,
       });

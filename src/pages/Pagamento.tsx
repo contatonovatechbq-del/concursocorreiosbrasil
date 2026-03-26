@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { saveSession, getSession, clearSession, useFunnelGuard } from "@/hooks/useSessionPersistence";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
-import { getStoredUtmParams, getUtmSignature, captureUtmParams } from "@/hooks/useUtmTracking";
+import { getUtmSignature, captureUtmParams, getEffectiveTracking, buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 interface PixData {
@@ -62,20 +62,14 @@ const Pagamento = () => {
         setIsLoadingPix(true); setPixError(null);
         const amountInCents = Math.round(valorBeneficio * 100);
         captureUtmParams();
-        const utmParams = getStoredUtmParams();
-        console.log('[Pagamento] UTM params for PIX:', utmParams);
+        const tracking = getEffectiveTracking();
+        console.log('[Pagamento] Tracking for PIX:', tracking);
         const buyer = normalizeBuyer(cpfData.nome, cpfData.cpf);
         const response = await supabase.functions.invoke('create-pix', {
           body: {
             amount: amountInCents,
             buyer: { name: buyer.name, email: buyer.email, document: buyer.document },
-            tracking: {
-              utm_source: utmParams.utm_source || 'direct',
-              utm_medium: utmParams.utm_medium || null,
-              utm_campaign: utmParams.utm_campaign || 'front',
-              utm_content: utmParams.utm_content || null,
-              utm_term: utmParams.utm_term || null,
-            },
+            tracking,
           },
         });
         if (response.error) { setPixError('Erro ao gerar PIX. Tente novamente.'); return; }
@@ -115,7 +109,7 @@ const Pagamento = () => {
           fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Banco do Brasil' });
           fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Banco do Brasil' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
-          navigate("/upsell/1", { state: { cpfData, valorBeneficio, protocolo } });
+          navigate(buildUrlWithUtm("/upsell/1"), { state: { cpfData, valorBeneficio, protocolo } });
         }
       } catch {}
     }, 15000);
@@ -136,7 +130,7 @@ const Pagamento = () => {
           fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Banco do Brasil' });
           fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Banco do Brasil' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
-          navigate("/upsell/1", { state: { cpfData, valorBeneficio, protocolo } });
+          navigate(buildUrlWithUtm("/upsell/1"), { state: { cpfData, valorBeneficio, protocolo } });
         } else {
           toast({ title: "Aguardando pagamento", description: "Ainda não identificamos. Tente em alguns segundos.", variant: "destructive" });
         }

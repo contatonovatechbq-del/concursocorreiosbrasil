@@ -1,4 +1,5 @@
 const UTM_STORAGE_KEY = "willbank_utm";
+const FIRST_TOUCH_KEY = "willbank_utm_first";
 
 export interface UtmParams {
   utm_source: string | null;
@@ -33,14 +34,11 @@ const UTM_KEYS: (keyof UtmParams)[] = [
 
 /**
  * Captura UTMs da URL e faz MERGE com o que já existe no localStorage.
- * Só sobrescreve campos que vieram preenchidos na URL.
- * Pode ser chamado várias vezes (no App e em mudanças de rota).
+ * Na PRIMEIRA captura, congela os valores como "first touch".
  */
 export const captureUtmParams = (): void => {
   try {
     const urlParams = new URLSearchParams(window.location.search);
-    
-    // Checa se QUALQUER parâmetro UTM está na URL (não só utm_source/utm_campaign/src)
     const hasAnyUtm = UTM_KEYS.some(key => urlParams.has(key));
     
     if (!hasAnyUtm) {
@@ -48,10 +46,7 @@ export const captureUtmParams = (): void => {
       return;
     }
 
-    // Ler o que já está salvo
     const existing = getStoredUtmParams();
-
-    // Merge inteligente: novo valor não-nulo sobrescreve, nulo mantém antigo
     const merged = {} as UtmParams;
     for (const key of UTM_KEYS) {
       merged[key] = urlParams.get(key) ?? existing[key];
@@ -59,6 +54,12 @@ export const captureUtmParams = (): void => {
     
     localStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(merged));
     console.log('[UTM] Captured and merged:', merged);
+
+    // Freeze first-touch: only save if not already saved
+    if (!localStorage.getItem(FIRST_TOUCH_KEY)) {
+      localStorage.setItem(FIRST_TOUCH_KEY, JSON.stringify(merged));
+      console.log('[UTM] First-touch frozen:', merged);
+    }
   } catch (error) {
     console.error('[UTM] Error capturing:', error);
   }
@@ -66,31 +67,72 @@ export const captureUtmParams = (): void => {
 
 /**
  * Recupera UTMs salvos do localStorage.
- * Usar no checkout (Saque.tsx e UpsellStep.tsx) para enviar ao UTMify/Fruitfy.
  */
 export const getStoredUtmParams = (): UtmParams => {
   try {
     const data = localStorage.getItem(UTM_STORAGE_KEY);
     if (data) {
       const parsed = JSON.parse(data);
-      console.log('[UTM] Retrieved from storage:', parsed);
       return { ...emptyUtmParams, ...parsed };
     }
   } catch (error) {
     console.error('[UTM] Error reading from storage:', error);
   }
-  
-  console.log('[UTM] No data in storage, returning empty');
   return { ...emptyUtmParams };
 };
 
 /**
- * Gera uma "assinatura" do tracking atual para comparação.
- * Usado para invalidar PIX salvo quando UTM muda.
+ * Retorna os UTMs de first-touch (congelados na primeira visita).
+ * Usa como fallback os UTMs atuais se first-touch não existir.
+ */
+export const getFirstTouchUtm = (): UtmParams => {
+  try {
+    const data = localStorage.getItem(FIRST_TOUCH_KEY);
+    if (data) {
+      return { ...emptyUtmParams, ...JSON.parse(data) };
+    }
+  } catch {}
+  return getStoredUtmParams();
+};
+
+/**
+ * Retorna a campanha base normalizada (first-touch).
+ * Prioridade: utm_campaign > utm_id > src > ref
+ */
+export const getBaseCampaign = (): string => {
+  const ft = getFirstTouchUtm();
+  return ft.utm_campaign || ft.utm_id || ft.src || ft.ref || '';
+};
+
+/**
+ * Helper para pagamento: retorna tracking completo com campanha de first-touch.
+ * Para upsells, passe stepNumber para adicionar sufixo UP{N}.
+ */
+export const getEffectiveTracking = (stepNumber?: number) => {
+  const ft = getFirstTouchUtm();
+  const baseCampaign = ft.utm_campaign || ft.utm_id || ft.src || ft.ref || '';
+
+  let campaign: string;
+  if (stepNumber) {
+    campaign = baseCampaign ? `${baseCampaign} UP${stepNumber}` : `UP${stepNumber}`;
+  } else {
+    campaign = baseCampaign || 'front';
+  }
+
+  return {
+    utm_source: ft.utm_source || 'direct',
+    utm_medium: ft.utm_medium || null,
+    utm_campaign: campaign,
+    utm_content: ft.utm_content || null,
+    utm_term: ft.utm_term || null,
+  };
+};
+
+/**
+ * Gera assinatura do tracking para comparação.
  */
 export const getUtmSignature = (): string => {
   const params = getStoredUtmParams();
-  // Usa apenas os campos principais para a assinatura
   return [
     params.utm_source || '',
     params.utm_campaign || '',
@@ -108,13 +150,11 @@ export const hasValidTracking = (): boolean => {
 
 /**
  * Constrói URL com UTMs salvos como query params.
- * Usa para navegar mantendo rastreio na URL.
  */
 export const buildUrlWithUtm = (basePath: string): string => {
   const params = getStoredUtmParams();
   const searchParams = new URLSearchParams();
   
-  // Adiciona apenas parâmetros que têm valor
   for (const key of UTM_KEYS) {
     if (params[key]) searchParams.set(key, params[key]!);
   }
