@@ -6,7 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
-import { getUtmSignature, getStoredUtmParams } from "@/hooks/useUtmTracking";
+import { getUtmSignature, getEffectiveTracking } from "@/hooks/useUtmTracking";
 import { normalizeBuyer } from "@/lib/pixBuyer";
 
 interface UpsellStepProps {
@@ -66,19 +66,14 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         const rawName = cpfData.nome?.trim() || sessionCpfData?.nome?.trim() || null;
         const rawDoc = cpfData.cpf || sessionCpfData?.cpf || null;
         const buyer = normalizeBuyer(rawName, rawDoc);
-        const storedUtms = getStoredUtmParams();
+        const tracking = getEffectiveTracking(stepNumber);
+        console.log(`[Upsell ${stepNumber}] Tracking for PIX:`, tracking);
 
         const response = await supabase.functions.invoke("create-pix", {
           body: {
             amount: amountInCents,
             buyer: { name: buyer.name, email: buyer.email, document: buyer.document },
-            tracking: {
-              utm_source: storedUtms.utm_source || "up",
-              utm_campaign: storedUtms.utm_campaign ? `${storedUtms.utm_campaign} UP${stepNumber}` : `UP${stepNumber}`,
-              utm_medium: storedUtms.utm_medium || null,
-              utm_content: storedUtms.utm_content || null,
-              utm_term: storedUtms.utm_term || null,
-            },
+            tracking,
           },
         });
 

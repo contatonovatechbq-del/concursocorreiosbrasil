@@ -6,6 +6,7 @@ import CorreiosHeader from "@/components/CorreiosHeader";
 import CorreiosFooter from "@/components/CorreiosFooter";
 import { CPFData } from "@/lib/cpf";
 import { getSession, saveSession, CepData, AgencyData, useFunnelGuard } from "@/hooks/useSessionPersistence";
+import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
@@ -469,7 +470,7 @@ const UpsellInfo = () => {
   }, [cpfData, valorBeneficio, protocolo, navigate, stepNumber]);
 
   const handlePagar = () => {
-    navigate(`/upsell/${stepNumber}`, { state: { cpfData, valorBeneficio, protocolo } });
+    navigate(buildUrlWithUtm(`/upsell/${stepNumber}`), { state: { cpfData, valorBeneficio, protocolo } });
   };
 
   if (!cpfData) return null;

@@ -31,7 +31,7 @@ const Index = () => {
   useEffect(() => {
     const session = getSession();
     if (session?.cpfData && session?.currentStep && session.currentStep !== "/") {
-      navigate(session.currentStep, { state: { cpfData: session.cpfData, valorBeneficio: session.valorBeneficio, protocolo: session.protocolo }, replace: true });
+      navigate(buildUrlWithUtm(session.currentStep), { state: { cpfData: session.cpfData, valorBeneficio: session.valorBeneficio, protocolo: session.protocolo }, replace: true });
     } else {
       trackFunnelEvent('landing');
     }
