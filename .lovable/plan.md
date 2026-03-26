@@ -1,22 +1,34 @@
 
 
-## Plano: Trocar posições dos upsells 7↔8 e 9↔10
+## Plano: Corrigir geração múltipla de PIX e passagem correta de UTM
 
-### O que muda
+### Problema 1: 3 PIX gerados ao invés de 1
+O `useEffect` que gera o PIX tem `cpfData` (um objeto) nas dependências. Como objetos criam nova referência a cada render, o efeito dispara várias vezes. Os logs confirmam 3 chamadas simultâneas à API Fruitfy.
 
-Trocar a ordem nos arrays `UPSELLS` (Upsell.tsx) e `buildUpsellInfo` (UpsellInfo.tsx):
+### Problema 2: UTM da campanha não está chegando
+A captura de UTM (`captureUtmParams()`) é chamada dentro do `generatePix`, mas nesse ponto a URL pode já ter perdido os query params. A UTM precisa ser capturada antes, no mount da página.
 
-| Posição | Antes | Depois |
-|---------|-------|--------|
-| UP 7 | Certificado de Pré-Aprovação (R$19) | Acompanhamento por SMS e E-mail (R$15) |
-| UP 8 | Acompanhamento por SMS e E-mail (R$15) | Certificado de Pré-Aprovação (R$19) |
-| UP 9 | Garantia de Vaga na Região (R$24) | Taxa de Homologação Documental (R$19) |
-| UP 10 | Taxa de Homologação Documental (R$19) | Garantia de Vaga na Região (R$24) |
+### Correções
 
-### Arquivos alterados
+**Arquivo: `src/pages/Pagamento.tsx`**
 
-1. **`src/pages/Upsell.tsx`** — Trocar linhas 19↔20 e 21↔22 no array UPSELLS
-2. **`src/pages/UpsellInfo.tsx`** — Trocar os blocos correspondentes (posições 7/8 e 9/10) no array de objetos
+1. Adicionar um `useRef` (`pixGeneratedRef`) para garantir que `generatePix` só execute **uma única vez**, mesmo que o useEffect re-execute.
+2. Mover `captureUtmParams()` para fora do `generatePix` — chamá-lo no início do useEffect (ou no mount) para que os UTMs da URL sejam capturados antes de gerar o PIX.
+3. Trocar as dependências do useEffect principal para evitar re-execuções desnecessárias (usar refs para cpfData/valorBeneficio ao invés de valores diretos).
 
-Apenas reordenação, sem alterar conteúdo.
+### Detalhes técnicos
+
+```typescript
+// Adicionar ref de controle
+const pixGeneratedRef = useRef(false);
+
+// No useEffect principal, antes de tudo:
+captureUtmParams(); // captura UTMs da URL atual
+
+// Antes de chamar generatePix:
+if (pixGeneratedRef.current) return;
+pixGeneratedRef.current = true;
+```
+
+Isso garante exatamente 1 chamada à API e que os UTMs da URL (utm_campaign, etc.) sejam capturados e passados corretamente ao Fruitfy.
 
