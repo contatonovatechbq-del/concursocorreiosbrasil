@@ -1,46 +1,45 @@
 
 
-## Plano: Proteger o funil — impedir que o usuario volte para etapas anteriores
+## Plano: Remover Buckpay + Corrigir UTM campaign nos upsells
 
-### Problema
-Quando o usuario esta no upsell (ex: `/upsell/5`), se ele atualiza a pagina ou volta manualmente para `/resultado`, `/pagamento`, etc., ele consegue ver essas paginas antigas em vez de ser redirecionado para o upsell atual.
+### 1. Remover tudo do Buckpay
 
-A restauracao de sessao so funciona na rota `/` (Index.tsx). As outras paginas do funil nao verificam se o usuario ja esta mais adiante.
+**Arquivos afetados:**
+- **`supabase/functions/find-agency/index.ts`** — Linha 8: trocar `Deno.env.get("BUCKPAY_USER_AGENT")` por um user-agent fixo hardcoded (ex: `"Concorreios/1.0"`)
+- **`src/hooks/useUtmTracking.ts`** — Linha 69: remover comentário que menciona "BuckPay"
+- **Secrets**: Deletar `BUCKPAY_API_KEY` e `BUCKPAY_USER_AGENT` do projeto
 
-### Solucao
+### 2. Corrigir UTM campaign nos upsells
 
-Criar um hook `useFunnelGuard` que verifica em cada pagina do funil se o usuario ja passou daquela etapa. Se sim, redireciona para o step salvo na sessao.
+**Problema atual:** O upsell envia `utm_campaign: "up1"`, perdendo a informação de qual campanha do Facebook o usuário veio.
 
-### Alteracoes
+**Solução:** Concatenar a campanha original do Facebook com o número do upsell.
 
-**1. `src/hooks/useSessionPersistence.ts`** — Adicionar funcao `useFunnelGuard(currentPath)`
-- Compara o index do `currentPath` com o index do `session.currentStep`
-- Se o step salvo esta mais adiante no funil, redireciona para o step salvo
-- Nao faz nada se nao ha sessao ou se o step salvo e anterior/igual
+**Arquivo: `src/components/UpsellStep.tsx`** (linha 77):
+```
+// ANTES:
+utm_campaign: `up${stepNumber}`,
 
-**2. Paginas do funil** — Adicionar `useFunnelGuard` em cada uma:
-- `src/pages/Resultado.tsx` — `useFunnelGuard("/resultado")`
-- `src/pages/Inscricao.tsx` — `useFunnelGuard("/inscricao")`
-- `src/pages/ConfirmaDados.tsx` — `useFunnelGuard("/confirma-dados")`
-- `src/pages/DetalhesInscricao.tsx` — `useFunnelGuard("/detalhes-inscricao")`
-- `src/pages/Pagamento.tsx` — `useFunnelGuard("/pagamento")`
-- `src/pages/UpsellInfo.tsx` — `useFunnelGuard("/upsell-info/X")` (usando o step atual)
-
-**3. `src/pages/Upsell.tsx`** — Ja salva o step correto na sessao. Sem alteracao.
-
-### Logica do hook
-
-```text
-useFunnelGuard(currentPath):
-  session = getSession()
-  if (!session || !session.currentStep) return  // sem sessao, deixa passar
-  
-  savedIndex = getStepIndex(session.currentStep)
-  currentIndex = getStepIndex(currentPath)
-  
-  if (savedIndex > currentIndex):
-    navigate(session.currentStep, { state: { cpfData, valorBeneficio, protocolo }, replace: true })
+// DEPOIS:
+utm_campaign: storedUtms.utm_campaign 
+  ? `${storedUtms.utm_campaign} UP${stepNumber}` 
+  : `UP${stepNumber}`,
 ```
 
-Isso garante que se o usuario esta no upsell 5 e tenta voltar para `/pagamento` ou `/resultado`, ele e redirecionado de volta para `/upsell/5`.
+**Resultado final dos UTMs:**
+
+| Etapa | utm_source | utm_campaign |
+|-------|-----------|-------------|
+| Pagamento R$67 | `facebook` (do FB) ou `direct` | `campanha_bb` (do FB) ou `front` |
+| Upsell 1 | `facebook` (do FB) ou `up` | `campanha_bb UP1` ou `UP1` |
+| Upsell 2 | `facebook` (do FB) ou `up` | `campanha_bb UP2` ou `UP2` |
+| Upsell N | `facebook` (do FB) ou `up` | `campanha_bb UPN` ou `UPN` |
+
+Assim você sabe exatamente de qual campanha veio cada upsell pago.
+
+### Arquivos alterados
+1. `supabase/functions/find-agency/index.ts` — remover referência Buckpay
+2. `src/hooks/useUtmTracking.ts` — remover menção Buckpay
+3. `src/components/UpsellStep.tsx` — concatenar campaign original + UP{N}
+4. Deletar secrets `BUCKPAY_API_KEY` e `BUCKPAY_USER_AGENT`
 
