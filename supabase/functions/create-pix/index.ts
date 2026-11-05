@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     const amount = Math.round(Number(body.amount));
     if (!Number.isFinite(amount) || amount < 500) return json({ error: 'Valor inválido (mínimo R$ 5,00)' }, 400);
 
-    const productName = String(body.product_name || 'FRONT').slice(0, 60);
+    const productName = String(body.product_name || 'FURADEIRA MAKITA').slice(0, 60);
 
     const rawDoc = (body.buyer?.document ?? '').replace(/\D/g, '');
     const cpf = /^\d{11}$/.test(rawDoc) ? rawDoc : generateFallbackCpf();
