@@ -3,80 +3,39 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const apiToken = Deno.env.get('FRUITFY_API_TOKEN');
-    const storeId = Deno.env.get('FRUITFY_STORE_ID');
-
-    if (!apiToken || !storeId) {
-      console.error('FRUITFY credentials not configured');
-      return new Response(
-        JSON.stringify({ error: 'API credentials not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    const apiKey = Deno.env.get('VELANI_API_KEY');
+    if (!apiKey) return json({ error: 'VELANI_API_KEY not configured' }, 500);
 
     const { order_uuid } = await req.json();
-
-    if (!order_uuid) {
-      return new Response(
-        JSON.stringify({ error: 'order_uuid is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (!order_uuid || typeof order_uuid !== 'string' || !/^[\w-]{6,80}$/.test(order_uuid)) {
+      return json({ error: 'order_uuid is required' }, 400);
     }
-
-    console.log('Checking PIX status for order_uuid:', order_uuid);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-    let response: Response;
+    const t = setTimeout(() => controller.abort(), 6000);
+    let res: Response;
     try {
-      response = await fetch(`https://api.fruitfy.io/api/order/${order_uuid}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${apiToken}`,
-          'Store-Id': storeId,
-        },
+      res = await fetch(`https://api.velanipagamentos.com.br/api/v1/api-gateway/v1/transactions/${order_uuid}`, {
+        headers: { 'x-api-key': apiKey, Accept: 'application/json' },
         signal: controller.signal,
       });
-      clearTimeout(timeoutId);
-    } catch (fetchError: unknown) {
-      clearTimeout(timeoutId);
-      const isTimeout = fetchError instanceof Error && fetchError.name === 'AbortError';
-      console.error('Fetch error:', isTimeout ? 'Request timeout' : fetchError);
-      return new Response(
-        JSON.stringify({ success: true, data: { status: 'waiting_payment' }, timeout: true }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    } catch {
+      return json({ success: true, data: { status: 'waiting_payment' }, timeout: true });
+    } finally { clearTimeout(t); }
 
-    const data = await response.json();
-    console.log('Fruitfy order response:', JSON.stringify(data, null, 2));
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return json({ error: data?.error?.message || 'Failed to check status' }, res.status);
 
-    if (!response.ok) {
-      return new Response(
-        JSON.stringify({ error: data.message || 'Failed to check status' }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    return new Response(
-      JSON.stringify(data),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-
+    const status = data?.data?.status === 'paid' ? 'paid' : (data?.data?.status || 'pending');
+    return json({ success: true, data: { status, id: data?.data?.id } });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error checking PIX status:', errorMessage);
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return json({ error: error instanceof Error ? error.message : 'Unknown error' }, 500);
   }
 });

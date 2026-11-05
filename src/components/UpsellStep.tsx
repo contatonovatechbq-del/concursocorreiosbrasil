@@ -76,6 +76,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
         const response = await supabase.functions.invoke("create-pix", {
           body: {
             amount: amountInCents,
+            product_name: `UP${stepNumber}`,
             buyer: { name: buyer.name, email: buyer.email, document: buyer.document },
             tracking,
           },
