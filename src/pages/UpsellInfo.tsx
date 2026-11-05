@@ -483,6 +483,7 @@ const UpsellInfo = () => {
       <main className="flex-1 px-4 py-6 sm:py-8">
         <div className="max-w-lg mx-auto space-y-5">
 
+          <p className="text-xs font-bold uppercase tracking-wide text-accent">Concurso Correios 2026 — Cargo: {getCargo().nome}</p>
           <h1 className="titulo-institucional text-lg leading-tight">{info.headline}</h1>
 
           {/* Explicação detalhada */}
