@@ -105,7 +105,7 @@ export async function consultarCPF(cpf: string): Promise<CPFData> {
     cpf: formatCPF(pick('cpf') || numbers),
     nome,
     dataNascimento: pick('nascimento', 'data_nascimento', 'datanascimento', 'dt_nascimento', 'nasc') || 'Não disponível',
-    nomeMae: pick('mae', 'nome_mae', 'nomemae', 'mãe') || 'Não disponível',
-    sexo,
+    nomeMae: '',
+    sexo: '',
   };
 }

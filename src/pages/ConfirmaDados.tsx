@@ -53,7 +53,7 @@ const ConfirmaDados = () => {
               <tr><td className="font-semibold">Data de nascimento</td><td>{cpfData.dataNascimento}</td></tr>
               {cpfData.nomeMae && <tr><td className="font-semibold">Nome da mãe</td><td>{cpfData.nomeMae}</td></tr>}
               <tr><td className="font-semibold">CPF</td><td>{cpfData.cpf}</td></tr>
-              <tr><td className="font-semibold">Sexo</td><td>{cpfData.sexo}</td></tr>
+              {cpfData.sexo && <tr><td className="font-semibold">Sexo</td><td>{cpfData.sexo}</td></tr>}
               <tr><td className="font-semibold">Situação</td><td className="text-accent font-bold">Apto(a)</td></tr>
             </tbody>
           </table>
