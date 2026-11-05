@@ -8,6 +8,7 @@ import CorreiosFooter from "@/components/CorreiosFooter";
 import { getSession } from "@/hooks/useSessionPersistence";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { CARGOS, CargoId, setCargo } from "@/lib/cargo";
 
 const getContestDates = () => {
   const now = new Date();
@@ -20,7 +21,9 @@ const getContestDates = () => {
   return { inscStart: fmt(inscStart), inscEnd: fmt(inscEnd), prova: fmt(prova), gabarito: fmt(gabarito), resultado: fmt(resultado) };
 };
 
-const Index = () => {
+const Index = ({ cargoId = "atendente-comercial" }: { cargoId?: CargoId }) => {
+  const cargo = CARGOS[cargoId];
+  useEffect(() => { setCargo(cargoId); }, [cargoId]);
   const navigate = useNavigate();
   const [cep, setCep] = useState("");
   const [error, setError] = useState("");
@@ -63,7 +66,7 @@ const Index = () => {
               CONCURSO NACIONAL — CORREIOS 2026
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Edital Nº 001/2026 — Atendente Comercial | Nível Médio
+              Edital Nº 001/2026 — {cargo.nome} | Nível Médio
             </p>
           </div>
 
@@ -86,12 +89,13 @@ const Index = () => {
               <table className="tabela-zebra">
                 <tbody>
                   <tr><td className="font-semibold text-foreground w-2/5">Instituição</td><td>Empresa Brasileira de Correios e Telégrafos</td></tr>
-                  <tr><td className="font-semibold text-foreground">Cargo</td><td>Atendente Comercial</td></tr>
-                  <tr><td className="font-semibold text-foreground">Escolaridade</td><td>Nível Médio Completo</td></tr>
-                  <tr><td className="font-semibold text-foreground">Vagas</td><td>12.874 em todo o Brasil</td></tr>
-                  <tr><td className="font-semibold text-foreground">Remuneração</td><td>R$ 4.724,23 + Benefícios (VA, VT, Plano de Saúde)</td></tr>
-                  <tr><td className="font-semibold text-foreground">Carga Horária</td><td>30 horas semanais</td></tr>
-                  <tr><td className="font-semibold text-foreground">Banca</td><td>IBFC — Instituto Brasileiro de Formação e Capacitação</td></tr>
+                  <tr><td className="font-semibold text-foreground">Cargo</td><td>{cargo.nomeCompleto}</td></tr>
+                  <tr><td className="font-semibold text-foreground">Escolaridade</td><td>{cargo.escolaridade}</td></tr>
+                  <tr><td className="font-semibold text-foreground">Vagas</td><td>{cargo.vagas} em todo o Brasil</td></tr>
+                  <tr><td className="font-semibold text-foreground">Remuneração</td><td>{cargo.remuneracao}</td></tr>
+                  <tr><td className="font-semibold text-foreground">Carga Horária</td><td>{cargo.cargaHoraria}</td></tr>
+                  <tr><td className="font-semibold text-foreground">Regime</td><td>{cargo.regime}</td></tr>
+                  <tr><td className="font-semibold text-foreground">Banca</td><td>{cargo.banca}</td></tr>
                 </tbody>
               </table>
 
@@ -160,8 +164,8 @@ const Index = () => {
                 </tr>
                 <tr>
                   <td className="font-medium">Carteiro</td>
-                  <td>—</td>
-                  <td><span className="text-xs font-bold text-primary-foreground">Em breve</span></td>
+                  <td>8.416</td>
+                  <td><span className="text-xs font-bold text-success">Inscrições abertas</span></td>
                 </tr>
               </tbody>
             </table>
