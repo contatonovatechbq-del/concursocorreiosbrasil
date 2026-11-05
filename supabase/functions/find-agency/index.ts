@@ -264,6 +264,38 @@ Deno.serve(async (req) => {
     }
 
     // 2. Query schools within 30km radius
+    // 2a. Photon (fast, proximity-biased OSM search)
+    {
+      const feats: any[] = [];
+      for (const q of ["escola", "colégio"]) {
+        const p = await safeFetchJson(
+          `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${origin.lat}&lon=${origin.lon}&osm_tag=amenity:school&limit=50&zoom=16&location_bias_scale=0.1`,
+          "Photon", {}, 1,
+        );
+        if (Array.isArray(p?.features)) feats.push(...p.features);
+      }
+      const best = feats
+        .map((f) => {
+          const [lo, la] = f?.geometry?.coordinates || [];
+          const pr = f?.properties || {};
+          if (!Number.isFinite(la) || !Number.isFinite(lo) || !isRealSchoolName({ name: pr.name || "" })) return null;
+          return { pr, d: haversineKm(origin!.lat, origin!.lon, la, lo) };
+        })
+        .filter(Boolean)
+        .sort((a: any, b: any) => a.d - b.d)[0] as { pr: any; d: number } | undefined;
+      if (best && best.d <= 30) {
+        const pr = best.pr;
+        const street = pr.street ? (pr.housenumber ? `${pr.street}, ${pr.housenumber}` : pr.street) : "";
+        const endereco = [street, pr.district || pr.locality, pr.postcode].filter(Boolean).join(" — ") || cityDisplay;
+        const cidade = pr.city ? `${pr.city}/${state || pr.state || ""}`.replace(/\/$/, "") : cityDisplay;
+        return new Response(JSON.stringify({
+          found: true,
+          agency: { name: pr.name, endereco, cidade },
+          metadata: { source: "photon", distanceKm: Math.round(best.d * 10) / 10, cep: cleanCep || null },
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
     let schools: any[] = [];
     for (const r of [3000, 10000, RADIUS_METERS]) {
       schools = await queryOverpassAround(origin.lat, origin.lon, r);
