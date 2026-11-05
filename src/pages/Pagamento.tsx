@@ -81,6 +81,7 @@ const Pagamento = () => {
         const response = await supabase.functions.invoke('create-pix', {
           body: {
             amount: amountInCents,
+            product_name: 'FRONT',
             buyer: { name: buyer.name, email: buyer.email, document: buyer.document },
             tracking,
           },
