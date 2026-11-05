@@ -8,6 +8,7 @@ import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } 
 import { fbEvents } from "@/lib/fbPixel";
 import { getUtmSignature, getEffectiveTracking } from "@/hooks/useUtmTracking";
 import { normalizeBuyer } from "@/lib/pixBuyer";
+import { useBackDiscount } from "@/hooks/useBackDiscount";
 import { getCargo } from "@/lib/cargo";
 
 interface UpsellStepProps {
@@ -28,7 +29,7 @@ interface PixData {
   order_uuid: string;
 }
 
-const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentConfirmed, stepNumber }: UpsellStepProps) => {
+const UpsellStepInner = ({ title, description, valor, cpfData, protocolo, onPaymentConfirmed, stepNumber, discountLevel }: UpsellStepProps & { discountLevel: number }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [countdown, setCountdown] = useState(600);
   const [pixData, setPixData] = useState<PixData | null>(null);
@@ -37,7 +38,7 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
   const [showPix, setShowPix] = useState(true);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pixGeneratedRef = useRef(false);
-  const pixStorageKey = getPixStorageKey("upsell", stepNumber);
+  const pixStorageKey = getPixStorageKey("upsell", stepNumber) + (discountLevel ? `_d${discountLevel}` : "");
 
   useEffect(() => {
     const currentUtmSignature = getUtmSignature();
@@ -211,6 +212,11 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
       </div>
     </CorreiosCard>
   );
+};
+
+const UpsellStep = (props: UpsellStepProps) => {
+  const { level, value } = useBackDiscount(`upsell_${props.stepNumber}`, props.valor);
+  return <UpsellStepInner key={`${props.stepNumber}_${level}`} {...props} valor={value ?? props.valor} discountLevel={level} />;
 };
 
 export default UpsellStep;

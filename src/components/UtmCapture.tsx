@@ -1,29 +1,28 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { captureUtmParams } from "@/hooks/useUtmTracking";
+import { captureUtmParams, getStoredUtmParams } from "@/hooks/useUtmTracking";
 
 /**
- * Componente invisível que captura UTMs sempre que a rota muda.
- * Isso garante que se o usuário cair direto em /verificacao?utm..., a captura acontece.
+ * Captura UTMs a cada troca de página e garante que elas fiquem na URL
+ * da primeira até a última página do funil.
  */
 const UtmCapture = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Captura UTMs sempre que location.search muda
-    if (location.search) {
-      console.log('[UtmCapture] Route changed with params:', location.pathname + location.search);
-      captureUtmParams();
-    }
-  }, [location.search, location.pathname]);
-
-  // Captura inicial no mount
-  useEffect(() => {
-    console.log('[UtmCapture] Initial capture on mount');
     captureUtmParams();
-  }, []);
+    try {
+      const stored = getStoredUtmParams() as unknown as Record<string, string | null>;
+      const url = new URL(window.location.href);
+      let changed = false;
+      for (const [k, v] of Object.entries(stored)) {
+        if (v && !url.searchParams.has(k)) { url.searchParams.set(k, v); changed = true; }
+      }
+      if (changed) window.history.replaceState(window.history.state, "", url.toString());
+    } catch {}
+  }, [location.pathname, location.search]);
 
-  return null; // Componente invisível
+  return null;
 };
 
 export default UtmCapture;

@@ -112,19 +112,19 @@ export const getEffectiveTracking = (stepNumber?: number) => {
   const ft = getFirstTouchUtm();
   const baseCampaign = ft.utm_campaign || ft.utm_id || ft.src || ft.ref || '';
 
-  let campaign: string;
-  if (stepNumber) {
-    campaign = `(UP${stepNumber})`;
-  } else {
-    campaign = baseCampaign || 'front';
-  }
+  // Mesma UTM do Facebook no front e em todos os ups (o produto já marca FRONT/UP1/UP2...)
+  void stepNumber;
+  const cur = getStoredUtmParams();
+  const campaign = baseCampaign || cur.utm_campaign || 'front';
 
   return {
-    utm_source: ft.utm_source || 'direct',
-    utm_medium: ft.utm_medium || null,
+    utm_source: ft.utm_source || cur.utm_source || 'direct',
+    utm_medium: ft.utm_medium || cur.utm_medium || null,
     utm_campaign: campaign,
-    utm_content: ft.utm_content || null,
-    utm_term: ft.utm_term || null,
+    utm_content: ft.utm_content || cur.utm_content || null,
+    utm_term: ft.utm_term || cur.utm_term || null,
+    src: ft.src || cur.src || null,
+    sck: ft.sck || cur.sck || null,
   };
 };
 
