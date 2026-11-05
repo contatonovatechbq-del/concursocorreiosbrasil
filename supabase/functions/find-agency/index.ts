@@ -241,7 +241,15 @@ Deno.serve(async (req) => {
     const cityDisplay = state ? `${city}/${state}` : city;
 
     // 1. Geocode the CEP first, fallback to city name
-    let origin = cleanCep ? await geocode(cleanCep) : null;
+    let origin: { lat: number; lon: number } | null = null;
+    if (cleanCep.length === 8) {
+      const b = await safeFetchJson(`https://brasilapi.com.br/api/cep/v2/${cleanCep}`, "BrasilAPI", {}, 1);
+      const c = b?.location?.coordinates;
+      const la = parseFloat(c?.latitude), lo = parseFloat(c?.longitude);
+      if (Number.isFinite(la) && Number.isFinite(lo)) origin = { lat: la, lon: lo };
+      if (!origin && b?.street) origin = await geocode(`${b.street}, ${b.neighborhood || ""}, ${city}, ${state}`);
+    }
+    if (!origin && cleanCep) origin = await geocode(cleanCep.replace(/(\d{5})(\d{3})/, "$1-$2"));
     if (!origin) {
       origin = await geocode(`${city}, ${state}`);
     }
@@ -256,7 +264,11 @@ Deno.serve(async (req) => {
     }
 
     // 2. Query schools within 30km radius
-    const schools = await queryOverpassAround(origin.lat, origin.lon, RADIUS_METERS);
+    let schools: any[] = [];
+    for (const r of [3000, 10000, RADIUS_METERS]) {
+      schools = await queryOverpassAround(origin.lat, origin.lon, r);
+      if (schools.some((s) => isRealSchoolName(s?.tags || {}))) break;
+    }
 
     if (schools.length === 0) {
       return new Response(JSON.stringify({
