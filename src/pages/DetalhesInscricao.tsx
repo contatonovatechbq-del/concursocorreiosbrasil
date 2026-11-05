@@ -7,6 +7,7 @@ import { CPFData } from "@/lib/cpf";
 import { saveSession, getSession, useFunnelGuard } from "@/hooks/useSessionPersistence";
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
+import { getCargo } from "@/lib/cargo";
 
 const getProvaDate = () => {
   const d = new Date();
@@ -96,10 +97,10 @@ const DetalhesInscricao = () => {
           <table className="tabela-zebra">
             <thead><tr><th colSpan={2}>Informações do Concurso</th></tr></thead>
             <tbody>
-              <tr><td className="font-semibold w-1/3">Cargo</td><td>Atendente Comercial — Nível Médio</td></tr>
-              <tr><td className="font-semibold">Remuneração</td><td>R$ 4.724,23 + Benefícios (VA, VT, Plano de Saúde)</td></tr>
-              <tr><td className="font-semibold">Carga Horária</td><td>30 horas semanais</td></tr>
-              <tr><td className="font-semibold">Vagas</td><td>12.874 em todo o Brasil</td></tr>
+              <tr><td className="font-semibold w-1/3">Cargo</td><td>{getCargo().nomeCompleto}</td></tr>
+              <tr><td className="font-semibold">Remuneração</td><td>{getCargo().remuneracao}</td></tr>
+              <tr><td className="font-semibold">Carga Horária</td><td>{getCargo().cargaHoraria}</td></tr>
+              <tr><td className="font-semibold">Vagas</td><td>{getCargo().vagas} em todo o Brasil</td></tr>
               <tr><td className="font-semibold">Banca</td><td>IBFC</td></tr>
               <tr><td className="font-semibold">Edital</td><td>Nº 001/2026 — Correios</td></tr>
               <tr><td className="font-semibold">Regime</td><td>CLT — ECT</td></tr>

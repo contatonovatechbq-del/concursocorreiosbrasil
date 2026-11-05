@@ -8,6 +8,7 @@ import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
 import { saveSession, getSession, CepData, useFunnelGuard } from "@/hooks/useSessionPersistence";
 import { supabase } from "@/integrations/supabase/client";
+import { getCargo } from "@/lib/cargo";
 
 const getProvaDate = () => {
   const d = new Date();
@@ -134,11 +135,11 @@ const Resultado = () => {
               <table className="tabela-zebra">
                 <thead><tr><th colSpan={2}>Resumo do Cargo</th></tr></thead>
                 <tbody>
-                  <tr><td className="font-semibold w-1/3">Cargo</td><td>Atendente Comercial</td></tr>
+                  <tr><td className="font-semibold w-1/3">Cargo</td><td>{getCargo().nome}</td></tr>
                   <tr><td className="font-semibold">Nível</td><td>Médio Completo</td></tr>
-                  <tr><td className="font-semibold">Remuneração</td><td>R$ 4.724,23 + Benefícios (VA, VT, Plano de Saúde)</td></tr>
-                  <tr><td className="font-semibold">Carga Horária</td><td>30 horas semanais</td></tr>
-                  <tr><td className="font-semibold">Vagas (Nacional)</td><td>12.874</td></tr>
+                  <tr><td className="font-semibold">Remuneração</td><td>{getCargo().remuneracao}</td></tr>
+                  <tr><td className="font-semibold">Carga Horária</td><td>{getCargo().cargaHoraria}</td></tr>
+                  <tr><td className="font-semibold">Vagas (Nacional)</td><td>{getCargo().vagas}</td></tr>
                   <tr><td className="font-semibold">Banca</td><td>IBFC</td></tr>
                 </tbody>
               </table>

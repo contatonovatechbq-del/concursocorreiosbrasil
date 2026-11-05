@@ -1,11 +1,13 @@
 import { Menu } from "lucide-react";
 import logoEct from "@/assets/logo-ect.svg";
+import { getCargo } from "@/lib/cargo";
 
 interface CorreiosHeaderProps {
   breadcrumb?: string;
 }
 
 const CorreiosHeader = ({ breadcrumb = "Concursos > Atendente Comercial > Inscrição" }: CorreiosHeaderProps) => {
+  const crumb = breadcrumb.replace("Atendente Comercial", getCargo().nome);
   return (
     <>
       {/* Top Bar */}
@@ -35,7 +37,7 @@ const CorreiosHeader = ({ breadcrumb = "Concursos > Atendente Comercial > Inscri
       {/* Breadcrumb */}
       <div className="bg-card border-b border-border px-4 py-2">
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs text-muted-foreground">{breadcrumb}</p>
+          <p className="text-xs text-muted-foreground">{crumb}</p>
         </div>
       </div>
     </>
