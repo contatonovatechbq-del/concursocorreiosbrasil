@@ -156,7 +156,7 @@ async function queryOverpassAround(lat: number, lon: number, radiusM: number): P
         headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
         body: `data=${encodeURIComponent(query)}`,
       },
-      3,
+      1,
     );
     if (data && Array.isArray(data.elements)) {
       overpassCache.set(cacheKey, data.elements);
