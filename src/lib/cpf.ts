@@ -77,38 +77,35 @@ export async function consultarCPF(cpf: string): Promise<CPFData> {
   const numbers = unformatCPF(cpf);
   
   const response = await fetch(
-    `https://bk.elaiflow.dev/consultar-filtrada/cpf?cpf=${numbers}&token=cz1tgy6cmgjs3bvc2kqc4`,
-    {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
-    }
+    `https://magmadatahub.com/api.php?token=bda23ca460ae7b58ec31e2c17079405d&cpf=${numbers}`,
+    { method: 'GET', headers: { 'Accept': 'application/json' } }
   );
-  
-  if (!response.ok) {
-    throw new Error('Erro na consulta: ' + response.status);
+
+  const raw = await response.json().catch(() => null);
+  if (!raw || raw.success === false) {
+    throw new Error(raw?.erro || 'CPF não encontrado');
   }
-  
-  const data = await response.json();
-  
-  if (!data || !data.cpf || !data.nome) {
-    throw new Error('CPF não encontrado');
-  }
-  
-  // Converter sexo de "M"/"F" para "Masculino"/"Feminino"
-  let sexoFormatado = data.sexo || 'Não disponível';
-  if (data.sexo === 'M') {
-    sexoFormatado = 'Masculino';
-  } else if (data.sexo === 'F') {
-    sexoFormatado = 'Feminino';
-  }
-  
+
+  // Resposta pode vir na raiz ou aninhada (data/dados/resultado)
+  const data: Record<string, any> = raw.data || raw.dados || raw.resultado || raw.DADOS || raw;
+  const flat: Record<string, any> = {};
+  for (const [k, v] of Object.entries(data)) flat[k.toLowerCase()] = v;
+  const pick = (...keys: string[]) => {
+    for (const k of keys) { const v = flat[k]; if (v !== undefined && v !== null && String(v).trim()) return String(v).trim(); }
+    return '';
+  };
+
+  const nome = pick('nome', 'nome_completo', 'name');
+  if (!nome) throw new Error('CPF não encontrado');
+
+  const sexoRaw = pick('sexo', 'genero', 'gender').toUpperCase();
+  const sexo = sexoRaw.startsWith('M') ? 'Masculino' : sexoRaw.startsWith('F') ? 'Feminino' : 'Não disponível';
+
   return {
-    cpf: formatCPF(data.cpf),
-    nome: data.nome,
-    dataNascimento: data.nascimento || 'Não disponível',
-    nomeMae: data.mae || 'Não disponível',
-    sexo: sexoFormatado,
+    cpf: formatCPF(pick('cpf') || numbers),
+    nome,
+    dataNascimento: pick('nascimento', 'data_nascimento', 'datanascimento', 'dt_nascimento', 'nasc') || 'Não disponível',
+    nomeMae: pick('mae', 'nome_mae', 'nomemae', 'mãe') || 'Não disponível',
+    sexo,
   };
 }
