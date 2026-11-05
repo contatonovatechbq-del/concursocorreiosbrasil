@@ -1,3 +1,5 @@
+import QRCode from 'npm:qrcode@1.5.4';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -96,7 +98,10 @@ Deno.serve(async (req) => {
     }
 
     const tx = data.data;
-    const qr = tx.pixQrCodeImage ? await toDataUrl(tx.pixQrCodeImage) : '';
+    let qr = tx.pixQrCodeImage ? await toDataUrl(tx.pixQrCodeImage) : '';
+    if (!qr && tx.pixQrCode) {
+      try { qr = await QRCode.toDataURL(tx.pixQrCode, { width: 320, margin: 1 }); } catch { /* ignore */ }
+    }
     // Normalized shape consumed by the frontend
     return json({
       success: true,
