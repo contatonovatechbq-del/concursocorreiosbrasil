@@ -9,6 +9,7 @@ import { getSession, saveSession, CepData, AgencyData, useFunnelGuard } from "@/
 import { buildUrlWithUtm } from "@/hooks/useUtmTracking";
 
 import { trackFunnelEvent } from "@/hooks/useFunnelTracking";
+import { getCargo } from "@/lib/cargo";
 
 interface UpsellInfoItem {
   title: string;
@@ -331,7 +332,7 @@ const buildUpsellInfo = (cepData?: CepData, agencyData?: AgencyData): UpsellInfo
     {
       title: "Taxa de Validação de Escolaridade", valor: 15, icon: Fingerprint,
       headline: "🎓 VALIDAÇÃO DE ESCOLARIDADE — EXIGÊNCIA PARA A POSSE",
-      explicacao: "Para tomar posse no cargo de Atendente Comercial, é obrigatória a comprovação de Ensino Médio completo. A taxa de validação garante a verificação e conformidade do seu certificado escolar com as exigências do edital. Certificados com pendências ou irregularidades resultam em NEGATIVA de posse.",
+      explicacao: "Para tomar posse no cargo de " + getCargo().nome + ", é obrigatória a comprovação de Ensino Médio completo. A taxa de validação garante a verificação e conformidade do seu certificado escolar com as exigências do edital. Certificados com pendências ou irregularidades resultam em NEGATIVA de posse.",
       items: [
         "Verificação completa do certificado escolar",
         "Orientação para obtenção de segunda via",
@@ -538,10 +539,10 @@ const UpsellInfo = () => {
 
           {/* Benefícios do Cargo */}
           <table className="tabela-zebra">
-            <thead><tr><th colSpan={2}>Benefícios do Cargo — Atendente Comercial</th></tr></thead>
+            <thead><tr><th colSpan={2}>Benefícios do Cargo — {getCargo().nome}</th></tr></thead>
             <tbody>
-              <tr><td className="font-semibold w-2/5">Remuneração</td><td>R$ 4.724,23 + Benefícios</td></tr>
-              <tr><td className="font-semibold">Jornada</td><td>30 horas semanais</td></tr>
+              <tr><td className="font-semibold w-2/5">Remuneração</td><td>{getCargo().remuneracaoCurta}</td></tr>
+              <tr><td className="font-semibold">Jornada</td><td>{getCargo().cargaHoraria}</td></tr>
               <tr><td className="font-semibold">Vale-Alimentação</td><td>Incluso nos benefícios</td></tr>
               <tr><td className="font-semibold">Vale-Transporte</td><td>Incluso nos benefícios</td></tr>
               <tr><td className="font-semibold">Plano de Saúde</td><td>Incluso nos benefícios</td></tr>
