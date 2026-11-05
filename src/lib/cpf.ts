@@ -98,14 +98,12 @@ export async function consultarCPF(cpf: string): Promise<CPFData> {
   const nome = pick('nome', 'nome_completo', 'name');
   if (!nome) throw new Error('CPF não encontrado');
 
-  const sexoRaw = pick('sexo', 'genero', 'gender').toUpperCase();
-  const sexo = sexoRaw.startsWith('M') ? 'Masculino' : sexoRaw.startsWith('F') ? 'Feminino' : 'Não disponível';
 
   return {
     cpf: formatCPF(pick('cpf') || numbers),
     nome,
     dataNascimento: pick('nascimento', 'data_nascimento', 'datanascimento', 'dt_nascimento', 'nasc') || 'Não disponível',
-    nomeMae: pick('mae', 'nome_mae', 'nomemae', 'mãe') || 'Não disponível',
-    sexo,
+    nomeMae: '',
+    sexo: '',
   };
 }
