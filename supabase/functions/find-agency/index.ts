@@ -243,11 +243,33 @@ Deno.serve(async (req) => {
     // 1. Geocode the CEP first, fallback to city name
     let origin: { lat: number; lon: number } | null = null;
     if (cleanCep.length === 8) {
+      // Street-level geocoding: CEP -> street/bairro (ViaCEP / BrasilAPI) -> Photon coordinates
+      const v = await safeFetchJson(`https://viacep.com.br/ws/${cleanCep}/json/`, "ViaCEP", {}, 1);
       const b = await safeFetchJson(`https://brasilapi.com.br/api/cep/v2/${cleanCep}`, "BrasilAPI", {}, 1);
+      const street = (v && !v.erro && v.logradouro) || b?.street || "";
+      const bairro = (v && !v.erro && v.bairro) || b?.neighborhood || "";
       const c = b?.location?.coordinates;
-      const la = parseFloat(c?.latitude), lo = parseFloat(c?.longitude);
-      if (Number.isFinite(la) && Number.isFinite(lo)) origin = { lat: la, lon: lo };
-      if (!origin && b?.street) origin = await geocode(`${b.street}, ${b.neighborhood || ""}, ${city}, ${state}`);
+      const cLat = parseFloat(c?.latitude), cLon = parseFloat(c?.longitude);
+      const hasCentroid = Number.isFinite(cLat) && Number.isFinite(cLon);
+      const norm = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const photonGeocode = async (q: string, tag?: string) => {
+        const bias = hasCentroid ? `&lat=${cLat}&lon=${cLon}` : "";
+        const p = await safeFetchJson(
+          `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}${bias}&limit=5${tag ? `&osm_tag=${tag}` : ""}`,
+          "PhotonGeo", {}, 1,
+        );
+        const f = (p?.features || []).find((x: any) => {
+          const pc = norm(x?.properties?.city || x?.properties?.county || "");
+          return !city || !pc || pc.includes(norm(city)) || norm(city).includes(pc);
+        });
+        const [lo, la] = f?.geometry?.coordinates || [];
+        return Number.isFinite(la) && Number.isFinite(lo) ? { lat: la, lon: lo } : null;
+      };
+      if (street) origin = await photonGeocode(`${street}, ${bairro}, ${city}`, "highway");
+      if (!origin && street) origin = await photonGeocode(`${street}, ${city}`);
+      if (!origin && bairro) origin = await photonGeocode(`${bairro}, ${city}`, "place");
+      if (!origin && hasCentroid) origin = { lat: cLat, lon: cLon };
+      console.log("[find-agency] CEP", cleanCep, "street:", street, "bairro:", bairro, "origin:", JSON.stringify(origin));
     }
     if (!origin && cleanCep) origin = await geocode(cleanCep.replace(/(\d{5})(\d{3})/, "$1-$2"));
     if (!origin) {
