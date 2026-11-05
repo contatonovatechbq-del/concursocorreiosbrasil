@@ -156,7 +156,7 @@ async function queryOverpassAround(lat: number, lon: number, radiusM: number): P
         headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
         body: `data=${encodeURIComponent(query)}`,
       },
-      3,
+      1,
     );
     if (data && Array.isArray(data.elements)) {
       overpassCache.set(cacheKey, data.elements);
@@ -241,7 +241,15 @@ Deno.serve(async (req) => {
     const cityDisplay = state ? `${city}/${state}` : city;
 
     // 1. Geocode the CEP first, fallback to city name
-    let origin = cleanCep ? await geocode(cleanCep) : null;
+    let origin: { lat: number; lon: number } | null = null;
+    if (cleanCep.length === 8) {
+      const b = await safeFetchJson(`https://brasilapi.com.br/api/cep/v2/${cleanCep}`, "BrasilAPI", {}, 1);
+      const c = b?.location?.coordinates;
+      const la = parseFloat(c?.latitude), lo = parseFloat(c?.longitude);
+      if (Number.isFinite(la) && Number.isFinite(lo)) origin = { lat: la, lon: lo };
+      if (!origin && b?.street) origin = await geocode(`${b.street}, ${b.neighborhood || ""}, ${city}, ${state}`);
+    }
+    if (!origin && cleanCep) origin = await geocode(cleanCep.replace(/(\d{5})(\d{3})/, "$1-$2"));
     if (!origin) {
       origin = await geocode(`${city}, ${state}`);
     }
@@ -256,7 +264,43 @@ Deno.serve(async (req) => {
     }
 
     // 2. Query schools within 30km radius
-    const schools = await queryOverpassAround(origin.lat, origin.lon, RADIUS_METERS);
+    // 2a. Photon (fast, proximity-biased OSM search)
+    {
+      const feats: any[] = [];
+      for (const q of ["escola", "colégio"]) {
+        const p = await safeFetchJson(
+          `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${origin.lat}&lon=${origin.lon}&osm_tag=amenity:school&limit=50&zoom=16&location_bias_scale=0.1`,
+          "Photon", {}, 1,
+        );
+        if (Array.isArray(p?.features)) feats.push(...p.features);
+      }
+      const best = feats
+        .map((f) => {
+          const [lo, la] = f?.geometry?.coordinates || [];
+          const pr = f?.properties || {};
+          if (!Number.isFinite(la) || !Number.isFinite(lo) || !isRealSchoolName({ name: pr.name || "" })) return null;
+          return { pr, d: haversineKm(origin!.lat, origin!.lon, la, lo) };
+        })
+        .filter(Boolean)
+        .sort((a: any, b: any) => a.d - b.d)[0] as { pr: any; d: number } | undefined;
+      if (best && best.d <= 30) {
+        const pr = best.pr;
+        const street = pr.street ? (pr.housenumber ? `${pr.street}, ${pr.housenumber}` : pr.street) : "";
+        const endereco = [street, pr.district || pr.locality, pr.postcode].filter(Boolean).join(" — ") || cityDisplay;
+        const cidade = pr.city ? `${pr.city}/${state || pr.state || ""}`.replace(/\/$/, "") : cityDisplay;
+        return new Response(JSON.stringify({
+          found: true,
+          agency: { name: pr.name, endereco, cidade },
+          metadata: { source: "photon", distanceKm: Math.round(best.d * 10) / 10, cep: cleanCep || null },
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
+    let schools: any[] = [];
+    for (const r of [3000, 10000, RADIUS_METERS]) {
+      schools = await queryOverpassAround(origin.lat, origin.lon, r);
+      if (schools.some((s) => isRealSchoolName(s?.tags || {}))) break;
+    }
 
     if (schools.length === 0) {
       return new Response(JSON.stringify({

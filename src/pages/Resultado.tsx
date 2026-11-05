@@ -61,7 +61,7 @@ const Resultado = () => {
           body: { cep: cd.cep, localidade: cd.localidade, uf: cd.uf },
         });
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('timeout')), 8000)
+          setTimeout(() => reject(new Error('timeout')), 25000)
         );
         const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
