@@ -8,6 +8,7 @@ import { getPixStorageKey, savePixData, getStoredPixData, getPixRemainingTime } 
 import { fbEvents } from "@/lib/fbPixel";
 import { getUtmSignature, getEffectiveTracking } from "@/hooks/useUtmTracking";
 import { normalizeBuyer } from "@/lib/pixBuyer";
+import { getCargo } from "@/lib/cargo";
 
 interface UpsellStepProps {
   title: string;
@@ -163,8 +164,9 @@ const UpsellStep = ({ title, description, valor, cpfData, protocolo, onPaymentCo
     <CorreiosCard className="w-full max-w-lg">
       <div className="space-y-5">
         <div className="text-center space-y-1">
+          <p className="text-xs font-bold uppercase tracking-wide text-accent">Concurso Correios 2026 — Cargo: {getCargo().nome}</p>
           <h1 className="text-lg sm:text-xl font-bold">{title}</h1>
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-sm text-muted-foreground">{description} Referente ao cargo de {getCargo().nome}.</p>
         </div>
 
         <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
